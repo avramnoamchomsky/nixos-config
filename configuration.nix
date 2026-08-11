@@ -223,6 +223,11 @@ in
 
   programs.nix-ld.enable = true;
 
+  # STM32 / ST-Link USB access
+  services.udev.packages = [
+    pkgs.stlink
+  ];
+
 
   # ============================================================
   # Niri
@@ -356,6 +361,10 @@ in
 
     # Prefer native Wayland for Chromium/Electron applications.
     NIXOS_OZONE_WL = "1";
+
+    # Fix Java AWT/Swing apps under Niri/XWayland
+    _JAVA_AWT_WM_NONREPARENTING = "1";
+    AWT_TOOLKIT = "MToolkit";
   };
 
 
@@ -400,6 +409,18 @@ in
     unstablePkgs.codex
 
     nodejs
+
+  # ----------------------------------------------------------
+  # Development
+  # ----------------------------------------------------------
+
+  # Python
+  python3
+  unstablePkgs.uv
+
+  # STM32
+  stm32cubemx
+  stlink
 
 
     # ----------------------------------------------------------
