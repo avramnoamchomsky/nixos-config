@@ -1,0 +1,13 @@
+# Nix build results
+result
+result-*
+
+# direnv
+.direnv/
+
+# Local environment files
+.env
+.env.*
+
+# Machine-local overrides
+*.local.nix
