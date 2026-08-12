@@ -27,6 +27,9 @@ let
       nightModeTemperature = 4500;
       nightModeHighTemperature = 6500;
       nightModeUseIPLocation = false;
+
+      # DMS derives its wallpaper cycling directory from the selected file.
+      wallpaperPath = "${config.xdg.userDirs.pictures}/Wallpapers/kali-layers-16x9.png";
     }
   );
 in
@@ -35,6 +38,10 @@ in
   # DMS itself and its user service are provided by the native NixOS module.
   # The complete reviewed settings snapshot is Git-owned and read-only.
   xdg.configFile."DankMaterialShell/settings.json".source = ./dms/settings.json;
+
+  # Keep the wallpaper collection declarative while exposing it at the
+  # conventional writable-user-data location expected by DMS file pickers.
+  home.file."Pictures/Wallpapers".source = ./wallpapers;
 
   xdg.configFile."DankMaterialShell/clsettings.json".text = builtins.toJSON {
     disabled = false;
