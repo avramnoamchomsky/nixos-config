@@ -29,6 +29,8 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 │   ├── default.nix
 │   ├── desktop.nix
 │   ├── dms.nix
+│   ├── dms
+│   │   └── settings.json
 │   ├── input-method.nix
 │   ├── niri.nix
 │   ├── niri
