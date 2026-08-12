@@ -12,10 +12,15 @@
     enable = true;
     defaultApplications = {
       "text/html" = [ "com.google.Chrome.desktop" ];
+      "x-scheme-handler/codex" = [ "codex-desktop.desktop" ];
       "x-scheme-handler/http" = [ "com.google.Chrome.desktop" ];
       "x-scheme-handler/https" = [ "com.google.Chrome.desktop" ];
     };
   };
+
+  # Take ownership of the mutable MIME files that predate Home Manager.
+  xdg.configFile."mimeapps.list".force = true;
+  xdg.dataFile."applications/mimeapps.list".force = true;
 
   # MControlCenter's window geometry is deliberately omitted; only hardware
   # behaviour belongs in Git.
