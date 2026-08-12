@@ -6,6 +6,7 @@
     ./desktop.nix
     ./hybrid-graphics.nix
     ./msi-control.nix
+    ./secrets.nix
   ];
 
   # Identity and locale

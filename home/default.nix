@@ -7,6 +7,7 @@
     ./input-method.nix
     ./niri.nix
     ./programs.nix
+    ./rclone.nix
   ];
 
   home = {

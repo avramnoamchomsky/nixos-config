@@ -1,0 +1,8 @@
+keys:
+  - &pisces age1eftfaqctscdh8ynz2vuf4wy8utgav3mktstvrqjlj0zyu8gr9cdqvta8ke
+
+creation_rules:
+  - path_regex: secrets/.*\.yaml$
+    key_groups:
+      - age:
+          - *pisces

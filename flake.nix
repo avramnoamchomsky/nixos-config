@@ -13,6 +13,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Pinned to a mature revision whose helper has a smaller, reliable build
+    # dependency graph on the current NixOS package set.
+    sops-nix.url = "github:Mic92/sops-nix/e93ee1d900ad264d65e9701a5c6f895683433386";
+
     codex-desktop-linux.url = "github:ilysenko/codex-desktop-linux";
   };
 
@@ -21,6 +25,7 @@
       nixpkgs,
       nixpkgs-unstable,
       home-manager,
+      sops-nix,
       codex-desktop-linux,
       ...
     }:
@@ -44,6 +49,7 @@
           modules = [
             ./system
             codex-desktop-linux.nixosModules.default
+            sops-nix.nixosModules.sops
             home-manager.nixosModules.home-manager
 
             {
