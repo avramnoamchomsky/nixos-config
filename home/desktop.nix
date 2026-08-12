@@ -8,6 +8,15 @@
     "org/gtk/gtk4/settings/file-chooser".show-hidden = true;
   };
 
+  xdg.mimeApps = {
+    enable = true;
+    defaultApplications = {
+      "text/html" = [ "com.google.Chrome.desktop" ];
+      "x-scheme-handler/http" = [ "com.google.Chrome.desktop" ];
+      "x-scheme-handler/https" = [ "com.google.Chrome.desktop" ];
+    };
+  };
+
   # MControlCenter's window geometry is deliberately omitted; only hardware
   # behaviour belongs in Git.
   xdg.configFile."MControlCenter.conf" = {
