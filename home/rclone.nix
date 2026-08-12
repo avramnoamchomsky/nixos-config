@@ -54,6 +54,32 @@ in
           options = mountOptions "infini-cloud-higa";
         };
       };
+
+      aquarius = {
+        config = {
+          type = "webdav";
+          url = "http://aquarius.local:5244/dav";
+          vendor = "other";
+        };
+        secrets = {
+          user = "/run/secrets/rclone/aquarius-username";
+          pass = "/run/secrets/rclone/aquarius-password";
+        };
+
+        mounts."" = {
+          enable = true;
+          mountPoint = "/home/chomsky/mnt/aquarius";
+          logLevel = "NOTICE";
+          options = mountOptions "aquarius";
+        };
+      };
     };
+  };
+
+  # Aquarius is a LAN server and may be offline for extended periods. Retry
+  # indefinitely at a modest interval instead of entering a tight restart loop.
+  systemd.user.services."rclone-mount:@aquarius" = {
+    Unit.StartLimitIntervalSec = 0;
+    Service.RestartSec = "30s";
   };
 }
