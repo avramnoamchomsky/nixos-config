@@ -51,25 +51,11 @@
     enableCalendarEvents = false;
   };
 
-  services.displayManager.dms-greeter = {
+  services.greetd = {
     enable = true;
-
-    compositor = {
-      name = "niri";
-      customConfig = ''
-        input {
-            keyboard {
-                xkb {
-                    layout "us"
-                }
-            }
-        }
-
-        cursor {
-            xcursor-theme "Adwaita"
-            xcursor-size 24
-        }
-      '';
+    settings.default_session = {
+      command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --cmd ${pkgs.niri}/bin/niri-session";
+      user = "greeter";
     };
   };
 
