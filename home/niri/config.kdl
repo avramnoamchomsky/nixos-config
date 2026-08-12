@@ -56,11 +56,6 @@ screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 
 animations { }
 
-// Diagnose partial-screen flicker not visible in compositor recordings.
-debug {
-    disable-cursor-plane
-}
-
 window-rule {
     geometry-corner-radius 12
     clip-to-geometry true
