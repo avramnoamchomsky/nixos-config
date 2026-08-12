@@ -19,11 +19,6 @@
   # Generic Mesa / graphics stack.
   hardware.graphics.enable = true;
 
-  # Work around partial-screen flicker on the internal panel at 240 Hz.
-  # DC_DISABLE_PSR: disable AMD Panel Self Refresh for diagnosis.
-  boot.kernelParams = [ "amdgpu.dcdebugmask=0x10" ];
-
-
   # This activates the NixOS NVIDIA driver module.
   #
   # The PRIME module itself configures the AMD side when
