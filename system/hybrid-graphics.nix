@@ -19,6 +19,10 @@
   # Generic Mesa / graphics stack.
   hardware.graphics.enable = true;
 
+  # Diagnose partial-screen flicker on the internal panel at 240 Hz.
+  # Force amdgpu to use full-frame updates instead of damage clips.
+  boot.kernelParams = [ "amdgpu.damageclips=0" ];
+
   # This activates the NixOS NVIDIA driver module.
   #
   # The PRIME module itself configures the AMD side when

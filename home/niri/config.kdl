@@ -56,12 +56,6 @@ screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 
 animations { }
 
-// Diagnostic workaround for partial-screen flicker at 240 Hz.
-// Keep compositing through Niri instead of scanning client buffers out directly.
-debug {
-    disable-direct-scanout
-}
-
 window-rule {
     geometry-corner-radius 12
     clip-to-geometry true
