@@ -2,7 +2,9 @@
 
 {
   imports = [
+    ./desktop.nix
     ./dms.nix
+    ./input-method.nix
     ./niri.nix
     ./programs.nix
   ];

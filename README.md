@@ -27,7 +27,9 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 │   └── msi-control.nix
 ├── home
 │   ├── default.nix
+│   ├── desktop.nix
 │   ├── dms.nix
+│   ├── input-method.nix
 │   ├── niri.nix
 │   ├── niri
 │   │   └── config.kdl
