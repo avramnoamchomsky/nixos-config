@@ -19,9 +19,9 @@
   # Generic Mesa / graphics stack.
   hardware.graphics.enable = true;
 
-  # Diagnose partial-screen flicker on the internal panel at 240 Hz.
-  # Force amdgpu to use full-frame updates instead of damage clips.
-  boot.kernelParams = [ "amdgpu.damageclips=0" ];
+  # Diagnose the malformed brightness response around 97-98%.
+  # DC_DISABLE_CUSTOM_BRIGHTNESS_CURVE keeps the standard backlight mapping.
+  boot.kernelParams = [ "amdgpu.dcdebugmask=0x40000" ];
 
   # This activates the NixOS NVIDIA driver module.
   #
