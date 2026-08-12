@@ -81,6 +81,21 @@
   };
 
   networking.networkmanager.enable = true;
+
+  # Local hostname and service discovery. This advertises pisces.local and
+  # allows resolving other IPv4 .local hosts on the LAN.
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+    openFirewall = true;
+
+    publish = {
+      enable = true;
+      addresses = true;
+      workstation = true;
+    };
+  };
+
   hardware.bluetooth.enable = true;
   services.upower.enable = true;
 
