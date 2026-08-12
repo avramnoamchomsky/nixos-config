@@ -1,5 +1,7 @@
 # NixOS Configuration
 
+[English](README.md) | [简体中文](README.zh-CN.md)
+
 Declarative configuration for the `pisces` laptop and the `chomsky` user environment.
 
 ## Highlights
@@ -45,7 +47,8 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 │   └── webdav.yaml
 ├── .sops.yaml
 ├── .gitignore
-└── README.md
+├── README.md
+└── README.zh-CN.md
 ```
 
 `system/` contains machine-wide hardware, boot, networking, services, security,
