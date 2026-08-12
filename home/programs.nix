@@ -65,6 +65,8 @@ in
 
   programs.btop.enable = true;
 
+  programs.obs-studio.enable = true;
+
   home.packages = with pkgs; [
     # Graphical applications
     google-chrome
