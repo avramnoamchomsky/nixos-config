@@ -213,7 +213,7 @@
   "spotlightCloseNiriOverview": true,
   "spotlightSectionViewModes": {},
   "appDrawerSectionViewModes": {},
-  "niriOverviewOverlayEnabled": true,
+  "niriOverviewOverlayEnabled": false,
   "dankLauncherV2Size": "compact",
   "dankLauncherV2BorderEnabled": false,
   "dankLauncherV2BorderThickness": 2,
