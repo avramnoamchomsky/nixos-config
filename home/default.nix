@@ -8,6 +8,7 @@
     ./niri.nix
     ./programs.nix
     ./rclone.nix
+    ./themes.nix
   ];
 
   home = {

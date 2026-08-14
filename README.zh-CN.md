@@ -13,6 +13,7 @@
 - Fcitx5 与 Rime Ice 输入法
 - PipeWire、NetworkManager、蓝牙及 Avahi/mDNS
 - Fish 和桌面应用，包括作为默认浏览器的 Google Chrome
+- 声明式 MacTahoe GTK 与 Kvantum 主题，以及 nwg-look、qt5ct 和 qt6ct
 - 使用 sops-nix 加密机密，并由仅存在于本机的 age 身份密钥解密
 - 自动挂载两个 InfiniCLOUD WebDAV 账户及可选的局域网主机 `aquarius.local`
 
@@ -41,6 +42,7 @@
 │   │   └── config.kdl
 │   ├── programs.nix
 │   ├── rclone.nix
+│   ├── themes.nix
 │   └── wallpapers
 │       └── ...
 ├── secrets
@@ -85,6 +87,22 @@
 允许 `aquarius.local` 处于离线状态。其用户服务会每隔 30 秒重新尝试启动，
 且不会阻塞系统启动。目前该连接使用未加密的 HTTP；如果服务器将来支持
 HTTPS，应优先改用 HTTPS。
+
+## 桌面主题
+
+- GTK 2/3 使用 `MacTahoe-Dark-nord`，可通过 `nwg-look` 查看和选择。
+- Qt 5/6 使用 `qt5ct`/`qt6ct` 作为平台配置层，并使用
+  `MacTahoeDark` Kvantum 主题；仍可通过 `kvantummanager` 查看配置。
+- 两个主题均从官方
+  [MacTahoe GTK](https://github.com/vinceliuice/MacTahoe-gtk-theme) 与
+  [MacTahoe KDE](https://github.com/vinceliuice/MacTahoe-kde) 仓库的固定
+  revision 构建。
+- GTK 4/libadwaita 会保留原生外观。第三方 GTK 4 主题需要 CSS 变通方案，
+  可能破坏应用程序样式，因此此处不启用。
+
+生成的 GTK、qt5ct、qt6ct 与 Kvantum 文件均由 Home Manager 管理。在图形
+工具中进行的修改只是临时的；如需持久保存，应将对应设置写回
+`home/themes.nix`。
 
 ## 验证与应用
 

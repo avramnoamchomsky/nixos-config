@@ -13,6 +13,7 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 - Fcitx5 with Rime Ice
 - PipeWire, NetworkManager, Bluetooth, and Avahi/mDNS
 - Fish and desktop applications, including Google Chrome as the default browser
+- Declarative MacTahoe GTK and Kvantum themes with nwg-look, qt5ct, and qt6ct
 - sops-nix encrypted secrets backed by a machine-local age identity
 - Automatic rclone WebDAV mounts for two InfiniCLOUD accounts and the optional LAN host `aquarius.local`
 
@@ -41,6 +42,7 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 │   │   └── config.kdl
 │   ├── programs.nix
 │   ├── rclone.nix
+│   ├── themes.nix
 │   └── wallpapers
 │       └── ...
 ├── secrets
@@ -86,6 +88,24 @@ The configured mount points are:
 `aquarius.local` is allowed to be offline. Its user service retries failed
 startup every 30 seconds without blocking boot. It currently uses plain HTTP,
 so HTTPS should be preferred if the server gains support for it.
+
+## Desktop themes
+
+- GTK 2/3 uses `MacTahoe-Dark-nord`, selectable and inspectable with
+  `nwg-look`.
+- Qt 5/6 uses `qt5ct`/`qt6ct` as the platform configuration layer and the
+  `MacTahoeDark` Kvantum theme. `kvantummanager` remains available for
+  inspection.
+- Both themes are built from pinned revisions of the official
+  [MacTahoe GTK](https://github.com/vinceliuice/MacTahoe-gtk-theme) and
+  [MacTahoe KDE](https://github.com/vinceliuice/MacTahoe-kde) repositories.
+- GTK 4/libadwaita is intentionally left on its native appearance. Applying a
+  third-party GTK 4 theme requires a CSS workaround that can break application
+  styling.
+
+The generated GTK, qt5ct, qt6ct, and Kvantum files are Home Manager-owned.
+Changes made in the graphical tools are temporary and should be copied back to
+`home/themes.nix` if they are meant to persist.
 
 ## Validate and apply
 
