@@ -18,6 +18,7 @@ input {
 layout {
     gaps 4
     center-focused-column "never"
+    background-color "transparent"
 
     preset-column-widths {
         proportion 0.5
@@ -251,4 +252,9 @@ binds {
     Mod+Shift+E { quit; }
     Ctrl+Alt+Delete { quit; }
     Mod+Shift+P { power-off-monitors; }
+}
+
+layer-rule {
+    match namespace="dms:blurwallpaper"
+    place-within-backdrop true
 }
