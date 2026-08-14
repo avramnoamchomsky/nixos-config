@@ -62,6 +62,11 @@ let
     };
   };
 
+  gtkTheme = {
+    name = "MacTahoe-Dark-nord";
+    package = macTahoeGtk;
+  };
+
   qtctAppearance = {
     style = "kvantum";
     icon_theme = "Adwaita";
@@ -74,10 +79,11 @@ in
   gtk = {
     enable = true;
     colorScheme = "dark";
-    theme = {
-      name = "MacTahoe-Dark-nord";
-      package = macTahoeGtk;
-    };
+    theme = gtkTheme;
+
+    # Home Manager 26.05 no longer applies gtk.theme to GTK 4 implicitly.
+    # This explicitly enables its declarative CSS import workaround.
+    gtk4.theme = gtkTheme;
   };
 
   qt = {

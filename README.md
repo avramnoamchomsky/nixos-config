@@ -100,9 +100,9 @@ so HTTPS should be preferred if the server gains support for it.
 - Both themes are built from pinned revisions of the official
   [MacTahoe GTK](https://github.com/vinceliuice/MacTahoe-gtk-theme) and
   [MacTahoe KDE](https://github.com/vinceliuice/MacTahoe-kde) repositories.
-- GTK 4/libadwaita is intentionally left on its native appearance. Applying a
-  third-party GTK 4 theme requires a CSS workaround that can break application
-  styling.
+- GTK 4/libadwaita uses the same theme through Home Manager's explicit CSS
+  import workaround. GTK 4 does not officially support third-party themes, so
+  some applications may still have visual inconsistencies.
 
 The generated GTK, qt5ct, qt6ct, and Kvantum files are Home Manager-owned.
 Changes made in the graphical tools are temporary and should be copied back to

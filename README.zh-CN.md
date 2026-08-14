@@ -98,8 +98,8 @@ HTTPS，应优先改用 HTTPS。
   [MacTahoe GTK](https://github.com/vinceliuice/MacTahoe-gtk-theme) 与
   [MacTahoe KDE](https://github.com/vinceliuice/MacTahoe-kde) 仓库的固定
   revision 构建。
-- GTK 4/libadwaita 会保留原生外观。第三方 GTK 4 主题需要 CSS 变通方案，
-  可能破坏应用程序样式，因此此处不启用。
+- GTK 4/libadwaita 通过 Home Manager 的显式 CSS 导入变通方案使用同一
+  主题。GTK 4 并不正式支持第三方主题，因此部分应用仍可能存在显示差异。
 
 生成的 GTK、qt5ct、qt6ct 与 Kvantum 文件均由 Home Manager 管理。在图形
 工具中进行的修改只是临时的；如需持久保存，应将对应设置写回
