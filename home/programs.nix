@@ -1,6 +1,8 @@
 { pkgs, unstablePkgs, ... }:
 
 let
+  browser115 = import ./packages/115-browser.nix { inherit pkgs; };
+
   wechat-fcitx = pkgs.symlinkJoin {
     name = "wechat-fcitx";
     paths = [ pkgs.wechat ];
@@ -81,6 +83,7 @@ in
 
   home.packages = with pkgs; [
     # Graphical applications
+    browser115
     google-chrome
     mpv
     vscode

@@ -12,7 +12,7 @@
 - AMD + NVIDIA 混合显卡
 - Fcitx5 与 Rime Ice 输入法
 - PipeWire、NetworkManager、蓝牙及 Avahi/mDNS
-- Fish 和桌面应用，包括作为默认浏览器的 Google Chrome
+- Fish 和桌面应用，包括 115 浏览器及作为默认浏览器的 Google Chrome
 - 声明式 MacTahoe GTK 与 Kvantum 主题，以及 nwg-look、qt5ct 和 qt6ct
 - ESP32 与 STM32 开发工具、direnv 及硬件访问规则
 - 使用 sops-nix 加密机密，并由仅存在于本机的 age 身份密钥解密
@@ -41,6 +41,8 @@
 │   ├── niri.nix
 │   ├── niri
 │   │   └── config.kdl
+│   ├── packages
+│   │   └── 115-browser.nix
 │   ├── programs.nix
 │   ├── rclone.nix
 │   ├── themes.nix
@@ -104,6 +106,19 @@ HTTPS，应优先改用 HTTPS。
 生成的 GTK、qt5ct、qt6ct 与 Kvantum 文件均由 Home Manager 管理。在图形
 工具中进行的修改只是临时的；如需持久保存，应将对应设置写回
 `home/themes.nix`。
+
+## 115 浏览器
+
+[官方 x86_64 Linux 版](https://q.115.com/115/T888199.html) 115 浏览器在
+`home/packages/115-browser.nix` 中以声明式方式打包。版本 `35.30.0` 及下载
+哈希已固定，厂商二进制文件已适配 NixOS，并会在 Niri 下启用 Wayland
+输入法支持。可通过应用启动器或 `115-browser` 命令运行。
+
+该厂商版本报告其 Chromium 版本为 `125.0.6422.61`，版本较旧。建议仅用于
+115 专属功能；日常网页浏览仍使用默认的 Google Chrome。
+
+浏览器无法更新 Nix store 中的只读文件。升级时需要修改软件包定义中的
+版本、官方下载地址及哈希，然后重新构建系统。
 
 ## 嵌入式开发
 

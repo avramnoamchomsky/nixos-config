@@ -12,7 +12,7 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 - AMD + NVIDIA hybrid graphics
 - Fcitx5 with Rime Ice
 - PipeWire, NetworkManager, Bluetooth, and Avahi/mDNS
-- Fish and desktop applications, including Google Chrome as the default browser
+- Fish and desktop applications, including 115 Browser and Google Chrome as the default browser
 - Declarative MacTahoe GTK and Kvantum themes with nwg-look, qt5ct, and qt6ct
 - ESP32 and STM32 development tooling with direnv and hardware access rules
 - sops-nix encrypted secrets backed by a machine-local age identity
@@ -41,6 +41,8 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 │   ├── niri.nix
 │   ├── niri
 │   │   └── config.kdl
+│   ├── packages
+│   │   └── 115-browser.nix
 │   ├── programs.nix
 │   ├── rclone.nix
 │   ├── themes.nix
@@ -107,6 +109,22 @@ so HTTPS should be preferred if the server gains support for it.
 The generated GTK, qt5ct, qt6ct, and Kvantum files are Home Manager-owned.
 Changes made in the graphical tools are temporary and should be copied back to
 `home/themes.nix` if they are meant to persist.
+
+## 115 Browser
+
+The [official x86_64 Linux release](https://q.115.com/115/T888199.html) of 115
+Browser is packaged declaratively in `home/packages/115-browser.nix`. Version
+`35.30.0` and its download hash are pinned, the vendor binary is adapted to
+NixOS, and Wayland input-method support is enabled when running under Niri.
+Launch it as `115-browser` or from the application launcher.
+
+The vendor build reports Chromium `125.0.6422.61`, which is old. Use it only for
+115-specific functionality; Google Chrome remains the default browser for
+general browsing.
+
+The browser cannot update files inside the immutable Nix store. Updating it
+requires changing the version, official URL, and hash in the package definition
+and rebuilding the system.
 
 ## Embedded development
 
