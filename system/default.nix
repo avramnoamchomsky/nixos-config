@@ -58,12 +58,16 @@
   # Required for applications such as Google Chrome and the NVIDIA driver.
   nixpkgs.config.allowUnfree = true;
 
+  users.groups.plugdev = { };
+
   users.users.chomsky = {
     isNormalUser = true;
     description = "chomsky";
     extraGroups = [
       "wheel"
       "networkmanager"
+      "plugdev"
+      "dialout"
     ];
     shell = pkgs.fish;
   };
@@ -97,6 +101,10 @@
     };
   };
 
+  services.udev.packages = [
+    pkgs.openocd
+    pkgs.stlink
+  ];
   hardware.bluetooth.enable = true;
   services.upower.enable = true;
 

@@ -14,6 +14,7 @@
 - PipeWire、NetworkManager、蓝牙及 Avahi/mDNS
 - Fish 和桌面应用，包括作为默认浏览器的 Google Chrome
 - 声明式 MacTahoe GTK 与 Kvantum 主题，以及 nwg-look、qt5ct 和 qt6ct
+- ESP32 与 STM32 开发工具、direnv 及硬件访问规则
 - 使用 sops-nix 加密机密，并由仅存在于本机的 age 身份密钥解密
 - 自动挂载两个 InfiniCLOUD WebDAV 账户及可选的局域网主机 `aquarius.local`
 
@@ -103,6 +104,17 @@ HTTPS，应优先改用 HTTPS。
 生成的 GTK、qt5ct、qt6ct 与 Kvantum 文件均由 Home Manager 管理。在图形
 工具中进行的修改只是临时的；如需持久保存，应将对应设置写回
 `home/themes.nix`。
+
+## 嵌入式开发
+
+- `esp32-shell` 会从 `~/all_files/projects/dev-envs/esp32` 打开基于 flake
+  的 ESP32 开发环境。
+- `~/all_files/projects/esp32/.envrc` 会通过 direnv 与 nix-direnv 自动加载
+  同一环境。
+- STM32 工具包括 STM32CubeMX、Arm 嵌入式工具链、CMake、Ninja、OpenOCD
+  及 ST-Link 工具。
+- 用户属于 `dialout` 与 `plugdev` 组，并启用 OpenOCD 与 ST-Link udev
+  规则；重新登录后即可访问支持的开发板。
 
 ## 验证与应用
 

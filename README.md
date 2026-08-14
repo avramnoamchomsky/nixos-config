@@ -14,6 +14,7 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 - PipeWire, NetworkManager, Bluetooth, and Avahi/mDNS
 - Fish and desktop applications, including Google Chrome as the default browser
 - Declarative MacTahoe GTK and Kvantum themes with nwg-look, qt5ct, and qt6ct
+- ESP32 and STM32 development tooling with direnv and hardware access rules
 - sops-nix encrypted secrets backed by a machine-local age identity
 - Automatic rclone WebDAV mounts for two InfiniCLOUD accounts and the optional LAN host `aquarius.local`
 
@@ -106,6 +107,17 @@ so HTTPS should be preferred if the server gains support for it.
 The generated GTK, qt5ct, qt6ct, and Kvantum files are Home Manager-owned.
 Changes made in the graphical tools are temporary and should be copied back to
 `home/themes.nix` if they are meant to persist.
+
+## Embedded development
+
+- `esp32-shell` opens the flake-based ESP32 environment from
+  `~/all_files/projects/dev-envs/esp32`.
+- `~/all_files/projects/esp32/.envrc` automatically loads the same environment
+  through direnv and nix-direnv.
+- STM32 tools include STM32CubeMX, the Arm embedded toolchain, CMake, Ninja,
+  OpenOCD, and ST-Link utilities.
+- Membership in `dialout` and `plugdev`, plus the OpenOCD and ST-Link udev
+  rules, grants access to supported development boards after a fresh login.
 
 ## Validate and apply
 

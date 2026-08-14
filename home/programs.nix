@@ -28,6 +28,18 @@ in
   };
 
   programs.fish.enable = true;
+  programs.fish.functions.esp32-shell = ''
+    nix develop ~/all_files/projects/dev-envs/esp32 -c fish
+  '';
+
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+  };
+
+  home.file."all_files/projects/esp32/.envrc".text = ''
+    use flake ~/all_files/projects/dev-envs/esp32
+  '';
 
   programs.ghostty = {
     enable = true;
@@ -79,9 +91,21 @@ in
     # Development tools
     unstablePkgs.codex
     nodejs
-    python3
+
+    (python3.withPackages (ps: with ps; [
+      pip
+      virtualenv
+    ]))
+
     unstablePkgs.uv
+
+    # STM32 development
     stm32cubemx
+    gcc-arm-embedded
+    cmake
+    ninja
+    openocd
+    stlink
 
     # Wayland utilities
     wl-clipboard
