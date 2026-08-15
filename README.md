@@ -74,6 +74,9 @@ configuration owned by the `chomsky` account.
 - UDisks handles removable storage at the system level, while the Home Manager
   `udiskie` service automatically mounts eligible filesystems under
   `/run/media/chomsky/`. Partitions marked by UDisks as ignored remain unmounted.
+- The `nvim.desktop` entry launches Neovim explicitly inside Ghostty. This
+  keeps Nautilus file associations working without relying on GLib to discover
+  a terminal emulator in the minimal Niri session.
 
 ## WebDAV mounts and secrets
 

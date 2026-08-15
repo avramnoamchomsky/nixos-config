@@ -1,4 +1,4 @@
-{ ... }:
+{ config, pkgs, ... }:
 
 {
   # UDisks provides mounting; udiskie reacts to removable-media events in the
@@ -8,6 +8,43 @@
     automount = true;
     notify = true;
     tray = "never";
+  };
+
+  # GLib cannot infer a terminal emulator in the minimal Niri session. Keep
+  # the upstream desktop ID so existing MIME associations continue to work,
+  # but launch Neovim explicitly inside Ghostty.
+  xdg.desktopEntries.nvim = {
+    name = "Neovim";
+    genericName = "Text Editor";
+    comment = "Edit text files in Neovim using Ghostty";
+    exec = "${pkgs.ghostty}/bin/ghostty -e ${config.programs.neovim.finalPackage}/bin/nvim %F";
+    icon = "nvim";
+    terminal = false;
+    startupNotify = false;
+    categories = [
+      "Utility"
+      "TextEditor"
+      "Development"
+    ];
+    mimeType = [
+      "application/json"
+      "application/x-shellscript"
+      "text/english"
+      "text/plain"
+      "text/x-c"
+      "text/x-c++"
+      "text/x-chdr"
+      "text/x-csrc"
+      "text/x-c++hdr"
+      "text/x-c++src"
+      "text/x-java"
+      "text/x-makefile"
+      "text/x-moc"
+      "text/x-pascal"
+      "text/x-tcl"
+      "text/x-tex"
+    ];
+    settings.Keywords = "Text;editor;";
   };
 
   # Stable desktop preferences. Other dconf keys remain mutable.

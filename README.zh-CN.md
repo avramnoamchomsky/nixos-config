@@ -73,6 +73,8 @@
 - UDisks 在系统层处理可移动存储，Home Manager 的 `udiskie` 服务会将符合
   条件的文件系统自动挂载到 `/run/media/chomsky/`；被 UDisks 标记为忽略的
   分区不会自动挂载。
+- `nvim.desktop` 会显式地在 Ghostty 中启动 Neovim，使 Nautilus 文件关联
+  无需依赖 GLib 在精简的 Niri 会话中自动发现终端模拟器。
 
 ## WebDAV 挂载与机密
 
