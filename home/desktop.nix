@@ -1,6 +1,15 @@
 { ... }:
 
 {
+  # UDisks provides mounting; udiskie reacts to removable-media events in the
+  # minimal Niri session, where no desktop environment starts an automounter.
+  services.udiskie = {
+    enable = true;
+    automount = true;
+    notify = true;
+    tray = "never";
+  };
+
   # Stable desktop preferences. Other dconf keys remain mutable.
   dconf.settings = {
     "org/gnome/desktop/interface".color-scheme = "prefer-dark";

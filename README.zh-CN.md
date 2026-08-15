@@ -12,6 +12,7 @@
 - AMD + NVIDIA 混合显卡
 - Fcitx5 与 Rime Ice 输入法
 - PipeWire、NetworkManager、蓝牙及 Avahi/mDNS
+- 通过 UDisks 与 udiskie 自动挂载可移动存储设备
 - Fish 和桌面应用，包括 Readest、115 浏览器及作为默认浏览器的 Google Chrome
 - 声明式 MacTahoe GTK 与 Kvantum 主题，以及 nwg-look、qt5ct 和 qt6ct
 - ESP32 与 STM32 开发工具、direnv 及硬件访问规则
@@ -69,6 +70,9 @@
   易变状态仍可由程序写入。
 - `home/wallpapers/` 中的壁纸会被部署到 `~/Pictures/Wallpapers`。
   DMS 根据当前所选壁纸的路径确定壁纸轮换目录。
+- UDisks 在系统层处理可移动存储，Home Manager 的 `udiskie` 服务会将符合
+  条件的文件系统自动挂载到 `/run/media/chomsky/`；被 UDisks 标记为忽略的
+  分区不会自动挂载。
 
 ## WebDAV 挂载与机密
 

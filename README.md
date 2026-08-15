@@ -12,6 +12,7 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 - AMD + NVIDIA hybrid graphics
 - Fcitx5 with Rime Ice
 - PipeWire, NetworkManager, Bluetooth, and Avahi/mDNS
+- Automatic removable-drive mounting through UDisks and udiskie
 - Fish and desktop applications, including Readest, 115 Browser, and Google Chrome as the default browser
 - Declarative MacTahoe GTK and Kvantum themes with nwg-look, qt5ct, and qt6ct
 - ESP32 and STM32 development tooling with direnv and hardware access rules
@@ -70,6 +71,9 @@ configuration owned by the `chomsky` account.
   detected devices, and other volatile state remain writable.
 - Wallpapers in `home/wallpapers/` are deployed to `~/Pictures/Wallpapers`.
   DMS derives its wallpaper cycling directory from the selected wallpaper path.
+- UDisks handles removable storage at the system level, while the Home Manager
+  `udiskie` service automatically mounts eligible filesystems under
+  `/run/media/chomsky/`. Partitions marked by UDisks as ignored remain unmounted.
 
 ## WebDAV mounts and secrets
 
