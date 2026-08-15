@@ -12,7 +12,7 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 - AMD + NVIDIA hybrid graphics
 - Fcitx5 with Rime Ice
 - PipeWire, NetworkManager, Bluetooth, and Avahi/mDNS
-- Fish and desktop applications, including 115 Browser and Google Chrome as the default browser
+- Fish and desktop applications, including Readest, 115 Browser, and Google Chrome as the default browser
 - Declarative MacTahoe GTK and Kvantum themes with nwg-look, qt5ct, and qt6ct
 - ESP32 and STM32 development tooling with direnv and hardware access rules
 - sops-nix encrypted secrets backed by a machine-local age identity
@@ -125,6 +125,14 @@ general browsing.
 The browser cannot update files inside the immutable Nix store. Updating it
 requires changing the version, official URL, and hash in the package definition
 and rebuilding the system.
+
+## Readest
+
+[Readest](https://github.com/readest/readest) is installed from the
+`nixpkgs-unstable` package set for a newer native Nix build that avoids the
+upstream AppImage's Wayland library-compatibility issue. Launch it as `readest`
+or from the application launcher. Its version advances when the flake's
+unstable input is updated.
 
 ## Embedded development
 

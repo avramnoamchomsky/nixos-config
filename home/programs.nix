@@ -85,6 +85,7 @@ in
     # Graphical applications
     browser115
     google-chrome
+    unstablePkgs.readest
     mpv
     vscode
     gh

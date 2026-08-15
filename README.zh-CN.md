@@ -12,7 +12,7 @@
 - AMD + NVIDIA 混合显卡
 - Fcitx5 与 Rime Ice 输入法
 - PipeWire、NetworkManager、蓝牙及 Avahi/mDNS
-- Fish 和桌面应用，包括 115 浏览器及作为默认浏览器的 Google Chrome
+- Fish 和桌面应用，包括 Readest、115 浏览器及作为默认浏览器的 Google Chrome
 - 声明式 MacTahoe GTK 与 Kvantum 主题，以及 nwg-look、qt5ct 和 qt6ct
 - ESP32 与 STM32 开发工具、direnv 及硬件访问规则
 - 使用 sops-nix 加密机密，并由仅存在于本机的 age 身份密钥解密
@@ -119,6 +119,13 @@ HTTPS，应优先改用 HTTPS。
 
 浏览器无法更新 Nix store 中的只读文件。升级时需要修改软件包定义中的
 版本、官方下载地址及哈希，然后重新构建系统。
+
+## Readest
+
+[Readest](https://github.com/readest/readest) 从 `nixpkgs-unstable` 软件包集
+安装，以获得较新的原生 Nix 构建，并避免上游 AppImage 在 Wayland 下的
+库兼容问题。可通过应用启动器或 `readest` 命令运行；更新 flake 的
+unstable 输入时，其版本也会随之升级。
 
 ## 嵌入式开发
 
