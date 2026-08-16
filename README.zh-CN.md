@@ -13,7 +13,7 @@
 - Fcitx5 与 Rime Ice 输入法
 - PipeWire、NetworkManager、蓝牙及 Avahi/mDNS
 - 通过 UDisks 与 udiskie 自动挂载可移动存储设备
-- Fish 和桌面应用，包括 Readest、115 浏览器及作为默认浏览器的 Google Chrome
+- Fish 和桌面应用，包括 SylvaKru、Readest、115 浏览器及作为默认浏览器的 Google Chrome
 - 声明式 MacTahoe GTK 与 Kvantum 主题，以及 nwg-look、qt5ct 和 qt6ct
 - ESP32 与 STM32 开发工具、direnv 及硬件访问规则
 - 使用 sops-nix 加密机密，并由仅存在于本机的 age 身份密钥解密
@@ -43,7 +43,8 @@
 │   ├── niri
 │   │   └── config.kdl
 │   ├── packages
-│   │   └── 115-browser.nix
+│   │   ├── 115-browser.nix
+│   │   └── sylvakru.nix
 │   ├── programs.nix
 │   ├── rclone.nix
 │   ├── themes.nix
@@ -132,6 +133,17 @@ HTTPS，应优先改用 HTTPS。
 安装，以获得较新的原生 Nix 构建，并避免上游 AppImage 在 Wayland 下的
 库兼容问题。可通过应用启动器或 `readest` 命令运行；更新 flake 的
 unstable 输入时，其版本也会随之升级。
+
+## SylvaKru
+
+[SylvaKru](https://github.com/AfalpHy/sylvakru) 通过
+`home/packages/sylvakru.nix` 中固定的官方 x86_64 Linux 版本安装。厂商软件
+包已适配 NixOS，并提供 GTK、系统托盘、机密存储、OpenGL 与 mpv 运行库。
+它支持本地音乐，以及通过 WebDAV、Navidrome 和 Emby 访问自托管音乐库。
+可通过应用启动器或 `sylvakru` 命令运行。
+
+软件包当前固定为 `3.6.0`。升级时需要修改软件包定义中的版本、官方发布
+地址及哈希。
 
 ## 嵌入式开发
 

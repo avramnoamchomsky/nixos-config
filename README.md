@@ -13,7 +13,7 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 - Fcitx5 with Rime Ice
 - PipeWire, NetworkManager, Bluetooth, and Avahi/mDNS
 - Automatic removable-drive mounting through UDisks and udiskie
-- Fish and desktop applications, including Readest, 115 Browser, and Google Chrome as the default browser
+- Fish and desktop applications, including SylvaKru, Readest, 115 Browser, and Google Chrome as the default browser
 - Declarative MacTahoe GTK and Kvantum themes with nwg-look, qt5ct, and qt6ct
 - ESP32 and STM32 development tooling with direnv and hardware access rules
 - sops-nix encrypted secrets backed by a machine-local age identity
@@ -43,7 +43,8 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 │   ├── niri
 │   │   └── config.kdl
 │   ├── packages
-│   │   └── 115-browser.nix
+│   │   ├── 115-browser.nix
+│   │   └── sylvakru.nix
 │   ├── programs.nix
 │   ├── rclone.nix
 │   ├── themes.nix
@@ -140,6 +141,18 @@ and rebuilding the system.
 upstream AppImage's Wayland library-compatibility issue. Launch it as `readest`
 or from the application launcher. Its version advances when the flake's
 unstable input is updated.
+
+## SylvaKru
+
+[SylvaKru](https://github.com/AfalpHy/sylvakru) is installed from its pinned
+official x86_64 Linux release in `home/packages/sylvakru.nix`. The vendor
+bundle is adapted to NixOS with GTK, system-tray, secret-storage, OpenGL, and
+mpv runtime libraries. It supports local music and self-hosted libraries via
+WebDAV, Navidrome, and Emby. Launch it as `sylvakru` or from the application
+launcher.
+
+The package is currently pinned to version `3.6.0`. Updating it requires
+changing the version, official release URL, and hash in the package definition.
 
 ## Embedded development
 

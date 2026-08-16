@@ -2,6 +2,7 @@
 
 let
   browser115 = import ./packages/115-browser.nix { inherit pkgs; };
+  sylvakru = import ./packages/sylvakru.nix { inherit pkgs; };
 
   wechat-fcitx = pkgs.symlinkJoin {
     name = "wechat-fcitx";
@@ -86,6 +87,7 @@ in
     browser115
     google-chrome
     unstablePkgs.readest
+    sylvakru
     mpv
     vscode
     gh
