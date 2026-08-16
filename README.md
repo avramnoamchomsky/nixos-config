@@ -75,6 +75,9 @@ configuration owned by the `chomsky` account.
 - UDisks handles removable storage at the system level, while the Home Manager
   `udiskie` service automatically mounts eligible filesystems under
   `/run/media/chomsky/`. Partitions marked by UDisks as ignored remain unmounted.
+- Home Manager declares the standard XDG user directories and creates missing
+  folders such as `Documents`, `Downloads`, `Music`, and `Pictures`. This also
+  supplies the paths expected by Flutter desktop applications such as SylvaKru.
 - The `nvim.desktop` entry launches Neovim explicitly inside Ghostty. This
   keeps Nautilus file associations working without relying on GLib to discover
   a terminal emulator in the minimal Niri session.

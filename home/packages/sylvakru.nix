@@ -53,7 +53,8 @@ pkgs.stdenv.mkDerivation {
     cp -a usr/share/icons "$out/share/icons"
 
     makeWrapper "$out/lib/sylvakru/sylvakru" "$out/bin/sylvakru" \
-      --prefix LD_LIBRARY_PATH : "${pkgs.lib.makeLibraryPath runtimeLibraries}" \
+      --prefix LD_LIBRARY_PATH : "$out/lib/sylvakru/lib:${pkgs.lib.makeLibraryPath runtimeLibraries}" \
+      --prefix PATH : "${pkgs.lib.makeBinPath [ pkgs.xdg-user-dirs ]}" \
       --prefix XDG_DATA_DIRS : "${pkgs.adwaita-icon-theme}/share:${pkgs.gsettings-desktop-schemas}/share:${pkgs.gtk3}/share"
 
     runHook postInstall
