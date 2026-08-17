@@ -7,6 +7,7 @@
 ## 主要特性
 
 - 使用 NixOS flakes，并将 Home Manager 集成到系统重构流程中
+- 使用 `linuxPackages_latest`，当前固定为 Linux `7.1.8`
 - 使用 Niri，并由 Git 完整管理其 KDL 配置
 - 使用 Dank Material Shell，管理经过审阅的设置和声明式壁纸
 - AMD + NVIDIA 混合显卡

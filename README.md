@@ -7,6 +7,7 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 ## Highlights
 
 - NixOS flakes with Home Manager integrated into the system rebuild
+- `linuxPackages_latest`, currently pinned to Linux `7.1.8`
 - Niri with a complete Git-owned KDL configuration
 - Dank Material Shell with reviewed settings and declarative wallpapers
 - AMD + NVIDIA hybrid graphics
