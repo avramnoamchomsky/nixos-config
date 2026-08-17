@@ -207,6 +207,16 @@ lsattr -d /var/lib/libvirt/images
 The `lsattr` output should contain an uppercase `C`. The command is installed
 system-wide by the `e2fsprogs` package.
 
+`virtiofsd` is registered with libvirt for sharing host directories with
+guests. With the guest shut down, enable shared memory on virt-manager's
+**Memory** screen, then use **Add Hardware > Filesystem** with the `virtiofs`
+driver, a host source directory, and an arbitrary target tag. The unprivileged
+`qemu-libvirtd` account must be able to traverse and access the entire source
+path; use a dedicated shared directory or a targeted ACL instead of opening the
+whole home directory. Linux guests mount the tag with
+`mount -t virtiofs TAG MOUNTPOINT`; Windows guests require WinFsp and the
+VirtIO-FS guest components from the virtio-win media.
+
 The existing hardware configuration loads `kvm-amd`. Keep CPU virtualization
 (SVM) enabled in the firmware settings; `/dev/kvm` will be unavailable if SVM
 is disabled.

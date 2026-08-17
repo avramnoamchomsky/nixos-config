@@ -194,6 +194,14 @@ lsattr -d /var/lib/libvirt/images
 `lsattr` 的输出应包含大写的 `C`；该命令由系统级安装的 `e2fsprogs`
 软件包提供。
 
+`virtiofsd` 已注册到 libvirt，可用于在主机与客户机之间共享目录。关闭
+客户机后，先在 virt-manager 的 **Memory** 页面启用共享内存，再通过
+**Add Hardware > Filesystem** 选择 `virtiofs` 驱动、主机源目录及任意目标
+标签。非特权账户 `qemu-libvirtd` 必须能够遍历并访问完整源路径；应使用
+专用共享目录或有针对性的 ACL，而不要放宽整个主目录的权限。Linux 客户机
+可通过 `mount -t virtiofs TAG MOUNTPOINT` 挂载该标签；Windows 客户机需要
+安装 WinFsp 及 virtio-win 介质中的 VirtIO-FS 客户机组件。
+
 现有硬件配置已加载 `kvm-amd`。请确保固件设置中的 CPU 虚拟化（SVM）
 处于启用状态；如果 SVM 被禁用，系统将无法提供 `/dev/kvm`。
 
