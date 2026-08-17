@@ -188,7 +188,11 @@ unstable 输入时，其版本也会随之升级。
 ```bash
 test -e /dev/kvm && echo "KVM is available"
 virsh --connect qemu:///system list --all
+lsattr -d /var/lib/libvirt/images
 ```
+
+`lsattr` 的输出应包含大写的 `C`；该命令由系统级安装的 `e2fsprogs`
+软件包提供。
 
 现有硬件配置已加载 `kvm-amd`。请确保固件设置中的 CPU 虚拟化（SVM）
 处于启用状态；如果 SVM 被禁用，系统将无法提供 `/dev/kvm`。

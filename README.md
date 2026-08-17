@@ -201,7 +201,11 @@ To verify hardware acceleration and the system connection:
 ```bash
 test -e /dev/kvm && echo "KVM is available"
 virsh --connect qemu:///system list --all
+lsattr -d /var/lib/libvirt/images
 ```
+
+The `lsattr` output should contain an uppercase `C`. The command is installed
+system-wide by the `e2fsprogs` package.
 
 The existing hardware configuration loads `kvm-amd`. Keep CPU virtualization
 (SVM) enabled in the firmware settings; `/dev/kvm` will be unavailable if SVM
