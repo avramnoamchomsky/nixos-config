@@ -179,6 +179,10 @@ changing the version, official release URL, and hash in the package definition.
 and software TPM support is available for guests that require TPM 2.0. UEFI
 firmware is included by the pinned QEMU package.
 
+The built-in `default` NAT network is marked for autostart and started when
+necessary by `libvirt-default-network.service`; manual `virsh net-start` and
+`virsh net-autostart` commands are not required.
+
 After applying the configuration, log out and back in (or reboot) so the
 `chomsky` account receives its new `libvirtd` group membership. Then launch
 `virt-manager` from the application launcher or a terminal. New virtual disks

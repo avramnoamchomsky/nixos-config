@@ -169,6 +169,10 @@ unstable 输入时，其版本也会随之升级。
 非特权账户 `qemu-libvirtd` 运行，并为需要 TPM 2.0 的客户机提供软件 TPM
 支持；固定版本的 QEMU 软件包已包含 UEFI 固件。
 
+内置的 `default` NAT 网络由 `libvirt-default-network.service` 设置为自动
+启动，并在需要时启动；无需手动执行 `virsh net-start` 或
+`virsh net-autostart` 命令。
+
 应用配置后，请注销并重新登录（或重启），使 `chomsky` 账户获得新的
 `libvirtd` 用户组成员身份。随后可从应用启动器或终端运行 `virt-manager`。
 由 libvirt 管理的新虚拟磁盘保存在 `/var/lib/libvirt/images/`。从主目录
