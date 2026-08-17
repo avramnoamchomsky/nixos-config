@@ -13,6 +13,7 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 - AMD + NVIDIA hybrid graphics
 - Fcitx5 with Rime Ice
 - PipeWire, NetworkManager, Bluetooth, and Avahi/mDNS
+- KVM/QEMU virtualization managed by libvirt and virt-manager
 - Automatic removable-drive mounting through UDisks and udiskie
 - Fish and desktop applications, including SylvaKru, Readest, 115 Browser, and Google Chrome as the default browser
 - Declarative MacTahoe GTK and Kvantum themes with nwg-look, qt5ct, and qt6ct
@@ -32,7 +33,8 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 │   ├── hardware-configuration.nix
 │   ├── hybrid-graphics.nix
 │   ├── msi-control.nix
-│   └── secrets.nix
+│   ├── secrets.nix
+│   └── virtualization.nix
 ├── home
 │   ├── default.nix
 │   ├── desktop.nix
@@ -168,6 +170,32 @@ changing the version, official release URL, and hash in the package definition.
   OpenOCD, and ST-Link utilities.
 - Membership in `dialout` and `plugdev`, plus the OpenOCD and ST-Link udev
   rules, grants access to supported development boards after a fresh login.
+
+## Virtual machines
+
+`system/virtualization.nix` enables libvirt with the hardware-accelerated
+`qemu_kvm` package and configures virt-manager to connect to
+`qemu:///system`. QEMU guests run as the unprivileged `qemu-libvirtd` account,
+and software TPM support is available for guests that require TPM 2.0. UEFI
+firmware is included by the pinned QEMU package.
+
+After applying the configuration, log out and back in (or reboot) so the
+`chomsky` account receives its new `libvirtd` group membership. Then launch
+`virt-manager` from the application launcher or a terminal. New virtual disks
+managed by libvirt are stored under `/var/lib/libvirt/images/`. When selecting
+an ISO from the home directory, allow virt-manager to grant the
+`qemu-libvirtd` account the required directory access if prompted.
+
+To verify hardware acceleration and the system connection:
+
+```bash
+test -e /dev/kvm && echo "KVM is available"
+virsh --connect qemu:///system list --all
+```
+
+The existing hardware configuration loads `kvm-amd`. Keep CPU virtualization
+(SVM) enabled in the firmware settings; `/dev/kvm` will be unavailable if SVM
+is disabled.
 
 ## Validate and apply
 

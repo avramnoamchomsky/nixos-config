@@ -7,6 +7,7 @@
     ./hybrid-graphics.nix
     ./msi-control.nix
     ./secrets.nix
+    ./virtualization.nix
   ];
 
   # Identity and locale

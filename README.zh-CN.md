@@ -13,6 +13,7 @@
 - AMD + NVIDIA 混合显卡
 - Fcitx5 与 Rime Ice 输入法
 - PipeWire、NetworkManager、蓝牙及 Avahi/mDNS
+- 由 libvirt 与 virt-manager 管理的 KVM/QEMU 虚拟化环境
 - 通过 UDisks 与 udiskie 自动挂载可移动存储设备
 - Fish 和桌面应用，包括 SylvaKru、Readest、115 浏览器及作为默认浏览器的 Google Chrome
 - 声明式 MacTahoe GTK 与 Kvantum 主题，以及 nwg-look、qt5ct 和 qt6ct
@@ -32,7 +33,8 @@
 │   ├── hardware-configuration.nix
 │   ├── hybrid-graphics.nix
 │   ├── msi-control.nix
-│   └── secrets.nix
+│   ├── secrets.nix
+│   └── virtualization.nix
 ├── home
 │   ├── default.nix
 │   ├── desktop.nix
@@ -159,6 +161,29 @@ unstable 输入时，其版本也会随之升级。
   及 ST-Link 工具。
 - 用户属于 `dialout` 与 `plugdev` 组，并启用 OpenOCD 与 ST-Link udev
   规则；重新登录后即可访问支持的开发板。
+
+## 虚拟机
+
+`system/virtualization.nix` 会启用 libvirt 与硬件加速的 `qemu_kvm`
+软件包，并将 virt-manager 配置为连接 `qemu:///system`。QEMU 客户机以
+非特权账户 `qemu-libvirtd` 运行，并为需要 TPM 2.0 的客户机提供软件 TPM
+支持；固定版本的 QEMU 软件包已包含 UEFI 固件。
+
+应用配置后，请注销并重新登录（或重启），使 `chomsky` 账户获得新的
+`libvirtd` 用户组成员身份。随后可从应用启动器或终端运行 `virt-manager`。
+由 libvirt 管理的新虚拟磁盘保存在 `/var/lib/libvirt/images/`。从主目录
+选择 ISO 镜像时，如果 virt-manager 发出提示，请允许它为
+`qemu-libvirtd` 账户授予所需的目录访问权限。
+
+可使用以下命令检查硬件加速及系统连接：
+
+```bash
+test -e /dev/kvm && echo "KVM is available"
+virsh --connect qemu:///system list --all
+```
+
+现有硬件配置已加载 `kvm-amd`。请确保固件设置中的 CPU 虚拟化（SVM）
+处于启用状态；如果 SVM 被禁用，系统将无法提供 `/dev/kvm`。
 
 ## 验证与应用
 
