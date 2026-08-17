@@ -16,6 +16,13 @@
   # Configure virt-manager to use the system libvirt connection by default.
   programs.virt-manager.enable = true;
 
+  # Avoid double copy-on-write overhead from qcow2 images on Btrfs. The C
+  # attribute is inherited by newly created files in the default storage pool.
+  systemd.tmpfiles.rules = [
+    "d /var/lib/libvirt/images 0711 root root - -"
+    "h /var/lib/libvirt/images - - - - +C"
+  ];
+
   # Keep libvirt's built-in NAT network enabled across fresh installations and
   # start it when it is not already active.
   systemd.services.libvirt-default-network = {

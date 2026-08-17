@@ -190,6 +190,12 @@ managed by libvirt are stored under `/var/lib/libvirt/images/`. When selecting
 an ISO from the home directory, allow virt-manager to grant the
 `qemu-libvirtd` account the required directory access if prompted.
 
+Because the storage pool resides on Btrfs, its directory declaratively inherits
+the NOCOW (`C`) attribute. This avoids stacking Btrfs copy-on-write beneath
+qcow2 copy-on-write for newly created virtual disks. Existing disk files are
+not converted, and NOCOW files do not use Btrfs data checksumming or
+compression.
+
 To verify hardware acceleration and the system connection:
 
 ```bash
