@@ -89,6 +89,7 @@ in
     unstablePkgs.readest
     sylvakru
     mpv
+    remmina
     vscode
     gh
     unstablePkgs.qq

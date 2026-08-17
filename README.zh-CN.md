@@ -15,7 +15,7 @@
 - PipeWire、NetworkManager、蓝牙及 Avahi/mDNS
 - 由 libvirt 与 virt-manager 管理的 KVM/QEMU 虚拟化环境
 - 通过 UDisks 与 udiskie 自动挂载可移动存储设备
-- Fish 和桌面应用，包括 SylvaKru、Readest、115 浏览器及作为默认浏览器的 Google Chrome
+- Fish 和桌面应用，包括 Remmina、SylvaKru、Readest、115 浏览器及作为默认浏览器的 Google Chrome
 - 声明式 MacTahoe GTK 与 Kvantum 主题，以及 nwg-look、qt5ct 和 qt6ct
 - ESP32 与 STM32 开发工具、direnv 及硬件访问规则
 - 使用 sops-nix 加密机密，并由仅存在于本机的 age 身份密钥解密
@@ -201,6 +201,11 @@ lsattr -d /var/lib/libvirt/images
 专用共享目录或有针对性的 ACL，而不要放宽整个主目录的权限。Linux 客户机
 可通过 `mount -t virtiofs TAG MOUNTPOINT` 挂载该标签；Windows 客户机需要
 安装 WinFsp 及 virtio-win 介质中的 VirtIO-FS 客户机组件。
+
+Remmina 作为 Windows 11 客户机的图形化 RDP 客户端安装。请先在 Windows
+中启用远程桌面，再通过 `virsh net-dhcp-leases default` 获取客户机地址，
+并在 Remmina 中为该地址新建 RDP 连接。Windows 账户必须设置密码，并拥有
+使用远程桌面的权限。
 
 现有硬件配置已加载 `kvm-amd`。请确保固件设置中的 CPU 虚拟化（SVM）
 处于启用状态；如果 SVM 被禁用，系统将无法提供 `/dev/kvm`。
