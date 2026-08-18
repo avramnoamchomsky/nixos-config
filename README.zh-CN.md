@@ -11,6 +11,7 @@
 - 使用 Niri，并由 Git 完整管理其 KDL 配置
 - 使用 Dank Material Shell，管理经过审阅的设置和声明式壁纸
 - AMD + NVIDIA 混合显卡
+- 显式配置的 s2idle 挂起及由加密 Btrfs 支持的休眠
 - Fcitx5 与 Rime Ice 输入法
 - PipeWire、NetworkManager、蓝牙及 Avahi/mDNS
 - 由 libvirt 与 virt-manager 管理的 KVM/QEMU 虚拟化环境
@@ -33,6 +34,7 @@
 │   ├── hardware-configuration.nix
 │   ├── hybrid-graphics.nix
 │   ├── msi-control.nix
+│   ├── power-management.nix
 │   ├── secrets.nix
 │   └── virtualization.nix
 ├── home
@@ -63,6 +65,28 @@
 
 `system/` 包含系统级硬件、启动、网络、服务、安全及机密解密配置；
 `home/` 包含由 `chomsky` 账户管理的应用程序及用户配置。
+
+## 挂起与休眠
+
+`system/power-management.nix` 仅启用 s2idle 挂起和 S4 休眠，并禁用混合
+睡眠及“先挂起后休眠”。DMS 电源菜单会提供这两个已启用的模式。
+
+日常内存压力仍由 zram 处理。休眠则使用 72 GiB 的
+`/var/lib/swapfile`；NixOS 会使用兼容 Btrfs 的 NOCOW 属性创建该文件。
+该文件位于 LUKS 加密的根文件系统内，因此保存到磁盘的内存映像也会加密。
+
+基于 systemd 的 initrd 会通过 EFI `HibernateLocation` 元数据动态查找交换
+文件及其 Btrfs 偏移量，无需写死 `resume_offset`。应用配置后，请在首次
+测试前重启一次，然后执行以下命令验证支持状态：
+
+```bash
+swapon --show
+busctl call org.freedesktop.login1 /org/freedesktop/login1 \
+  org.freedesktop.login1.Manager CanHibernate
+```
+
+第二条命令应返回 `s "yes"`。请保存所有工作后再测试休眠。如果删除
+`/var/lib/swapfile`，下次重新构建时会自动创建它。
 
 ## 声明式桌面状态
 

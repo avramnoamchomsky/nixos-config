@@ -11,6 +11,7 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 - Niri with a complete Git-owned KDL configuration
 - Dank Material Shell with reviewed settings and declarative wallpapers
 - AMD + NVIDIA hybrid graphics
+- Explicit s2idle suspend and encrypted Btrfs-backed hibernation
 - Fcitx5 with Rime Ice
 - PipeWire, NetworkManager, Bluetooth, and Avahi/mDNS
 - KVM/QEMU virtualization managed by libvirt and virt-manager
@@ -33,6 +34,7 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 │   ├── hardware-configuration.nix
 │   ├── hybrid-graphics.nix
 │   ├── msi-control.nix
+│   ├── power-management.nix
 │   ├── secrets.nix
 │   └── virtualization.nix
 ├── home
@@ -64,6 +66,31 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 `system/` contains machine-wide hardware, boot, networking, services, security,
 and secret-decryption configuration. `home/` contains the applications and user
 configuration owned by the `chomsky` account.
+
+## Suspend and hibernation
+
+`system/power-management.nix` deliberately enables only s2idle suspend and
+S4 hibernation. Hybrid sleep and suspend-then-hibernate are disabled. DMS
+offers both enabled modes in its power menu.
+
+Normal memory pressure continues to use zram. Hibernation instead uses the
+72 GiB `/var/lib/swapfile`, which NixOS creates with the Btrfs-compatible NOCOW
+attributes. The file resides inside the LUKS-encrypted root filesystem, so the
+saved memory image is encrypted at rest.
+
+The systemd-based initrd uses EFI `HibernateLocation` metadata to discover the
+swap file and its Btrfs offset dynamically; no hard-coded `resume_offset` is
+required. After applying this configuration, reboot once before the first
+test, then verify support with:
+
+```bash
+swapon --show
+busctl call org.freedesktop.login1 /org/freedesktop/login1 \
+  org.freedesktop.login1.Manager CanHibernate
+```
+
+The second command should return `s "yes"`. Test hibernation only after saving
+open work. If `/var/lib/swapfile` is removed, the next rebuild recreates it.
 
 ## Declarative desktop state
 

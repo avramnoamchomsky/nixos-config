@@ -6,6 +6,7 @@
     ./desktop.nix
     ./hybrid-graphics.nix
     ./msi-control.nix
+    ./power-management.nix
     ./secrets.nix
     ./virtualization.nix
   ];
@@ -25,9 +26,6 @@
 
   # Keep following the newest kernel in the pinned stable release.
   boot.kernelPackages = pkgs.linuxPackages_latest;
-
-  # RAM-backed compressed swap. Disk swap can be added if hibernation is needed.
-  zramSwap.enable = true;
 
   hardware.enableRedistributableFirmware = true;
 
