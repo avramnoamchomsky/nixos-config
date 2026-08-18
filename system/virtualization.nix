@@ -1,6 +1,11 @@
 { pkgs, ... }:
 
 {
+  # Expose AMD SVM to nested guests instead of relying on the kernel default.
+  boot.extraModprobeConfig = ''
+    options kvm_amd nested=1
+  '';
+
   virtualisation.libvirtd = {
     enable = true;
 

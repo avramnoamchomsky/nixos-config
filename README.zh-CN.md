@@ -231,8 +231,11 @@ Remmina 作为 Windows 11 客户机的图形化 RDP 客户端安装。请先在 
 并在 Remmina 中为该地址新建 RDP 连接。Windows 账户必须设置密码，并拥有
 使用远程桌面的权限。
 
-现有硬件配置已加载 `kvm-amd`。请确保固件设置中的 CPU 虚拟化（SVM）
-处于启用状态；如果 SVM 被禁用，系统将无法提供 `/dev/kvm`。
+现有硬件配置已加载 `kvm-amd`，并通过模块选项 `nested=1` 为 Taurus 等使用
+host-passthrough 的客户机显式启用嵌套虚拟化。请确保固件设置中的 CPU
+虚拟化（SVM）处于启用状态；如果 SVM 被禁用，系统将无法提供 `/dev/kvm`。
+可通过 `cat /sys/module/kvm_amd/parameters/nested` 检查主机设置，输出应为
+`1`。
 
 ## 验证与应用
 

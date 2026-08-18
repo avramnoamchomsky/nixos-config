@@ -250,9 +250,11 @@ Enable Remote Desktop inside Windows, obtain the guest address with
 that address. The Windows account must have a password and permission to use
 Remote Desktop.
 
-The existing hardware configuration loads `kvm-amd`. Keep CPU virtualization
-(SVM) enabled in the firmware settings; `/dev/kvm` will be unavailable if SVM
-is disabled.
+The existing hardware configuration loads `kvm-amd`, and its `nested=1` module
+option explicitly enables nested virtualization for host-passthrough guests
+such as Taurus. Keep CPU virtualization (SVM) enabled in the firmware settings;
+`/dev/kvm` will be unavailable if SVM is disabled. Verify the host setting with
+`cat /sys/module/kvm_amd/parameters/nested`; it should print `1`.
 
 ## Validate and apply
 
