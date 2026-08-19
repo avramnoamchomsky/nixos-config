@@ -19,18 +19,20 @@
   # resume_offset that could become stale if the file is recreated.
   boot.initrd.systemd.enable = true;
 
-  # Serialize device suspend and resume callbacks. Several integrated AMD SoC
-  # functions failed together during asynchronous restore on this laptop.
-  boot.kernelParams = [ "pm_async=off" ];
-
-  # Offer only the two independent modes used on this laptop. Its firmware
-  # exposes s2idle but not ACPI S3/deep sleep.
+  # Both s2idle and S4 currently leave integrated AMD SoC devices in an
+  # unrecoverable state. Keep every system sleep path disabled until an
+  # upstream kernel or firmware fix is available.
   systemd.sleep.settings.Sleep = {
-    AllowSuspend = true;
-    AllowHibernation = true;
+    AllowSuspend = false;
+    AllowHibernation = false;
     AllowHybridSleep = false;
     AllowSuspendThenHibernate = false;
-    HibernateMode = "shutdown";
-    MemorySleepMode = "s2idle";
+  };
+
+  # Closing the lid must not request a disabled or unreliable sleep state.
+  services.logind.settings.Login = {
+    HandleLidSwitch = "ignore";
+    HandleLidSwitchExternalPower = "ignore";
+    HandleLidSwitchDocked = "ignore";
   };
 }

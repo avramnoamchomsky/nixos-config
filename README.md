@@ -11,7 +11,7 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 - Niri with a complete Git-owned KDL configuration
 - Dank Material Shell with reviewed settings and declarative wallpapers
 - AMD + NVIDIA hybrid graphics
-- Explicit s2idle suspend and encrypted Btrfs-backed hibernation
+- System sleep disabled pending AMD platform-resume fixes
 - Fcitx5 with Rime Ice
 - PipeWire, NetworkManager, Bluetooth, and Avahi/mDNS
 - KVM/QEMU virtualization managed by libvirt and virt-manager
@@ -69,38 +69,32 @@ configuration owned by the `chomsky` account.
 
 ## Suspend and hibernation
 
-`system/power-management.nix` deliberately enables only s2idle suspend and
-S4 hibernation. Hybrid sleep and suspend-then-hibernate are disabled. DMS
-offers both enabled modes in its power menu.
-
-Device power-management callbacks are serialized with the `pm_async=off`
-kernel parameter to avoid races between integrated AMD SoC functions whose
-dependencies are not represented correctly. S4 uses systemd's `shutdown`
-hibernation mode instead of the firmware's unreliable ACPI `platform` path.
+`system/power-management.nix` disables s2idle, S4, hybrid sleep, and
+suspend-then-hibernate while the current AMD platform-resume failures remain
+unfixed. Lid-close handling is set to `ignore`, and DMS does not expose
+suspend or hibernate actions, preventing accidental entry into a broken state.
 
 Normal memory pressure continues to use zram. Hibernation instead uses the
 72 GiB `/var/lib/swapfile`, which NixOS creates with the Btrfs-compatible NOCOW
 attributes. The file resides inside the LUKS-encrypted root filesystem, so the
 saved memory image is encrypted at rest.
 
-The systemd-based initrd uses EFI `HibernateLocation` metadata to discover the
-swap file and its Btrfs offset dynamically; no hard-coded `resume_offset` is
-required. After applying this configuration, reboot once before the first
-test, then verify support with:
+The systemd-based initrd retains the infrastructure needed to discover the
+swap file and its Btrfs offset dynamically if S4 is re-enabled later. Keeping
+the swap file active does not enable hibernation. After applying the
+configuration and rebooting, verify the disabled policy with:
 
 ```bash
 swapon --show
-cat /sys/power/pm_async
-systemd-analyze cat-config systemd/sleep.conf | \
-  grep -E 'HibernateMode|MemorySleepMode'
+systemd-analyze cat-config systemd/sleep.conf | grep '^Allow'
+busctl call org.freedesktop.login1 /org/freedesktop/login1 \
+  org.freedesktop.login1.Manager CanSuspend
 busctl call org.freedesktop.login1 /org/freedesktop/login1 \
   org.freedesktop.login1.Manager CanHibernate
 ```
 
-`pm_async` should be `0`, the sleep configuration should select `shutdown` and
-`s2idle`, and the final command should return `s "yes"`. Test s2idle and S4
-separately from clean boots, with open work saved. If `/var/lib/swapfile` is
-removed, the next rebuild recreates it.
+All four `Allow*` settings should be `false`, and both bus calls should return
+`s "no"`. If `/var/lib/swapfile` is removed, the next rebuild recreates it.
 
 ## Declarative desktop state
 
