@@ -73,6 +73,11 @@ configuration owned by the `chomsky` account.
 S4 hibernation. Hybrid sleep and suspend-then-hibernate are disabled. DMS
 offers both enabled modes in its power menu.
 
+Device power-management callbacks are serialized with the `pm_async=off`
+kernel parameter to avoid races between integrated AMD SoC functions whose
+dependencies are not represented correctly. S4 uses systemd's `shutdown`
+hibernation mode instead of the firmware's unreliable ACPI `platform` path.
+
 Normal memory pressure continues to use zram. Hibernation instead uses the
 72 GiB `/var/lib/swapfile`, which NixOS creates with the Btrfs-compatible NOCOW
 attributes. The file resides inside the LUKS-encrypted root filesystem, so the
@@ -85,12 +90,17 @@ test, then verify support with:
 
 ```bash
 swapon --show
+cat /sys/power/pm_async
+systemd-analyze cat-config systemd/sleep.conf | \
+  grep -E 'HibernateMode|MemorySleepMode'
 busctl call org.freedesktop.login1 /org/freedesktop/login1 \
   org.freedesktop.login1.Manager CanHibernate
 ```
 
-The second command should return `s "yes"`. Test hibernation only after saving
-open work. If `/var/lib/swapfile` is removed, the next rebuild recreates it.
+`pm_async` should be `0`, the sleep configuration should select `shutdown` and
+`s2idle`, and the final command should return `s "yes"`. Test s2idle and S4
+separately from clean boots, with open work saved. If `/var/lib/swapfile` is
+removed, the next rebuild recreates it.
 
 ## Declarative desktop state
 

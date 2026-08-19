@@ -19,6 +19,10 @@
   # resume_offset that could become stale if the file is recreated.
   boot.initrd.systemd.enable = true;
 
+  # Serialize device suspend and resume callbacks. Several integrated AMD SoC
+  # functions failed together during asynchronous restore on this laptop.
+  boot.kernelParams = [ "pm_async=off" ];
+
   # Offer only the two independent modes used on this laptop. Its firmware
   # exposes s2idle but not ACPI S3/deep sleep.
   systemd.sleep.settings.Sleep = {
@@ -26,6 +30,7 @@
     AllowHibernation = true;
     AllowHybridSleep = false;
     AllowSuspendThenHibernate = false;
+    HibernateMode = "shutdown";
     MemorySleepMode = "s2idle";
   };
 }

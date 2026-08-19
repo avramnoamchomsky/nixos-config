@@ -71,6 +71,10 @@
 `system/power-management.nix` 仅启用 s2idle 挂起和 S4 休眠，并禁用混合
 睡眠及“先挂起后休眠”。DMS 电源菜单会提供这两个已启用的模式。
 
+内核参数 `pm_async=off` 会按顺序执行设备电源管理回调，以避免依赖关系未被
+正确表达的 AMD SoC 集成功能之间发生竞争。S4 使用 systemd 的 `shutdown`
+休眠模式，而不使用固件中不可靠的 ACPI `platform` 路径。
+
 日常内存压力仍由 zram 处理。休眠则使用 72 GiB 的
 `/var/lib/swapfile`；NixOS 会使用兼容 Btrfs 的 NOCOW 属性创建该文件。
 该文件位于 LUKS 加密的根文件系统内，因此保存到磁盘的内存映像也会加密。
@@ -81,12 +85,16 @@
 
 ```bash
 swapon --show
+cat /sys/power/pm_async
+systemd-analyze cat-config systemd/sleep.conf | \
+  grep -E 'HibernateMode|MemorySleepMode'
 busctl call org.freedesktop.login1 /org/freedesktop/login1 \
   org.freedesktop.login1.Manager CanHibernate
 ```
 
-第二条命令应返回 `s "yes"`。请保存所有工作后再测试休眠。如果删除
-`/var/lib/swapfile`，下次重新构建时会自动创建它。
+`pm_async` 应输出 `0`，休眠配置应选择 `shutdown` 与 `s2idle`，最后一条
+命令应返回 `s "yes"`。请从干净启动开始分别测试 s2idle 和 S4，并提前保存
+所有工作。如果删除 `/var/lib/swapfile`，下次重新构建时会自动创建它。
 
 ## 声明式桌面状态
 
