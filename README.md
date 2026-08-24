@@ -10,7 +10,7 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 - `linuxPackages_latest`, currently pinned to Linux `7.1.8`
 - Niri with a complete Git-owned KDL configuration
 - Dank Material Shell with reviewed settings and declarative wallpapers
-- AMD + NVIDIA hybrid graphics
+- AMD + NVIDIA hybrid graphics with a boot-selectable RTX 4060 VFIO mode
 - System sleep disabled pending AMD platform-resume fixes
 - Fcitx5 with Rime Ice
 - PipeWire, NetworkManager, Bluetooth, and Avahi/mDNS
@@ -36,6 +36,7 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 │   ├── msi-control.nix
 │   ├── power-management.nix
 │   ├── secrets.nix
+│   ├── vfio.nix
 │   └── virtualization.nix
 ├── home
 │   ├── default.nix
@@ -259,6 +260,47 @@ option explicitly enables nested virtualization for host-passthrough guests
 such as Taurus. Keep CPU virtualization (SVM) enabled in the firmware settings;
 `/dev/kvm` will be unavailable if SVM is disabled. Verify the host setting with
 `cat /sys/module/kvm_amd/parameters/nested`; it should print `1`.
+
+### RTX 4060 passthrough
+
+`system/vfio.nix` adds a `vfio` specialisation without changing the normal boot
+configuration. The normal entry keeps the RTX 4060 available to NixOS through
+PRIME offload. The `vfio` entry binds both isolated members of IOMMU group 13
+to `vfio-pci` during the initrd:
+
+```text
+01:00.0  NVIDIA RTX 4060                 10de:28a0
+01:00.1  NVIDIA High Definition Audio    10de:22be
+```
+
+Install both boot entries without switching the running system into VFIO mode:
+
+```bash
+sudo nixos-rebuild boot --flake .#pisces
+```
+
+After rebooting into the `vfio` specialisation, verify that both functions show
+`Kernel driver in use: vfio-pci`:
+
+```bash
+lspci -nnk -s 01:00.0
+lspci -nnk -s 01:00.1
+```
+
+With Taurus fully shut down, open its hardware details in virt-manager and use
+**Add Hardware > PCI Host Device** to add both NVIDIA functions. Keep the
+VirtIO video and SPICE devices as a recovery console. Windows retains its
+NVIDIA driver when the physical devices are later removed from the VM.
+
+Before using Taurus in the normal boot mode, shut it down and remove only the
+two NVIDIA PCI host devices in virt-manager. They can also be removed after
+booting normally, provided Taurus has not been started. Taurus then uses its
+existing VirtIO/SPICE display while NixOS retains the RTX 4060. Do not remove
+the separately passed-through `05:00.3` USB controller.
+
+The internal laptop panel remains attached to the AMD iGPU in both modes.
+Physical NVIDIA HDMI/DisplayPort outputs belong to Windows in VFIO mode; RDP
+can be used when no external display is connected.
 
 ## Validate and apply
 

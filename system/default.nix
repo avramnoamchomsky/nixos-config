@@ -8,6 +8,7 @@
     ./msi-control.nix
     ./power-management.nix
     ./secrets.nix
+    ./vfio.nix
     ./virtualization.nix
   ];
 

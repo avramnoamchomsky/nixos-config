@@ -10,7 +10,7 @@
 - 使用 `linuxPackages_latest`，当前固定为 Linux `7.1.8`
 - 使用 Niri，并由 Git 完整管理其 KDL 配置
 - 使用 Dank Material Shell，管理经过审阅的设置和声明式壁纸
-- AMD + NVIDIA 混合显卡
+- AMD + NVIDIA 混合显卡，以及可在启动时选择的 RTX 4060 VFIO 模式
 - 在 AMD 平台恢复问题修复前禁用系统睡眠
 - Fcitx5 与 Rime Ice 输入法
 - PipeWire、NetworkManager、蓝牙及 Avahi/mDNS
@@ -36,6 +36,7 @@
 │   ├── msi-control.nix
 │   ├── power-management.nix
 │   ├── secrets.nix
+│   ├── vfio.nix
 │   └── virtualization.nix
 ├── home
 │   ├── default.nix
@@ -240,6 +241,45 @@ host-passthrough 的客户机显式启用嵌套虚拟化。请确保固件设置
 虚拟化（SVM）处于启用状态；如果 SVM 被禁用，系统将无法提供 `/dev/kvm`。
 可通过 `cat /sys/module/kvm_amd/parameters/nested` 检查主机设置，输出应为
 `1`。
+
+### RTX 4060 直通
+
+`system/vfio.nix` 会新增 `vfio` specialisation，但不会改变正常启动配置。
+正常启动项仍由 NixOS 通过 PRIME offload 使用 RTX 4060；`vfio` 启动项则在
+initrd 阶段将 IOMMU 组 13 中彼此隔离的两个成员绑定到 `vfio-pci`：
+
+```text
+01:00.0  NVIDIA RTX 4060                 10de:28a0
+01:00.1  NVIDIA High Definition Audio    10de:22be
+```
+
+可使用以下命令安装两个启动项，而不将当前运行的系统切换到 VFIO 模式：
+
+```bash
+sudo nixos-rebuild boot --flake .#pisces
+```
+
+重启并选择 `vfio` specialisation 后，请检查两个功能是否都显示
+`Kernel driver in use: vfio-pci`：
+
+```bash
+lspci -nnk -s 01:00.0
+lspci -nnk -s 01:00.1
+```
+
+完全关闭 Taurus 后，在 virt-manager 中打开其硬件详情，通过
+**Add Hardware > PCI Host Device** 添加两个 NVIDIA 功能。请保留 VirtIO
+显卡与 SPICE 设备作为应急控制台；之后从虚拟机移除物理设备时，Windows
+仍会保留已安装的 NVIDIA 驱动。
+
+在正常启动模式下使用 Taurus 前，请将其关闭，并在 virt-manager 中仅移除
+两个 NVIDIA PCI 主机设备。也可以在进入正常模式后、尚未启动 Taurus 时
+移除它们。随后 Taurus 会使用现有的 VirtIO/SPICE 显示，而 NixOS 继续使用
+RTX 4060。请勿移除单独直通的 `05:00.3` USB 控制器。
+
+笔记本内置屏幕在两种模式下都连接到 AMD iGPU。在 VFIO 模式下，物理
+NVIDIA HDMI/DisplayPort 输出归 Windows 使用；未连接外部显示器时可使用
+RDP。
 
 ## 验证与应用
 
