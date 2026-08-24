@@ -49,6 +49,10 @@ cursor {
     hide-when-typing
 }
 
+clipboard {
+    disable-primary
+}
+
 hotkey-overlay {
     skip-at-startup
 }
