@@ -203,6 +203,18 @@ changing the version, official release URL, and hash in the package definition.
 - Membership in `dialout` and `plugdev`, plus the OpenOCD and ST-Link udev
   rules, grants access to supported development boards after a fresh login.
 
+## Android device modding
+
+`android-tools` provides ADB, Fastboot, AVB tools, boot-image unpacking and
+repacking, sparse-image conversion, and dynamic-partition utilities.
+`payload-dumper-go` extracts partition images from Android OTA `payload.bin`
+files. NixOS 26.05 grants USB access through systemd's built-in `uaccess`
+rules, so no obsolete `adbusers` group or third-party udev rules are needed.
+
+After applying the configuration, authorize USB debugging on the device and
+check it with `adb devices`. In bootloader mode, verify the connection with
+`fastboot devices`.
+
 ## Virtual machines
 
 `system/virtualization.nix` enables libvirt with the hardware-accelerated

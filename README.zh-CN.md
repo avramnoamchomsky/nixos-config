@@ -191,6 +191,17 @@ unstable 输入时，其版本也会随之升级。
 - 用户属于 `dialout` 与 `plugdev` 组，并启用 OpenOCD 与 ST-Link udev
   规则；重新登录后即可访问支持的开发板。
 
+## Android 设备修改
+
+`android-tools` 提供 ADB、Fastboot、AVB、启动镜像解包与重新打包、稀疏
+镜像转换以及动态分区工具。`payload-dumper-go` 可从 Android OTA 的
+`payload.bin` 中提取分区镜像。NixOS 26.05 通过 systemd 内置的 `uaccess`
+规则授予 USB 访问权限，因此无需旧的 `adbusers` 用户组或第三方 udev
+规则。
+
+应用配置后，在设备上授权 USB 调试，并使用 `adb devices` 检查连接；
+进入 bootloader 模式后，使用 `fastboot devices` 检查连接。
+
 ## 虚拟机
 
 `system/virtualization.nix` 会启用 libvirt 与硬件加速的 `qemu_kvm`

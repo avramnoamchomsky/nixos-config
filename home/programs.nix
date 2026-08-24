@@ -106,6 +106,10 @@ in
 
     unstablePkgs.uv
 
+    # Android device maintenance and firmware images
+    android-tools
+    payload-dumper-go
+
     # STM32 development
     stm32cubemx
     gcc-arm-embedded
