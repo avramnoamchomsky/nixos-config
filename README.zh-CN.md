@@ -283,17 +283,40 @@ RDP。
 
 ## 验证与应用
 
-在不执行构建的情况下检查完整 flake：
+NixOS 不会自动监视这些文件。每次修改配置后，请先在不执行构建的情况下
+检查完整 flake：
 
 ```bash
 nix flake check --no-build
 ```
 
-应用完整的 NixOS 与 Home Manager 配置：
+在正常启动模式下进行普通的软件包、桌面或服务修改时，可应用完整的 NixOS
+与 Home Manager 配置：
 
 ```bash
 sudo nixos-rebuild switch --flake .#pisces
 ```
+
+`switch` 会创建新的启动 generation、立即激活正常配置，并重新构建继承该
+配置的 `vfio` specialisation。父配置中的修改通常会同时出现在两种模式中；
+`system/vfio.nix` 仅覆盖为 RTX 4060 预留设备所需的设置。
+
+修改内核、initrd、VFIO、显卡驱动或引导程序时，请安装新的 generation，
+但不要改变当前运行的系统，然后重启：
+
+```bash
+sudo nixos-rebuild boot --flake .#pisces
+sudo reboot
+```
+
+当前系统处于 VFIO 模式时应优先使用 `boot`。重启前请关闭 Taurus；否则直接
+执行正常配置的 `switch`，可能会在客户机或 VFIO 仍占用 RTX 4060 时尝试将
+它交还给 NVIDIA 驱动。
+
+每次成功重构都会创建一个 generation；systemd-boot 会按照
+`boot.loader.systemd-boot.configurationLimit` 的配置保留最多十个
+generation。如果新配置损坏，可在启动时选择较旧的 generation 恢复。Git
+与系统激活彼此独立：提交不会重构系统，重构也不会提交配置。
 
 ## 提交前检查
 

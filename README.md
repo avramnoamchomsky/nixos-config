@@ -304,17 +304,42 @@ can be used when no external display is connected.
 
 ## Validate and apply
 
-Evaluate the complete flake without building:
+NixOS does not monitor these files automatically. After every configuration
+change, first evaluate the complete flake without building:
 
 ```bash
 nix flake check --no-build
 ```
 
-Apply the complete NixOS and Home Manager configuration:
+For ordinary package, desktop, and service changes made while running the
+normal boot mode, apply the complete NixOS and Home Manager configuration:
 
 ```bash
 sudo nixos-rebuild switch --flake .#pisces
 ```
+
+`switch` creates a new boot generation, activates the normal configuration
+immediately, and rebuilds its inherited `vfio` specialisation. Changes to the
+parent configuration normally appear in both modes; `system/vfio.nix`
+overrides only the settings needed to reserve the RTX 4060.
+
+For kernel, initrd, VFIO, GPU-driver, or boot-loader changes, install the new
+generation without changing the running system and then reboot:
+
+```bash
+sudo nixos-rebuild boot --flake .#pisces
+sudo reboot
+```
+
+Prefer `boot` whenever the system is currently running in VFIO mode. Shut down
+Taurus before rebooting; a normal `switch` could otherwise try to return the
+RTX 4060 to the NVIDIA driver while the guest or VFIO still owns it.
+
+Each successful rebuild creates a generation, and systemd-boot retains up to
+the ten generations configured by `boot.loader.systemd-boot.configurationLimit`.
+Select an older generation at boot to recover from a broken change. Git and
+system activation remain separate: committing does not rebuild the machine,
+and rebuilding does not commit the configuration.
 
 ## Before committing
 
