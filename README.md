@@ -222,7 +222,9 @@ check it with `adb devices`. In bootloader mode, verify the connection with
 Flatpak through the pinned `nix-flatpak` flake input. Flathub and the
 `com.usebottles.bottles` application are declared in `system/desktop.nix`, and
 a weekly timer keeps managed Flatpaks updated. Unused Flatpak runtimes are
-removed automatically.
+removed automatically. The Flathub remote uses USTC's mainland-China cache;
+the management service also reconciles an existing remote to that URL before
+installing or updating packages.
 
 Flatpak applications are convergently managed rather than stored in Nix
 generations, so a NixOS rollback does not roll Bottles back. Bottles remains

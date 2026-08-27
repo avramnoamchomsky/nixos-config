@@ -208,7 +208,9 @@ unstable 输入时，其版本也会随之升级。
 [Bottles](https://usebottles.com/) 通过固定的 `nix-flatpak` flake 输入，以
 上游正式支持的 Flatpak 形式安装。Flathub 与
 `com.usebottles.bottles` 应用在 `system/desktop.nix` 中声明，并由每周
-定时器更新；不再使用的 Flatpak runtime 会自动清理。
+定时器更新；不再使用的 Flatpak runtime 会自动清理。Flathub 远程源使用
+中科大中国大陆缓存；管理服务会在安装或更新前，将已有远程源同步到该
+地址。
 
 Flatpak 应用以收敛方式管理，并不存储在 Nix generation 中，因此回退
 NixOS 不会同时回退 Bottles。Bottles 仍处于沙箱内；应通过文件 portal

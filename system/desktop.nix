@@ -73,7 +73,7 @@
     remotes = [
       {
         name = "flathub";
-        location = "https://dl.flathub.org/repo/flathub.flatpakrepo";
+        location = "https://mirrors.ustc.edu.cn/flathub";
       }
     ];
 
@@ -86,6 +86,16 @@
 
     uninstallUnused = true;
   };
+
+  # nix-flatpak adds missing remotes but does not reconcile the URL of an
+  # existing one. Keep the system Flathub remote on the reachable USTC cache.
+  systemd.services.flatpak-managed-install.preStart = ''
+    if ${pkgs.flatpak}/bin/flatpak remotes --system --columns=name \
+      | ${pkgs.gnugrep}/bin/grep -qx flathub; then
+      ${pkgs.flatpak}/bin/flatpak remote-modify --system flathub \
+        --url=https://mirrors.ustc.edu.cn/flathub
+    fi
+  '';
 
   # Fish must be registered system-wide before it can be a login shell.
   programs.fish.enable = true;
