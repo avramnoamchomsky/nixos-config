@@ -93,12 +93,14 @@ pkgs.stdenvNoCC.mkDerivation {
       --set-rpath "$out/libexec/115-browser:${libraryPath}" \
       "$out/libexec/115-browser/chrome_crashpad_handler"
 
+    # The vendor's Chromium 125 build renders its Transfer Manager incorrectly
+    # on native Wayland. Keep this application on XWayland until it is updated.
     makeWrapper "$out/libexec/115-browser/115Browser" "$out/bin/115-browser" \
       --chdir "$out/libexec/115-browser" \
       --prefix LD_LIBRARY_PATH : "$out/libexec/115-browser:${libraryPath}" \
       --prefix PATH : "${pkgs.lib.makeBinPath [ pkgs.coreutils pkgs.xdg-utils ]}" \
       --prefix XDG_DATA_DIRS : "${pkgs.adwaita-icon-theme}/share:${pkgs.gsettings-desktop-schemas}/share:${pkgs.gtk3}/share" \
-      --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations --enable-wayland-ime=true}}"
+      --add-flags "--ozone-platform=x11"
 
     cp usr/share/applications/115Browser.desktop \
       "$out/share/applications/115-browser.desktop"

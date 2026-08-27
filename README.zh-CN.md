@@ -153,8 +153,9 @@ HTTPS，应优先改用 HTTPS。
 
 [官方 x86_64 Linux 版](https://q.115.com/115/T888199.html) 115 浏览器在
 `home/packages/115-browser.nix` 中以声明式方式打包。版本 `35.30.0` 及下载
-哈希已固定，厂商二进制文件已适配 NixOS，并会在 Niri 下启用 Wayland
-输入法支持。可通过应用启动器或 `115-browser` 命令运行。
+哈希已固定，厂商二进制文件已适配 NixOS。由于其传输管理器在 Niri 原生
+Wayland 下显示异常，该应用会强制通过 XWayland 运行。可通过应用启动器或
+`115-browser` 命令运行。
 
 该厂商版本报告其 Chromium 版本为 `125.0.6422.61`，版本较旧。建议仅用于
 115 专属功能；日常网页浏览仍使用默认的 Google Chrome。

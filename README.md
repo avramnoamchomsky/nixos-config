@@ -161,8 +161,9 @@ Changes made in the graphical tools are temporary and should be copied back to
 The [official x86_64 Linux release](https://q.115.com/115/T888199.html) of 115
 Browser is packaged declaratively in `home/packages/115-browser.nix`. Version
 `35.30.0` and its download hash are pinned, the vendor binary is adapted to
-NixOS, and Wayland input-method support is enabled when running under Niri.
-Launch it as `115-browser` or from the application launcher.
+NixOS, and it is forced through XWayland because its Transfer Manager renders
+incorrectly on native Wayland under Niri. Launch it as `115-browser` or from
+the application launcher.
 
 The vendor build reports Chromium `125.0.6422.61`, which is old. Use it only for
 115-specific functionality; Google Chrome remains the default browser for
