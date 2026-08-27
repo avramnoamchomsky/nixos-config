@@ -216,6 +216,24 @@ After applying the configuration, authorize USB debugging on the device and
 check it with `adb devices`. In bootloader mode, verify the connection with
 `fastboot devices`.
 
+## Windows games with Bottles
+
+[Bottles](https://usebottles.com/) is installed as its upstream-supported
+Flatpak through the pinned `nix-flatpak` flake input. Flathub and the
+`com.usebottles.bottles` application are declared in `system/desktop.nix`, and
+a weekly timer keeps managed Flatpaks updated. Unused Flatpak runtimes are
+removed automatically.
+
+Flatpak applications are convergently managed rather than stored in Nix
+generations, so a NixOS rollback does not roll Bottles back. Bottles remains
+sandboxed; grant individual game directories through the file portal instead
+of exposing the entire home directory. Its per-bottle graphics settings can
+select the discrete NVIDIA GPU when a game needs it.
+
+The maintained upstream 7-Zip CLI is also installed. Use either `7zz` or the
+provided compatibility command `7z`; both invoke version `26.02` from the
+pinned Nixpkgs package set.
+
 ## Virtual machines
 
 `system/virtualization.nix` enables libvirt with the hardware-accelerated

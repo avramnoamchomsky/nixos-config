@@ -203,6 +203,21 @@ unstable 输入时，其版本也会随之升级。
 应用配置后，在设备上授权 USB 调试，并使用 `adb devices` 检查连接；
 进入 bootloader 模式后，使用 `fastboot devices` 检查连接。
 
+## 使用 Bottles 运行 Windows 游戏
+
+[Bottles](https://usebottles.com/) 通过固定的 `nix-flatpak` flake 输入，以
+上游正式支持的 Flatpak 形式安装。Flathub 与
+`com.usebottles.bottles` 应用在 `system/desktop.nix` 中声明，并由每周
+定时器更新；不再使用的 Flatpak runtime 会自动清理。
+
+Flatpak 应用以收敛方式管理，并不存储在 Nix generation 中，因此回退
+NixOS 不会同时回退 Bottles。Bottles 仍处于沙箱内；应通过文件 portal
+单独授权游戏目录，而不是开放整个主目录。需要时可在每个 bottle 的图形
+设置中选择 NVIDIA 独立显卡。
+
+系统还安装了目前维护的上游 7-Zip CLI。`7zz` 与兼容命令 `7z` 均可使用，
+两者都会调用固定 Nixpkgs 软件包集中的 `26.02` 版本。
+
 ## 虚拟机
 
 `system/virtualization.nix` 会启用 libvirt 与硬件加速的 `qemu_kvm`

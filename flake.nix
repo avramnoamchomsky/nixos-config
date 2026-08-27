@@ -13,6 +13,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
+
     # Pinned to a mature revision whose helper has a smaller, reliable build
     # dependency graph on the current NixOS package set.
     sops-nix.url = "github:Mic92/sops-nix/e93ee1d900ad264d65e9701a5c6f895683433386";
@@ -25,6 +27,7 @@
       nixpkgs,
       nixpkgs-unstable,
       home-manager,
+      nix-flatpak,
       sops-nix,
       codex-desktop-linux,
       ...
@@ -49,6 +52,7 @@
           modules = [
             ./system
             codex-desktop-linux.nixosModules.default
+            nix-flatpak.nixosModules.nix-flatpak
             sops-nix.nixosModules.sops
             home-manager.nixosModules.home-manager
 

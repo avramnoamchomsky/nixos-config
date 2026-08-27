@@ -67,7 +67,25 @@
 
   services.gvfs.enable = true;
   services.udisks2.enable = true;
-  services.flatpak.enable = true;
+  services.flatpak = {
+    enable = true;
+
+    remotes = [
+      {
+        name = "flathub";
+        location = "https://dl.flathub.org/repo/flathub.flatpakrepo";
+      }
+    ];
+
+    packages = [ "com.usebottles.bottles" ];
+
+    update.auto = {
+      enable = true;
+      onCalendar = "weekly";
+    };
+
+    uninstallUnused = true;
+  };
 
   # Fish must be registered system-wide before it can be a login shell.
   programs.fish.enable = true;

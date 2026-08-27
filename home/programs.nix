@@ -4,6 +4,14 @@ let
   browser115 = import ./packages/115-browser.nix { inherit pkgs; };
   sylvakru = import ./packages/sylvakru.nix { inherit pkgs; };
 
+  sevenZip = pkgs.symlinkJoin {
+    name = "7zip-with-7z-alias";
+    paths = [ pkgs._7zz ];
+    postBuild = ''
+      ln -s "$out/bin/7zz" "$out/bin/7z"
+    '';
+  };
+
   wechat-fcitx = pkgs.symlinkJoin {
     name = "wechat-fcitx";
     paths = [ pkgs.wechat ];
@@ -129,6 +137,7 @@ in
     ripgrep
     fd
     jq
+    sevenZip
     tealdeer
     fastfetch
     lazygit
