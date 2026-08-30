@@ -234,7 +234,10 @@ select the discrete NVIDIA GPU when a game needs it.
 
 The maintained upstream 7-Zip CLI is also installed. Use either `7zz` or the
 provided compatibility command `7z`; both invoke version `26.02` from the
-pinned Nixpkgs package set.
+pinned Nixpkgs package set. Fish provides `7zip` and `7sec` aliases for maximum
+LZMA2 compression, plus `7zipv` and `7secv` variants that split archives into
+100 GiB volumes. The `7sec` variants encrypt file contents and names with the
+configured convenience passphrase.
 
 ## Virtual machines
 

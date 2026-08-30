@@ -38,10 +38,20 @@ in
     };
   };
 
-  programs.fish.enable = true;
-  programs.fish.functions.esp32-shell = ''
-    nix develop ~/all_files/projects/dev-envs/esp32 -c fish
-  '';
+  programs.fish = {
+    enable = true;
+
+    shellAliases = {
+      "7sec" = "7z a -t7z -m0=lzma2 -mx=9 -mmt=(nproc) -pcoffee -mhe=on";
+      "7zip" = "7z a -t7z -m0=lzma2 -mx=9 -mmt=(nproc)";
+      "7secv" = "7z a -t7z -v107374182400b -m0=lzma2 -mx=9 -mmt=(nproc) -pcoffee -mhe=on";
+      "7zipv" = "7z a -t7z -v107374182400b -m0=lzma2 -mx=9 -mmt=(nproc)";
+    };
+
+    functions.esp32-shell = ''
+      nix develop ~/all_files/projects/dev-envs/esp32 -c fish
+    '';
+  };
 
   programs.direnv = {
     enable = true;
