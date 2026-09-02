@@ -16,7 +16,7 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 - PipeWire, NetworkManager, Bluetooth, and Avahi/mDNS
 - KVM/QEMU virtualization managed by libvirt and virt-manager
 - Automatic removable-drive mounting through UDisks and udiskie
-- Fish and desktop applications, including Remmina, SylvaKru, Readest, 115 Browser, and Google Chrome as the default browser
+- Fish and desktop applications, including Raspberry Pi Imager, Remmina, SylvaKru, Readest, 115 Browser, and Google Chrome as the default browser
 - Declarative MacTahoe GTK and Kvantum themes with nwg-look, qt5ct, and qt6ct
 - ESP32 and STM32 development tooling with direnv and hardware access rules
 - sops-nix encrypted secrets backed by a machine-local age identity

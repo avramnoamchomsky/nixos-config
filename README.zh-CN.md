@@ -16,7 +16,7 @@
 - PipeWire、NetworkManager、蓝牙及 Avahi/mDNS
 - 由 libvirt 与 virt-manager 管理的 KVM/QEMU 虚拟化环境
 - 通过 UDisks 与 udiskie 自动挂载可移动存储设备
-- Fish 和桌面应用，包括 Remmina、SylvaKru、Readest、115 浏览器及作为默认浏览器的 Google Chrome
+- Fish 和桌面应用，包括 Raspberry Pi Imager、Remmina、SylvaKru、Readest、115 浏览器及作为默认浏览器的 Google Chrome
 - 声明式 MacTahoe GTK 与 Kvantum 主题，以及 nwg-look、qt5ct 和 qt6ct
 - ESP32 与 STM32 开发工具、direnv 及硬件访问规则
 - 使用 sops-nix 加密机密，并由仅存在于本机的 age 身份密钥解密
