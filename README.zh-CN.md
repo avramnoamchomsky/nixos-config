@@ -198,6 +198,14 @@ unstable 输入时，其版本也会随之升级。
 应用配置后，在设备上授权 USB 调试，并使用 `adb devices` 检查连接；
 进入 bootloader 模式后，使用 `fastboot devices` 检查连接。
 
+## Raspberry Pi 镜像写入
+
+Raspberry Pi Imager 在系统层安装，并配有声明式 PolicyKit 操作；该操作只
+匹配 Nix store 中不可变的可执行文件。从应用启动器或终端运行 `rpi-imager`
+时，系统会请求管理员认证，再为该次运行提升权限，使其能够写入可移动存储。
+不要使用 `sudo` 启动、点击程序中会进行命令式修改的 **Install Authorization**
+按钮，也不要通过加入 `disk` 组授予用户不受限制的原始磁盘访问权限。
+
 ## 使用 Bottles 运行 Windows 游戏
 
 [Bottles](https://usebottles.com/) 通过固定的 `nix-flatpak` flake 输入，以

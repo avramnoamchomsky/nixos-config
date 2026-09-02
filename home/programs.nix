@@ -104,7 +104,6 @@ in
     # Graphical applications
     browser115
     google-chrome
-    rpi-imager
     unstablePkgs.readest
     sylvakru
     mpv

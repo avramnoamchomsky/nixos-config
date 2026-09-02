@@ -1,5 +1,47 @@
 { pkgs, unstablePkgs, ... }:
 
+let
+  rpiImagerPolicy = pkgs.writeText "com.raspberrypi.rpi-imager.policy.in" ''
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE policyconfig PUBLIC
+      "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+      "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+    <policyconfig>
+      <vendor>Raspberry Pi Ltd</vendor>
+      <vendor_url>https://www.raspberrypi.com/</vendor_url>
+      <action id="com.raspberrypi.rpi-imager">
+        <description>Run Raspberry Pi Imager with elevated privileges</description>
+        <message>Authentication is required to write a Raspberry Pi image</message>
+        <defaults>
+          <allow_any>no</allow_any>
+          <allow_inactive>no</allow_inactive>
+          <allow_active>auth_admin_keep</allow_active>
+        </defaults>
+        <annotate key="org.freedesktop.policykit.exec.path">@rpi-imager@</annotate>
+        <annotate key="org.freedesktop.policykit.exec.allow_gui">true</annotate>
+      </action>
+    </policyconfig>
+  '';
+
+  rpiImager = pkgs.symlinkJoin {
+    name = "rpi-imager-with-polkit-${pkgs.rpi-imager.version}";
+    paths = [ pkgs.rpi-imager ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+
+    postBuild = ''
+      wrapProgram "$out/bin/rpi-imager" \
+        --run "if [[ \"\$EUID\" -ne 0 ]]; then exec /run/wrappers/bin/pkexec \"$out/bin/rpi-imager\" \"\$@\"; fi"
+
+      install -Dm644 ${rpiImagerPolicy} \
+        "$out/share/polkit-1/actions/com.raspberrypi.rpi-imager.policy"
+      substituteInPlace \
+        "$out/share/polkit-1/actions/com.raspberrypi.rpi-imager.policy" \
+        --replace-fail "@rpi-imager@" "$out/bin/rpi-imager"
+    '';
+
+    meta = pkgs.rpi-imager.meta;
+  };
+in
 {
   # Input method: Fcitx5 + Rime Ice + Xiaohe Shuangpin.
   i18n.inputMethod = {
@@ -121,6 +163,7 @@
     adwaita-icon-theme
 
     # Hardware access and administration
+    rpiImager
     stlink
     cryptsetup
     btrfs-progs

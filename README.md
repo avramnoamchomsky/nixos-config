@@ -211,6 +211,15 @@ After applying the configuration, authorize USB debugging on the device and
 check it with `adb devices`. In bootloader mode, verify the connection with
 `fastboot devices`.
 
+## Raspberry Pi imaging
+
+Raspberry Pi Imager is installed system-wide with a declarative PolicyKit
+action tied to its immutable Nix store executable. Launching `rpi-imager` from
+the application launcher or terminal requests administrator authentication and
+then elevates that invocation so it can write removable storage. Do not run it
+with `sudo`, click its imperative **Install Authorization** button, or grant the
+user unrestricted raw-disk access through the `disk` group.
+
 ## Windows games with Bottles
 
 [Bottles](https://usebottles.com/) is installed as its upstream-supported
