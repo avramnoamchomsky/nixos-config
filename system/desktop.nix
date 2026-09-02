@@ -18,7 +18,6 @@ let
           <allow_active>auth_admin_keep</allow_active>
         </defaults>
         <annotate key="org.freedesktop.policykit.exec.path">@rpi-imager@</annotate>
-        <annotate key="org.freedesktop.policykit.exec.allow_gui">true</annotate>
       </action>
     </policyconfig>
   '';
