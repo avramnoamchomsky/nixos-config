@@ -20,7 +20,7 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 - Declarative MacTahoe GTK and Kvantum themes with nwg-look, qt5ct, and qt6ct
 - ESP32 and STM32 development tooling with direnv and hardware access rules
 - sops-nix encrypted secrets backed by a machine-local age identity
-- Automatic rclone WebDAV mounts for two InfiniCLOUD accounts and the optional LAN host `aquarius.local`
+- Automatic rclone WebDAV mounts for two InfiniCLOUD accounts
 
 ## Structure
 
@@ -131,12 +131,7 @@ The configured mount points are:
 ```text
 ~/mnt/infini-cloud-kurio
 ~/mnt/infini-cloud-higa
-~/mnt/aquarius
 ```
-
-`aquarius.local` is allowed to be offline. Its user service retries failed
-startup every 30 seconds without blocking boot. It currently uses plain HTTP,
-so HTTPS should be preferred if the server gains support for it.
 
 ## Desktop themes
 

@@ -20,7 +20,7 @@
 - 声明式 MacTahoe GTK 与 Kvantum 主题，以及 nwg-look、qt5ct 和 qt6ct
 - ESP32 与 STM32 开发工具、direnv 及硬件访问规则
 - 使用 sops-nix 加密机密，并由仅存在于本机的 age 身份密钥解密
-- 自动挂载两个 InfiniCLOUD WebDAV 账户及可选的局域网主机 `aquarius.local`
+- 自动挂载两个 InfiniCLOUD WebDAV 账户
 
 ## 目录结构
 
@@ -126,12 +126,7 @@ busctl call org.freedesktop.login1 /org/freedesktop/login1 \
 ```text
 ~/mnt/infini-cloud-kurio
 ~/mnt/infini-cloud-higa
-~/mnt/aquarius
 ```
-
-允许 `aquarius.local` 处于离线状态。其用户服务会每隔 30 秒重新尝试启动，
-且不会阻塞系统启动。目前该连接使用未加密的 HTTP；如果服务器将来支持
-HTTPS，应优先改用 HTTPS。
 
 ## 桌面主题
 

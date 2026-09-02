@@ -25,16 +25,6 @@
         owner = "chomsky";
         mode = "0400";
       };
-
-      "rclone/aquarius-username" = {
-        owner = "chomsky";
-        mode = "0400";
-      };
-
-      "rclone/aquarius-password" = {
-        owner = "chomsky";
-        mode = "0400";
-      };
     };
   };
 }
