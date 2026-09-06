@@ -117,6 +117,7 @@ in
     # Development tools
     unstablePkgs.codex
     nodejs
+    conan
 
     (python3.withPackages (ps: with ps; [
       pip
