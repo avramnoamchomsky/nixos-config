@@ -138,6 +138,7 @@ in
 
     # Wayland utilities
     wl-clipboard
+    wlr-randr
 
     # General CLI tools
     curl
