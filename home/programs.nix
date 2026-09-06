@@ -108,6 +108,7 @@ in
     sylvakru
     mpv
     remmina
+    kdiskmark
     vscode
     gh
     unstablePkgs.qq
