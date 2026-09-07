@@ -153,6 +153,7 @@ in
     sevenZip
     tealdeer
     fastfetch
+    duf
     lazygit
   ];
 }
