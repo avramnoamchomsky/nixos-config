@@ -1,9 +1,9 @@
 { pkgs, ... }:
 
 {
-  # Expose AMD SVM to nested guests instead of relying on the kernel default.
+  # Keep host KVM acceleration available without exposing AMD SVM to guests.
   boot.extraModprobeConfig = ''
-    options kvm_amd nested=1
+    options kvm_amd nested=0
   '';
 
   virtualisation.libvirtd = {
