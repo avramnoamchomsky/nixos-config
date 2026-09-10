@@ -74,7 +74,7 @@
     force = true;
     text = ''
       [Settings]
-      UserMode=super_battery_mode
+      UserMode=balanced_mode
       fan1SpeedSettings=30|30|30|30|30|30|30
       fan1TempSettings=50|55|60|65|70|75
       fan2SpeedSettings=30|30|30|30|30|30|30
