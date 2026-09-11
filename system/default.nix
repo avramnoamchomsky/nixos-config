@@ -4,6 +4,7 @@
   imports = [
     ./hardware-configuration.nix
     ./desktop.nix
+    ./gaming.nix
     ./hybrid-graphics.nix
     ./msi-control.nix
     ./power-management.nix
