@@ -126,6 +126,12 @@ in
 
     unstablePkgs.uv
 
+    # HDL development
+    iverilog
+    verilator
+    verible
+    surfer
+
     # Android device maintenance and firmware images
     android-tools
     payload-dumper-go
