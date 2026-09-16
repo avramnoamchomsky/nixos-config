@@ -33,10 +33,30 @@ let
           --name "$container_name"
       fi
 
+      # Container creation normally downloads this helper. Retry explicitly in
+      # case a transient network failure interrupted the initial setup.
+      distrobox enter --name "$container_name" -- \
+        /usr/bin/distrobox-host-exec --yes true >/dev/null 2>&1 || true
+
       distrobox enter --name "$container_name" -- bash -lc '
         set -euo pipefail
         sudo apt-get update
-        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common zip
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+          libasound2 \
+          libgtk2.0-0 \
+          libgtk-3-0 \
+          libnss3 \
+          libx11-6 \
+          libxext6 \
+          libxft2 \
+          libxi6 \
+          libxinerama1 \
+          libxkbcommon-x11-0 \
+          libxrandr2 \
+          libxrender1 \
+          libxtst6 \
+          software-properties-common \
+          zip
         sudo add-apt-repository -y universe
         cd /tmp
         sudo '"$installer_directory"'/installLibs.sh
