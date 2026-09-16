@@ -15,6 +15,7 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 - Fcitx5 with Rime Ice
 - PipeWire, NetworkManager, Bluetooth, and Avahi/mDNS
 - KVM/QEMU virtualization managed by libvirt and virt-manager
+- Docker and Distrobox with an Ubuntu 22.04 Vitis/Vivado 2023.2 environment
 - Automatic removable-drive mounting through UDisks and udiskie
 - Fish and desktop applications, including Raspberry Pi Imager, Remmina, SylvaKru, Readest, 115 Browser, and Google Chrome as the default browser
 - Declarative MacTahoe GTK and Kvantum themes with nwg-look, qt5ct, and qt6ct
@@ -31,6 +32,7 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 ├── system
 │   ├── default.nix
 │   ├── desktop.nix
+│   ├── fpga.nix
 │   ├── hardware-configuration.nix
 │   ├── hybrid-graphics.nix
 │   ├── msi-control.nix
@@ -54,6 +56,7 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 │   ├── programs.nix
 │   ├── rclone.nix
 │   ├── themes.nix
+│   ├── vitis.nix
 │   └── wallpapers
 │       └── ...
 ├── secrets
@@ -198,6 +201,96 @@ changing the version, official release URL, and hash in the package definition.
   OpenOCD, and ST-Link utilities.
 - Membership in `dialout` and `plugdev`, plus the OpenOCD and ST-Link udev
   rules, grants access to supported development boards after a fresh login.
+
+## AMD Vitis and Vivado 2023.2
+
+Vitis and Vivado run in an Ubuntu 22.04 Distrobox named `vitis-2023.2` while
+the NixOS host owns Docker, USB/JTAG permissions, launch commands, and the VNC
+service. The AMD tools are installed under `~/Xilinx`, which is shared with the
+container and remains intact if the container is recreated. `system/fpga.nix`
+provides udev rules for AMD/Xilinx and Digilent programmers commonly used with
+Artix-7 boards.
+
+After rebuilding, log out and back in once to acquire membership in the
+`docker` group. Create the container, install its dependencies, and start the
+AMD installer with:
+
+```bash
+vitis-2023.2-setup
+```
+
+The installer is expected at
+`/home/chomsky/all_files/FPGAs_AdaptiveSoCs_Unified_2023.2_1013_2256`. On its
+component-selection page, keep **Vitis**, **Vivado**, **Vitis HLS**, and
+**Devices for Custom Platforms > 7 Series**. For an Artix-7-only installation,
+disable Vitis IP Cache, Vitis Networking P4, Vitis Model Composer, DocNav,
+Alveo and Kria platforms, SoCs, UltraScale, UltraScale+, Versal, and engineering
+sample devices. Set the destination to `/home/chomsky/Xilinx`; `/tools/Xilinx`
+is not writable from this rootless container. Desktop and program-group
+shortcuts are unnecessary.
+
+### VNC desktop and GUI tools
+
+The setup command installs a minimal XFCE desktop and TigerVNC in the Ubuntu
+container. Set the VNC password once:
+
+```bash
+distrobox enter --name vitis-2023.2 -- vncpasswd
+```
+
+`vitis-vnc.service` then starts automatically with the Home Manager user
+session. It listens only on the host loopback interface. Create a Remmina VNC
+profile pointing to `127.0.0.1:5901`; no SSH tunnel is required for a local
+connection. The service uses an isolated X11/XFCE startup environment to avoid
+the black-screen and incompatible-library problems caused by inheriting the
+NixOS Wayland session.
+
+Use these commands to inspect or control the desktop:
+
+```bash
+systemctl --user status vitis-vnc.service
+systemctl --user restart vitis-vnc.service
+systemctl --user stop vitis-vnc.service
+journalctl --user -u vitis-vnc.service -f
+```
+
+Inside the VNC desktop, open XFCE Terminal and launch either application:
+
+```bash
+source ~/Xilinx/Vivado/2023.2/settings64.sh
+vivado
+```
+
+```bash
+source ~/Xilinx/Vitis/2023.2/settings64.sh
+vitis
+```
+
+If the VNC service was enabled before the password existed, create the password
+and restart the service. VNC logs are available under `~/.vnc/`.
+
+### Host-side CLI
+
+Vivado's non-graphical modes work directly from a NixOS terminal through the
+provided Distrobox wrapper; VNC does not need to be running:
+
+```bash
+vivado-2023.2 -mode tcl
+vivado-2023.2 -mode batch -source build.tcl
+vivado-2023.2 -mode batch -source build.tcl -tclargs argument1 argument2
+```
+
+The wrappers `vivado-2023.2` and `vitis-2023.2` source the corresponding AMD
+environment inside Ubuntu and forward all arguments. Run commands from a
+project directory so generated files are kept with that project. Vivado's
+accidental repository-root `vivado.jou` and `vivado.log` files are ignored.
+
+After changing this configuration, apply it with:
+
+```bash
+sudo nixos-rebuild switch --flake .#pisces
+systemctl --user restart vitis-vnc.service
+```
 
 ## Android device modding
 

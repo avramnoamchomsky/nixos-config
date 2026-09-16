@@ -4,6 +4,41 @@ let
   containerName = "vitis-2023.2";
   installerDirectory = "/home/chomsky/all_files/FPGAs_AdaptiveSoCs_Unified_2023.2_1013_2256";
 
+  # Run a small X11-only XFCE session without inheriting the host's NixOS,
+  # Wayland, GTK, or Qt environment. Those variables can make applications in
+  # the Ubuntu container render a black VNC desktop or load incompatible host
+  # libraries.
+  vitisVncXstartup = pkgs.writeTextFile {
+    name = "vitis-vnc-xstartup";
+    executable = true;
+    text = ''
+      #!/bin/sh
+      unset SESSION_MANAGER
+      unset DBUS_SESSION_BUS_ADDRESS
+      unset WAYLAND_DISPLAY
+      unset GIO_EXTRA_MODULES
+      unset GI_TYPELIB_PATH
+      unset GTK_PATH
+      unset GTK2_RC_FILES
+      unset GTK3_MODULES
+      unset GTK_MODULES
+      unset QT_PLUGIN_PATH
+      unset QML2_IMPORT_PATH
+      export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      export XDG_SESSION_TYPE=x11
+      export XDG_CURRENT_DESKTOP=XFCE
+      export XDG_SESSION_DESKTOP=xfce
+      export GDK_BACKEND=x11
+      export LIBGL_ALWAYS_SOFTWARE=1
+      export XDG_CONFIG_HOME="$HOME/.config-vitis-vnc"
+      export XDG_CACHE_HOME="$HOME/.cache-vitis-vnc"
+      export XDG_DATA_HOME="$HOME/.local/share-vitis-vnc"
+      export XDG_CONFIG_DIRS=/etc/xdg
+      export XDG_DATA_DIRS=/usr/local/share:/usr/share
+      exec /usr/bin/dbus-run-session -- /usr/bin/startxfce4
+    '';
+  };
+
   vitisSetup = pkgs.writeShellApplication {
     name = "vitis-2023.2-setup";
     runtimeInputs = with pkgs; [
@@ -42,6 +77,11 @@ let
         set -euo pipefail
         sudo apt-get update
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+          software-properties-common
+        sudo add-apt-repository -y universe
+        sudo apt-get update
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+          dbus-x11 \
           libasound2 \
           libgtk2.0-0 \
           libgtk-3-0 \
@@ -55,9 +95,10 @@ let
           libxrandr2 \
           libxrender1 \
           libxtst6 \
-          software-properties-common \
+          tigervnc-standalone-server \
+          xfce4 \
+          xfce4-terminal \
           zip
-        sudo add-apt-repository -y universe
         cd /tmp
         sudo '"$installer_directory"'/installLibs.sh
       '
@@ -125,6 +166,7 @@ EOF
 
     text = ''
       container_name=${lib.escapeShellArg containerName}
+      xstartup=${lib.escapeShellArg "${vitisVncXstartup}"}
 
       for attempt in {1..60}; do
         if docker info >/dev/null 2>&1; then
@@ -162,8 +204,8 @@ EOF
           -localhost yes \
           -geometry 1920x1080 \
           -depth 24 \
-          -xstartup "$HOME/.vnc/xstartup"
-      '
+          -xstartup "$1"
+      ' bash "$xstartup"
     '';
   };
 

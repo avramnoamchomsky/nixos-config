@@ -15,6 +15,7 @@
 - Fcitx5 与 Rime Ice 输入法
 - PipeWire、NetworkManager、蓝牙及 Avahi/mDNS
 - 由 libvirt 与 virt-manager 管理的 KVM/QEMU 虚拟化环境
+- Docker 与 Distrobox，以及基于 Ubuntu 22.04 的 Vitis/Vivado 2023.2 环境
 - 通过 UDisks 与 udiskie 自动挂载可移动存储设备
 - Fish 和桌面应用，包括 Raspberry Pi Imager、Remmina、SylvaKru、Readest、115 浏览器及作为默认浏览器的 Google Chrome
 - 声明式 MacTahoe GTK 与 Kvantum 主题，以及 nwg-look、qt5ct 和 qt6ct
@@ -31,6 +32,7 @@
 ├── system
 │   ├── default.nix
 │   ├── desktop.nix
+│   ├── fpga.nix
 │   ├── hardware-configuration.nix
 │   ├── hybrid-graphics.nix
 │   ├── msi-control.nix
@@ -54,6 +56,7 @@
 │   ├── programs.nix
 │   ├── rclone.nix
 │   ├── themes.nix
+│   ├── vitis.nix
 │   └── wallpapers
 │       └── ...
 ├── secrets
@@ -186,6 +189,90 @@ unstable 输入时，其版本也会随之升级。
   及 ST-Link 工具。
 - 用户属于 `dialout` 与 `plugdev` 组，并启用 OpenOCD 与 ST-Link udev
   规则；重新登录后即可访问支持的开发板。
+
+## AMD Vitis 与 Vivado 2023.2
+
+Vitis 与 Vivado 在名为 `vitis-2023.2` 的 Ubuntu 22.04 Distrobox 中运行；
+NixOS 主机负责 Docker、USB/JTAG 权限、启动命令及 VNC 服务。AMD 工具安装
+在与容器共享的 `~/Xilinx` 中，因此重建容器不会删除它们。
+`system/fpga.nix` 提供适用于常见 Artix-7 开发板的 AMD/Xilinx 与 Digilent
+下载器 udev 规则。
+
+应用系统配置后，请注销并重新登录一次，以获得 `docker` 组成员身份。随后
+使用以下命令创建容器、安装依赖并启动 AMD 安装程序：
+
+```bash
+vitis-2023.2-setup
+```
+
+安装程序应位于
+`/home/chomsky/all_files/FPGAs_AdaptiveSoCs_Unified_2023.2_1013_2256`。在组件
+选择页面保留 **Vitis**、**Vivado**、**Vitis HLS** 与
+**Devices for Custom Platforms > 7 Series**。若只使用 Artix-7，请取消
+Vitis IP Cache、Vitis Networking P4、Vitis Model Composer、DocNav、Alveo、
+Kria、SoCs、UltraScale、UltraScale+、Versal 及工程样片器件。安装目录应设为
+`/home/chomsky/Xilinx`；非 root 容器无法写入 `/tools/Xilinx`。无需创建桌面
+或程序组快捷方式。
+
+### VNC 桌面与图形界面
+
+安装命令会在 Ubuntu 容器中安装精简的 XFCE 桌面和 TigerVNC。首次使用时
+设置一次 VNC 密码：
+
+```bash
+distrobox enter --name vitis-2023.2 -- vncpasswd
+```
+
+此后 `vitis-vnc.service` 会随 Home Manager 用户会话自动启动，并且只监听
+主机回环地址。在 Remmina 中建立指向 `127.0.0.1:5901` 的 VNC 配置即可；
+本机连接不需要 SSH 隧道。服务使用隔离的 X11/XFCE 启动环境，以避免继承
+NixOS Wayland 会话而导致黑屏或加载不兼容库。
+
+可使用以下命令检查或控制桌面：
+
+```bash
+systemctl --user status vitis-vnc.service
+systemctl --user restart vitis-vnc.service
+systemctl --user stop vitis-vnc.service
+journalctl --user -u vitis-vnc.service -f
+```
+
+在 VNC 桌面中打开 XFCE Terminal，然后启动相应程序：
+
+```bash
+source ~/Xilinx/Vivado/2023.2/settings64.sh
+vivado
+```
+
+```bash
+source ~/Xilinx/Vitis/2023.2/settings64.sh
+vitis
+```
+
+如果 VNC 服务在设置密码前已经启用，请创建密码后重启服务。VNC 日志位于
+`~/.vnc/`。
+
+### 主机端命令行
+
+Vivado 的非图形模式可通过 Distrobox 包装命令直接从 NixOS 终端运行，无需
+启动 VNC：
+
+```bash
+vivado-2023.2 -mode tcl
+vivado-2023.2 -mode batch -source build.tcl
+vivado-2023.2 -mode batch -source build.tcl -tclargs argument1 argument2
+```
+
+`vivado-2023.2` 与 `vitis-2023.2` 会在 Ubuntu 内加载相应 AMD 环境，并原样
+转发所有参数。请从项目目录执行这些命令，使生成文件留在项目中；误生成在
+本仓库根目录的 `vivado.jou` 与 `vivado.log` 已被忽略。
+
+修改本配置后，可通过以下命令应用并重启 VNC：
+
+```bash
+sudo nixos-rebuild switch --flake .#pisces
+systemctl --user restart vitis-vnc.service
+```
 
 ## Android 设备修改
 

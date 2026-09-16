@@ -11,3 +11,7 @@ result-*
 
 # Machine-local overrides
 *.local.nix
+
+# Vivado files generated in the launch directory
+/vivado.jou
+/vivado.log
