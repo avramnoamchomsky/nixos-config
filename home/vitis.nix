@@ -114,11 +114,91 @@ EOF
         bash -lc 'source "$HOME/Xilinx/Vivado/2023.2/settings64.sh" && exec vivado "$@"' bash "$@"
     '';
   };
+
+  vitisVncServer = pkgs.writeShellApplication {
+    name = "vitis-vnc-server";
+    runtimeInputs = with pkgs; [
+      coreutils
+      distrobox
+      docker
+    ];
+
+    text = ''
+      container_name=${lib.escapeShellArg containerName}
+
+      for attempt in {1..60}; do
+        if docker info >/dev/null 2>&1; then
+          break
+        fi
+
+        if [[ "$attempt" -eq 60 ]]; then
+          echo "Docker did not become ready within two minutes." >&2
+          exit 1
+        fi
+
+        sleep 2
+      done
+
+      if ! docker container inspect "$container_name" >/dev/null 2>&1; then
+        echo "Distrobox $container_name does not exist; run vitis-2023.2-setup first." >&2
+        exit 1
+      fi
+
+      if [[ ! -s "$HOME/.vnc/passwd" ]]; then
+        echo "TigerVNC password is missing; run vncpasswd inside $container_name." >&2
+        exit 1
+      fi
+
+      distrobox enter --name "$container_name" -- bash -lc '
+        vncserver -kill :1 >/dev/null 2>&1 || true
+        vncserver -list -cleanstale >/dev/null 2>&1 || true
+      '
+
+      # HOME is intentionally expanded by the inner Ubuntu shell.
+      # shellcheck disable=SC2016
+      exec distrobox enter --name "$container_name" -- bash -lc '
+        exec vncserver :1 \
+          -fg \
+          -localhost yes \
+          -geometry 1920x1080 \
+          -depth 24 \
+          -xstartup "$HOME/.vnc/xstartup"
+      '
+    '';
+  };
+
+  vitisVncStop = pkgs.writeShellApplication {
+    name = "vitis-vnc-stop";
+    runtimeInputs = [ pkgs.distrobox ];
+    text = ''
+      distrobox enter --name ${lib.escapeShellArg containerName} -- \
+        bash -lc 'vncserver -kill :1 >/dev/null 2>&1 || true'
+    '';
+  };
 in
 {
   home.packages = [
     vitisLauncher
     vitisSetup
+    vitisVncServer
+    vitisVncStop
     vivadoLauncher
   ];
+
+  systemd.user.services.vitis-vnc = {
+    Unit = {
+      Description = "Vitis Ubuntu Distrobox VNC desktop";
+      ConditionPathExists = "%h/.vnc/passwd";
+    };
+
+    Service = {
+      Type = "simple";
+      ExecStart = lib.getExe vitisVncServer;
+      ExecStop = lib.getExe vitisVncStop;
+      Restart = "always";
+      RestartSec = 5;
+    };
+
+    Install.WantedBy = [ "default.target" ];
+  };
 }
