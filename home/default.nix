@@ -9,6 +9,7 @@
     ./programs.nix
     ./rclone.nix
     ./themes.nix
+    ./vitis.nix
   ];
 
   home = {
