@@ -19,11 +19,16 @@
     };
   };
 
+  virtualisation.docker.enable = true;
+
   # Configure virt-manager to use the system libvirt connection by default.
   programs.virt-manager.enable = true;
 
   # Provide lsattr and chattr for inspecting the Btrfs NOCOW attribute.
-  environment.systemPackages = [ pkgs.e2fsprogs ];
+  environment.systemPackages = with pkgs; [
+    distrobox
+    e2fsprogs
+  ];
 
   # Avoid double copy-on-write overhead from qcow2 images on Btrfs. The C
   # attribute is inherited by newly created files in the default storage pool.
@@ -60,5 +65,8 @@
     '';
   };
 
-  users.users.chomsky.extraGroups = [ "libvirtd" ];
+  users.users.chomsky.extraGroups = [
+    "docker"
+    "libvirtd"
+  ];
 }
