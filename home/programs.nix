@@ -143,6 +143,7 @@ in
     ninja
     openocd
     stlink
+    tio
 
     # Wayland utilities
     wl-clipboard
