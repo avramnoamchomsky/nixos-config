@@ -254,18 +254,36 @@ vitis
 
 ### 主机端命令行
 
-Vivado 的非图形模式可通过 Distrobox 包装命令直接从 NixOS 终端运行，无需
-启动 VNC：
+Vivado 的非图形模式可通过 `vivado-2023.2` Distrobox 包装命令直接从
+NixOS 终端运行，无需启动 VNC。该命令会进入 `vitis-2023.2` 容器、加载
+`~/Xilinx/Vivado/2023.2/settings64.sh`，并将所有参数原样传给真正的
+`vivado` 可执行文件。不要使用 `sudo`。
+
+检查安装、进入 FPGA 项目目录并打开交互式 Tcl shell：
 
 ```bash
+vivado-2023.2 -version
+cd ~/all_files/projects/fpga/my-design
 vivado-2023.2 -mode tcl
+```
+
+Vivado 默认使用 `gui` 模式，因此从主机运行时应明确选择 `-mode tcl` 或
+`-mode batch`。无需打开图形界面即可运行已有 Tcl 构建脚本：
+
+```bash
 vivado-2023.2 -mode batch -source build.tcl
 vivado-2023.2 -mode batch -source build.tcl -tclargs argument1 argument2
 ```
 
-`vivado-2023.2` 与 `vitis-2023.2` 会在 Ubuntu 内加载相应 AMD 环境，并原样
-转发所有参数。请从项目目录执行这些命令，使生成文件留在项目中；误生成在
-本仓库根目录的 `vivado.jou` 与 `vivado.log` 已被忽略。
+NixOS 主目录会以相同路径挂载到 Distrobox，因此可继续在主机上正常编辑项目
+文件。Vivado 会在当前目录写入 `vivado.jou` 与 `vivado.log`。若要使用其他
+AMD 工具或排查包装命令，可直接进入 Ubuntu：
+
+```bash
+distrobox enter --name vitis-2023.2 -- bash
+source ~/Xilinx/Vivado/2023.2/settings64.sh
+vivado -mode tcl
+```
 
 修改本配置后，可通过以下命令应用并重启 VNC：
 

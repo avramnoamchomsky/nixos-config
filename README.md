@@ -272,18 +272,37 @@ and restart the service. VNC logs are available under `~/.vnc/`.
 ### Host-side CLI
 
 Vivado's non-graphical modes work directly from a NixOS terminal through the
-provided Distrobox wrapper; VNC does not need to be running:
+`vivado-2023.2` Distrobox wrapper; VNC does not need to be running. The wrapper
+enters `vitis-2023.2`, sources `~/Xilinx/Vivado/2023.2/settings64.sh`, and
+forwards every argument to the real `vivado` executable. Do not use `sudo`.
+
+Check the installation, change to the FPGA project directory, and open the
+interactive Tcl shell with:
 
 ```bash
+vivado-2023.2 -version
+cd ~/all_files/projects/fpga/my-design
 vivado-2023.2 -mode tcl
+```
+
+The default mode is `gui`, so explicitly use `-mode tcl` or `-mode batch` from
+the host. To execute an existing Tcl build script without opening a GUI:
+
+```bash
 vivado-2023.2 -mode batch -source build.tcl
 vivado-2023.2 -mode batch -source build.tcl -tclargs argument1 argument2
 ```
 
-The wrappers `vivado-2023.2` and `vitis-2023.2` source the corresponding AMD
-environment inside Ubuntu and forward all arguments. Run commands from a
-project directory so generated files are kept with that project. Vivado's
-accidental repository-root `vivado.jou` and `vivado.log` files are ignored.
+Directories under the NixOS home directory are mounted into Distrobox at the
+same paths, so project files can be edited normally on the host. Vivado writes
+`vivado.jou` and `vivado.log` to the current directory. To use another AMD tool
+or diagnose the wrapper, enter Ubuntu directly:
+
+```bash
+distrobox enter --name vitis-2023.2 -- bash
+source ~/Xilinx/Vivado/2023.2/settings64.sh
+vivado -mode tcl
+```
 
 After changing this configuration, apply it with:
 
