@@ -257,7 +257,7 @@ journalctl --user -u vitis-vnc.service -f
 Inside the VNC desktop, open XFCE Terminal and launch either application:
 
 ```bash
-source ~/Xilinx/Vivado/2023.2/settings64.sh
+source ~/Xilinx/Vitis/2023.2/settings64.sh
 vivado
 ```
 
