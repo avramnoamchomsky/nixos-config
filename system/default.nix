@@ -32,10 +32,19 @@
   boot.lanzaboote = {
     enable = true;
 
-    # Secure Boot is currently disabled. Keep UKIs bootable without signing
-    # keys; this can be turned off after a PKI bundle is configured.
+    # Generate signing keys locally, but do not enroll them or enable Secure
+    # Boot. Unsigned artifacts remain allowed for the first rebuild, before
+    # the key-generation service has run.
     pkiBundle = "/var/lib/sbctl";
     allowUnsigned = true;
+    autoGenerateKeys.enable = true;
+  };
+
+  # Lanzaboote signs fwupd's EFI helper whenever fwupd is enabled. On the first
+  # activation, ensure the signing keys exist before that service starts.
+  systemd.services.fwupd-efi = {
+    requires = [ "generate-sb-keys.service" ];
+    after = [ "generate-sb-keys.service" ];
   };
 
   # Keep following the newest kernel in the pinned stable release.
