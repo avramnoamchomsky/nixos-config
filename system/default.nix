@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
 {
   imports = [
@@ -21,11 +21,22 @@
 
   # Boot
   boot.loader.systemd-boot = {
-    enable = true;
+    # Lanzaboote replaces the stock installer while retaining systemd-boot as
+    # the boot manager and producing one UKI per retained generation.
+    enable = lib.mkForce false;
     configurationLimit = 10;
     editor = false;
   };
   boot.loader.efi.canTouchEfiVariables = true;
+
+  boot.lanzaboote = {
+    enable = true;
+
+    # Secure Boot is currently disabled. Keep UKIs bootable without signing
+    # keys; this can be turned off after a PKI bundle is configured.
+    pkiBundle = "/var/lib/sbctl";
+    allowUnsigned = true;
+  };
 
   # Keep following the newest kernel in the pinned stable release.
   boot.kernelPackages = pkgs.linuxPackages_latest;

@@ -19,6 +19,11 @@
     # dependency graph on the current NixOS package set.
     sops-nix.url = "github:Mic92/sops-nix/e93ee1d900ad264d65e9701a5c6f895683433386";
 
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote/v1.1.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     codex-desktop-linux.url = "github:ilysenko/codex-desktop-linux";
   };
 
@@ -29,6 +34,7 @@
       home-manager,
       nix-flatpak,
       sops-nix,
+      lanzaboote,
       codex-desktop-linux,
       ...
     }:
@@ -54,6 +60,7 @@
             codex-desktop-linux.nixosModules.default
             nix-flatpak.nixosModules.nix-flatpak
             sops-nix.nixosModules.sops
+            lanzaboote.nixosModules.lanzaboote
             home-manager.nixosModules.home-manager
 
             {
