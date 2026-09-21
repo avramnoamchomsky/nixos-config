@@ -19,7 +19,6 @@
       ipv4 = {
         method = "manual";
         addresses = "10.90.50.43/24";
-        gateway = "";
         dns = "";
         dns-search = "";
         ignore-auto-dns = true;
@@ -40,11 +39,17 @@
   };
 
   # atftpd has no read-only switch. Make the service's view of the TFTP root
-  # read-only so write requests cannot create or replace artifacts.
+  # read-only so write requests cannot create or replace artifacts. Loading a
+  # NetworkManager profile is asynchronous, so retry until its address exists.
   systemd.services.atftpd = {
-    wants = [ "network-online.target" ];
-    after = [ "network-online.target" ];
-    serviceConfig.ReadOnlyPaths = [ "/srv/tftp" ];
+    requires = [ "NetworkManager-ensure-profiles.service" ];
+    after = [ "NetworkManager-ensure-profiles.service" ];
+
+    serviceConfig = {
+      ReadOnlyPaths = [ "/srv/tftp" ];
+      Restart = "on-failure";
+      RestartSec = "2s";
+    };
   };
 
   systemd.tmpfiles.rules = [
