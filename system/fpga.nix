@@ -40,10 +40,25 @@
 
   # atftpd has no read-only switch. Make the service's view of the TFTP root
   # read-only so write requests cannot create or replace artifacts. Loading a
-  # NetworkManager profile is asynchronous, so retry until its address exists.
+  # NetworkManager profile is asynchronous, so wait for its address before
+  # binding and retain a restart policy for later link reconfiguration.
   systemd.services.atftpd = {
     requires = [ "NetworkManager-ensure-profiles.service" ];
     after = [ "NetworkManager-ensure-profiles.service" ];
+
+    preStart = ''
+      for _ in {1..30}; do
+        if ${pkgs.iproute2}/bin/ip -4 -o address show dev enp3s0 \
+          | ${pkgs.gnugrep}/bin/grep --fixed-strings --quiet "10.90.50.43/24"; then
+          exit 0
+        fi
+
+        ${pkgs.coreutils}/bin/sleep 1
+      done
+
+      echo "Timed out waiting for 10.90.50.43/24 on enp3s0" >&2
+      exit 1
+    '';
 
     serviceConfig = {
       ReadOnlyPaths = [ "/srv/tftp" ];
