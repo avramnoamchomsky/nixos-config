@@ -1,5 +1,11 @@
 { pkgs, ... }:
 
+let
+  la32rLinuxV01 = pkgs.fetchurl {
+    url = "https://gitee.com/loongson-edu/la32r-Linux/releases/download/v0.1/vmlinux";
+    hash = "sha256-MPlQBaJRHErgXPRyM5XRF8RSkq8I5IsY6yjSQvUVp4Q=";
+  };
+in
 {
   # Keep the directly connected FPGA board on an isolated, route-less network.
   # The profile has no gateway or DNS and must never replace Wi-Fi's default
@@ -69,6 +75,7 @@
 
   systemd.tmpfiles.rules = [
     "d /srv/tftp 0755 nobody nogroup -"
+    "L+ /srv/tftp/vmlinux-v0.1 - - - - ${la32rLinuxV01}"
   ];
 
   # Linux 6.0 removed automatic conntrack-helper assignment, and NixOS rejects
