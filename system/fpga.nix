@@ -5,6 +5,11 @@ let
     url = "https://gitee.com/loongson-edu/la32r-Linux/releases/download/v0.1/vmlinux";
     hash = "sha256-MPlQBaJRHErgXPRyM5XRF8RSkq8I5IsY6yjSQvUVp4Q=";
   };
+
+  la32rLinuxV02 = pkgs.fetchurl {
+    url = "https://gitee.com/loongson-edu/la32r-Linux/releases/download/v0.2/vmlinux";
+    hash = "sha256-svQ0WAADcjHbE/uaLxmkn3btUsS2rPgKMDO+Eq1f0qE=";
+  };
 in
 {
   # Keep the directly connected FPGA board on an isolated, route-less network.
@@ -76,6 +81,7 @@ in
   systemd.tmpfiles.rules = [
     "d /srv/tftp 0755 nobody nogroup -"
     "L+ /srv/tftp/vmlinux-v0.1 - - - - ${la32rLinuxV01}"
+    "L+ /srv/tftp/vmlinux-v0.2 - - - - ${la32rLinuxV02}"
   ];
 
   # Linux 6.0 removed automatic conntrack-helper assignment, and NixOS rejects
