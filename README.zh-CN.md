@@ -435,6 +435,10 @@ nix flake check --no-build
 sudo nixos-rebuild switch --flake .#pisces
 ```
 
+ChatGPT Desktop 版本固定在 `flake.lock` 中。日后如需更新，先以普通用户
+运行 `nix flake update codex-desktop-linux`，再执行上述重建命令。
+单独运行重建命令只会应用已锁定的版本。
+
 `switch` 会创建新的启动 generation、立即激活正常配置，并重新构建继承该
 配置的 `vfio` specialisation。父配置中的修改通常会同时出现在两种模式中；
 `system/vfio.nix` 仅覆盖为 RTX 4060 预留设备所需的设置。

@@ -470,6 +470,10 @@ normal boot mode, apply the complete NixOS and Home Manager configuration:
 sudo nixos-rebuild switch --flake .#pisces
 ```
 
+The ChatGPT Desktop version is pinned in `flake.lock`. To update it before a
+future rebuild, run `nix flake update codex-desktop-linux` as your normal user.
+The rebuild command above applies the pinned version without changing it.
+
 `switch` creates a new boot generation, activates the normal configuration
 immediately, and rebuilds its inherited `vfio` specialisation. Changes to the
 parent configuration normally appear in both modes; `system/vfio.nix`
