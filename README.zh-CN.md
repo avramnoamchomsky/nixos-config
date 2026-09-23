@@ -163,10 +163,11 @@ Wayland 下显示异常，该应用会强制通过 XWayland 运行。可通过�
 
 ## Readest
 
-[Readest](https://github.com/readest/readest) 从 `nixpkgs-unstable` 软件包集
-安装，以获得较新的原生 Nix 构建，并避免上游 AppImage 在 Wayland 下的
-库兼容问题。可通过应用启动器或 `readest` 命令运行；更新 flake 的
-unstable 输入时，其版本也会随之升级。
+[Readest](https://github.com/readest/readest) 使用
+`home/packages/readest.nix` 中固定的上游版本构建原生 Nix 软件包，
+并使用 `nixpkgs-unstable` 软件包集提供依赖，以避免上游 AppImage 在
+Wayland 下的库兼容问题。可通过应用启动器或 `readest` 命令运行。
+升级时需更新软件包版本及哈希。
 
 ## SylvaKru
 

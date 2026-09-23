@@ -3,6 +3,7 @@
 let
   browser115 = import ./packages/115-browser.nix { inherit pkgs; };
   sylvakru = import ./packages/sylvakru.nix { inherit pkgs; };
+  readest = unstablePkgs.callPackage ./packages/readest.nix { };
 
   sevenZip = pkgs.symlinkJoin {
     name = "7zip-with-7z-alias";
@@ -104,7 +105,7 @@ in
     # Graphical applications
     browser115
     google-chrome
-    unstablePkgs.readest
+    readest
     sylvakru
     mpv
     remmina

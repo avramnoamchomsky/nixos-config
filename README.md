@@ -173,11 +173,11 @@ and rebuilding the system.
 
 ## Readest
 
-[Readest](https://github.com/readest/readest) is installed from the
-`nixpkgs-unstable` package set for a newer native Nix build that avoids the
-upstream AppImage's Wayland library-compatibility issue. Launch it as `readest`
-or from the application launcher. Its version advances when the flake's
-unstable input is updated.
+[Readest](https://github.com/readest/readest) is built as a native Nix package
+from the pinned upstream release in `home/packages/readest.nix`, using the
+`nixpkgs-unstable` package set for its dependencies. This avoids the upstream
+AppImage's Wayland library-compatibility issue. Launch it as `readest` or from
+the application launcher. Update the package version and hashes to upgrade it.
 
 ## SylvaKru
 
