@@ -50,6 +50,13 @@
   # Keep following the newest kernel in the pinned stable release.
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
+  # This external trackpad uses Apple's USB ID 05ac:0265, but its second HID
+  # interface needs hid-multitouch. If magicmouse loads first, it claims both
+  # interfaces and the trackpad stops reporting movement and gestures.
+  boot.extraModprobeConfig = ''
+    softdep hid_magicmouse pre: hid_multitouch
+  '';
+
   hardware.enableRedistributableFirmware = true;
 
   nix.settings = {
