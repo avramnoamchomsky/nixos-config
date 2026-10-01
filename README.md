@@ -202,6 +202,43 @@ changing the version, official release URL, and hash in the package definition.
 - Membership in `dialout` and `plugdev`, plus the OpenOCD and ST-Link udev
   rules, grants access to supported development boards after a fresh login.
 
+## Open-source HDL and FPGA tools
+
+`home/programs.nix` installs the HDL tools. Yosys and SymbiYosys use the pinned
+unstable Nixpkgs input together because stable Yosys passes obsolete CLI flags
+to modern Bitwuzla; the remaining tools use the pinned stable input.
+`system/fpga.nix` installs openFPGALoader and manages USB/JTAG access.
+
+| Tool | Command | Purpose |
+| --- | --- | --- |
+| Icarus Verilog | `iverilog`, `vvp` | Verilog compilation and simulation |
+| Verilator | `verilator` | SystemVerilog linting and compiled simulation |
+| Verible | `verible-verilog-lint`, `verible-verilog-format`, `verible-verilog-ls` | Linting, formatting, and language server |
+| Yosys | `yosys` | RTL synthesis and formal model preparation |
+| nextpnr | `nextpnr-ice40`, `nextpnr-ecp5`, `nextpnr-himbaechel` | FPGA placement and routing |
+| SymbiYosys | `sby` | Yosys-based formal verification |
+| Bitwuzla | `bitwuzla` | SMT solving for formal verification |
+| openFPGALoader | `openFPGALoader` | FPGA programming |
+
+GCC and GNU Make are included for building Verilator's generated C++
+simulations. Yices supplies SymbiYosys's default SMT solver. To select Bitwuzla
+instead, use this engine section in a project's `.sby` file:
+
+```ini
+[engines]
+smtbmc bitwuzla
+```
+
+Run a project's formal checks with `sby -f design.sby` and inspect simulation
+waveforms with the existing `surfer` viewer. The pinned nextpnr package includes
+iCE40, ECP5, and Himbaechel backends, including Gowin; its Xilinx backend is
+disabled. Artix-7 placement, routing, and bitstream generation continue to use
+the Vivado environment below. openFPGALoader uses the existing host-side
+programmer permissions.
+
+Apply these packages with `sudo nixos-rebuild switch --flake .#pisces` in the
+normal boot mode, following the validation instructions below.
+
 ## AMD Vitis and Vivado 2023.2
 
 Vitis and Vivado run in an Ubuntu 22.04 Distrobox named `vitis-2023.2` while

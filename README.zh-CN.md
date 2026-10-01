@@ -191,6 +191,41 @@ Wayland 下的库兼容问题。可通过应用启动器或 `readest` 命令运�
 - 用户属于 `dialout` 与 `plugdev` 组，并启用 OpenOCD 与 ST-Link udev
   规则；重新登录后即可访问支持的开发板。
 
+## 开源 HDL 与 FPGA 工具
+
+`home/programs.nix` 安装 HDL 工具。Yosys 与 SymbiYosys 一起使用固定的
+不稳定版 Nixpkgs 输入，因为稳定版 Yosys 会向新版 Bitwuzla 传递已废弃的
+命令行参数；其余工具使用固定的稳定版输入。`system/fpga.nix` 安装
+openFPGALoader，并管理 USB/JTAG 访问权限。
+
+| 工具 | 命令 | 用途 |
+| --- | --- | --- |
+| Icarus Verilog | `iverilog`、`vvp` | Verilog 编译与仿真 |
+| Verilator | `verilator` | SystemVerilog 检查与编译式仿真 |
+| Verible | `verible-verilog-lint`、`verible-verilog-format`、`verible-verilog-ls` | 检查、格式化与语言服务器 |
+| Yosys | `yosys` | RTL 综合与形式化模型生成 |
+| nextpnr | `nextpnr-ice40`、`nextpnr-ecp5`、`nextpnr-himbaechel` | FPGA 布局布线 |
+| SymbiYosys | `sby` | 基于 Yosys 的形式化验证 |
+| Bitwuzla | `bitwuzla` | 形式化验证的 SMT 求解器 |
+| openFPGALoader | `openFPGALoader` | FPGA 下载 |
+
+GCC 与 GNU Make 用于编译 Verilator 生成的 C++ 仿真程序。Yices 提供
+SymbiYosys 默认使用的 SMT 求解器。若要改用 Bitwuzla，请在项目的 `.sby`
+文件中设置：
+
+```ini
+[engines]
+smtbmc bitwuzla
+```
+
+使用 `sby -f design.sby` 运行项目的形式化检查，使用已有的 `surfer` 查看
+仿真波形。固定的 nextpnr 软件包包含 iCE40、ECP5 与 Himbaechel 后端，
+其中包括 Gowin；Xilinx 后端未启用。Artix-7 的布局布线与位流生成继续
+使用下方的 Vivado 环境。openFPGALoader 使用已有的主机端下载器权限。
+
+在普通启动模式下，按下方验证步骤执行
+`sudo nixos-rebuild switch --flake .#pisces` 即可应用这些软件包。
+
 ## AMD Vitis 与 Vivado 2023.2
 
 Vitis 与 Vivado 在名为 `vitis-2023.2` 的 Ubuntu 22.04 Distrobox 中运行；

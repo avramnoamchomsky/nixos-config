@@ -132,6 +132,15 @@ in
     verilator
     verible
     surfer
+    # Keep Yosys and SymbiYosys together: stable Yosys passes obsolete CLI
+    # flags to modern Bitwuzla, while this pinned unstable pair has the fix.
+    unstablePkgs.yosys
+    unstablePkgs.sby
+    nextpnr
+    bitwuzla
+    yices # Default solver for SymbiYosys's smtbmc engine
+    gcc
+    gnumake # Build Verilator's generated C++ simulations
 
     # Android device maintenance and firmware images
     android-tools
