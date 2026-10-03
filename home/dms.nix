@@ -29,7 +29,7 @@ let
       nightModeUseIPLocation = false;
 
       # DMS derives its wallpaper cycling directory from the selected file.
-      wallpaperPath = "${config.xdg.userDirs.pictures}/Wallpapers/kali-layers-16x9.png";
+      wallpaperPath = "${config.xdg.userDirs.pictures}/Wallpapers/rose-wallpaper-3840x2160-vibrant-hues-pink-blossoms-454.jpg";
     }
   );
 in
