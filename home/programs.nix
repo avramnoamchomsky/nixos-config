@@ -26,6 +26,33 @@ let
         --set QT_QPA_PLATFORM "xcb"
     '';
   };
+
+  wpsOffice = pkgs.symlinkJoin {
+    name = "wpsoffice-cn-fcitx-${pkgs.wpsoffice-cn.version}";
+    paths = [ pkgs.wpsoffice-cn ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+
+    postBuild = ''
+      # WPS uses bundled Qt under XWayland, so select Fcitx explicitly.
+      for program in wps et wpp wpspdf; do
+        wrapProgram "$out/bin/$program" \
+          --set XMODIFIERS "@im=fcitx" \
+          --set QT_IM_MODULE "fcitx" \
+          --set GTK_IM_MODULE "fcitx" \
+          --set QT_QPA_PLATFORM "xcb"
+      done
+
+      # Desktop entries otherwise bypass these wrappers via the base package.
+      for desktop in "$out"/share/applications/*.desktop; do
+        cp "$desktop" "$desktop.tmp"
+        mv "$desktop.tmp" "$desktop"
+        substituteInPlace "$desktop" \
+          --replace-fail "${pkgs.wpsoffice-cn}/bin/" "$out/bin/"
+      done
+    '';
+
+    meta = pkgs.wpsoffice-cn.meta;
+  };
 in
 {
   programs.git = {
@@ -114,6 +141,7 @@ in
     gh
     unstablePkgs.qq
     wechat-fcitx
+    wpsOffice
 
     # Development tools
     unstablePkgs.codex

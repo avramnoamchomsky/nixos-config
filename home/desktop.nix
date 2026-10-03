@@ -56,11 +56,51 @@
 
   xdg.mimeApps = {
     enable = true;
+    associations.added = config.xdg.mimeApps.defaultApplications;
     defaultApplications = {
+      "application/pdf" = [ "com.google.Chrome.desktop" ];
+      "application/xhtml+xml" = [ "com.google.Chrome.desktop" ];
       "text/html" = [ "com.google.Chrome.desktop" ];
       "x-scheme-handler/codex" = [ "codex-desktop.desktop" ];
       "x-scheme-handler/http" = [ "com.google.Chrome.desktop" ];
       "x-scheme-handler/https" = [ "com.google.Chrome.desktop" ];
+
+      # Word documents and templates, including WPS's custom MIME types.
+      "application/msword" = [ "wps-office-wps.desktop" ];
+      "application/msword-template" = [ "wps-office-wps.desktop" ];
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document" = [ "wps-office-wps.desktop" ];
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.template" = [ "wps-office-wps.desktop" ];
+      "application/vnd.ms-word.document.macroEnabled.12" = [ "wps-office-wps.desktop" ];
+      "application/vnd.ms-word.template.macroEnabled.12" = [ "wps-office-wps.desktop" ];
+      "application/wps-office.doc" = [ "wps-office-wps.desktop" ];
+      "application/wps-office.docx" = [ "wps-office-wps.desktop" ];
+      "application/wps-office.dot" = [ "wps-office-wps.desktop" ];
+      "application/wps-office.dotx" = [ "wps-office-wps.desktop" ];
+
+      # PowerPoint presentations, slideshows, and templates.
+      "application/vnd.ms-powerpoint" = [ "wps-office-wpp.desktop" ];
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation" = [ "wps-office-wpp.desktop" ];
+      "application/vnd.openxmlformats-officedocument.presentationml.slideshow" = [ "wps-office-wpp.desktop" ];
+      "application/vnd.openxmlformats-officedocument.presentationml.template" = [ "wps-office-wpp.desktop" ];
+      "application/vnd.ms-powerpoint.presentation.macroEnabled.12" = [ "wps-office-wpp.desktop" ];
+      "application/vnd.ms-powerpoint.slideshow.macroEnabled.12" = [ "wps-office-wpp.desktop" ];
+      "application/vnd.ms-powerpoint.template.macroEnabled.12" = [ "wps-office-wpp.desktop" ];
+      "application/wps-office.ppt" = [ "wps-office-wpp.desktop" ];
+      "application/wps-office.pptx" = [ "wps-office-wpp.desktop" ];
+      "application/wps-office.pot" = [ "wps-office-wpp.desktop" ];
+      "application/wps-office.potx" = [ "wps-office-wpp.desktop" ];
+
+      # Excel spreadsheets and templates.
+      "application/vnd.ms-excel" = [ "wps-office-et.desktop" ];
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" = [ "wps-office-et.desktop" ];
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.template" = [ "wps-office-et.desktop" ];
+      "application/vnd.ms-excel.sheet.macroEnabled.12" = [ "wps-office-et.desktop" ];
+      "application/vnd.ms-excel.sheet.binary.macroEnabled.12" = [ "wps-office-et.desktop" ];
+      "application/vnd.ms-excel.template.macroEnabled.12" = [ "wps-office-et.desktop" ];
+      "application/wps-office.xls" = [ "wps-office-et.desktop" ];
+      "application/wps-office.xlsx" = [ "wps-office-et.desktop" ];
+      "application/wps-office.xlt" = [ "wps-office-et.desktop" ];
+      "application/wps-office.xltx" = [ "wps-office-et.desktop" ];
     };
   };
 

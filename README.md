@@ -17,7 +17,7 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 - KVM/QEMU virtualization managed by libvirt and virt-manager
 - Docker and Distrobox with an Ubuntu 22.04 Vitis/Vivado 2023.2 environment
 - Automatic removable-drive mounting through UDisks and udiskie
-- Fish and desktop applications, including Raspberry Pi Imager, Remmina, SylvaKru, Readest, 115 Browser, and Google Chrome as the default browser
+- Fish and desktop applications, including WPS Office Chinese personal edition, Raspberry Pi Imager, Remmina, SylvaKru, Readest, 115 Browser, and Google Chrome as the default browser
 - Declarative MacTahoe GTK and Kvantum themes with nwg-look, qt5ct, and qt6ct
 - ESP32 and STM32 development tooling with direnv and hardware access rules
 - sops-nix encrypted secrets backed by a machine-local age identity
@@ -153,6 +153,22 @@ The configured mount points are:
 The generated GTK, qt5ct, qt6ct, and Kvantum files are Home Manager-owned.
 Changes made in the graphical tools are temporary and should be copied back to
 `home/themes.nix` if they are meant to persist.
+
+## WPS Office
+
+Home Manager installs the Chinese personal edition from the stable
+`wpsoffice-cn` package, currently pinned to `12.1.2.25882`. Its Writer (`wps`),
+Spreadsheets (`et`), Presentation (`wpp`), and PDF (`wpspdf`) launchers explicitly
+select XWayland and Fcitx for Chinese input in Niri. Application-menu entries
+use the same wrappers. Chinese text uses the system's existing Noto CJK fonts.
+
+WPS is the default application for Microsoft Word, PowerPoint, and Excel files,
+including templates and macro-enabled document formats. The defaults cover
+both standard MIME types and WPS's custom MIME types. Google Chrome remains the
+default browser and opens PDF files by default.
+
+Apply the configuration with `sudo nixos-rebuild switch --flake .#pisces`, then
+launch WPS from the application menu or with `wps`.
 
 ## 115 Browser
 

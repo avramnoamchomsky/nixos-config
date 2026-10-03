@@ -17,7 +17,7 @@
 - 由 libvirt 与 virt-manager 管理的 KVM/QEMU 虚拟化环境
 - Docker 与 Distrobox，以及基于 Ubuntu 22.04 的 Vitis/Vivado 2023.2 环境
 - 通过 UDisks 与 udiskie 自动挂载可移动存储设备
-- Fish 和桌面应用，包括 Raspberry Pi Imager、Remmina、SylvaKru、Readest、115 浏览器及作为默认浏览器的 Google Chrome
+- Fish 和桌面应用，包括 WPS Office 中文个人版、Raspberry Pi Imager、Remmina、SylvaKru、Readest、115 浏览器及作为默认浏览器的 Google Chrome
 - 声明式 MacTahoe GTK 与 Kvantum 主题，以及 nwg-look、qt5ct 和 qt6ct
 - ESP32 与 STM32 开发工具、direnv 及硬件访问规则
 - 使用 sops-nix 加密机密，并由仅存在于本机的 age 身份密钥解密
@@ -146,6 +146,21 @@ busctl call org.freedesktop.login1 /org/freedesktop/login1 \
 生成的 GTK、qt5ct、qt6ct 与 Kvantum 文件均由 Home Manager 管理。在图形
 工具中进行的修改只是临时的；如需持久保存，应将对应设置写回
 `home/themes.nix`。
+
+## WPS Office
+
+Home Manager 从稳定版 `wpsoffice-cn` 软件包安装中文个人版，当前固定为
+`12.1.2.25882`。文字（`wps`）、表格（`et`）、演示（`wpp`）及 PDF
+（`wpspdf`）启动器会显式选择 XWayland 和 Fcitx，以支持 Niri 中的中文
+输入。应用菜单入口使用相同的包装启动器；中文显示使用系统已有的
+Noto CJK 字体。
+
+WPS 是 Microsoft Word、PowerPoint 和 Excel 文件的默认打开方式，包括
+模板及启用宏的文档格式；默认关联同时覆盖标准 MIME 类型和 WPS 自定义
+MIME 类型。Google Chrome 继续作为默认浏览器，并默认打开 PDF 文件。
+
+执行 `sudo nixos-rebuild switch --flake .#pisces` 应用配置后，可从应用菜单
+或使用 `wps` 启动。
 
 ## 115 浏览器
 
