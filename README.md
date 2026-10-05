@@ -120,6 +120,30 @@ All four `Allow*` settings should be `false`, and both bus calls should return
   keeps Nautilus file associations working without relying on GLib to discover
   a terminal emulator in the minimal Niri session.
 
+## Ghost Downloader
+
+Home Manager installs [Ghost Downloader v4.3.7](https://github.com/XiaoYouChR/Ghost-Downloader-3/releases/tag/v4.3.7)
+from the official x86_64 AppImage, pinned by SHA-256 in
+`home/packages/ghost-downloader.nix`. The package supplies an FHS environment
+for the bundled Python and Qt libraries, plus FFmpeg for media downloads.
+The current flake inputs remain pinned.
+
+Launch `ghost-downloader` from the shell or **Ghost Downloader** from the
+application menu. `home/ghost-downloader.nix` registers the
+`ghostdownloader://` URI handler with the Nix wrapper, so browser links launch
+the same working executable.
+
+Application settings, download history, and feature packs remain writable in
+`~/.local/share/GhostDownloader/`. On a fresh installation, TLS certificate
+verification is enabled and application update checks are disabled. Update
+the application by changing the pinned version and checksum, then rebuilding
+NixOS; later rebuilds preserve settings changed inside the application.
+
+For browser download interception, install the optional
+[Ghost Downloader for Browser extension](https://chromewebstore.google.com/detail/ghost-downloader-for-brow/lagbjgkmaafnlinaeonbhjchnjinjpeh)
+and pair it through Ghost Downloader's setup wizard or browser-integration
+settings. The desktop application works independently of the extension.
+
 ## WebDAV mounts and secrets
 
 The WebDAV usernames and passwords in `secrets/webdav.yaml` are encrypted with

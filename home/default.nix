@@ -4,6 +4,7 @@
   imports = [
     ./desktop.nix
     ./dms.nix
+    ./ghost-downloader.nix
     ./input-method.nix
     ./niri.nix
     ./programs.nix
