@@ -58,6 +58,14 @@
     enable = true;
     associations.added = config.xdg.mimeApps.defaultApplications;
     defaultApplications = {
+      "image/png" = [ "swayimg.desktop" ];
+      "image/jpeg" = [ "swayimg.desktop" ];
+      "image/gif" = [ "swayimg.desktop" ];
+      "image/webp" = [ "swayimg.desktop" ];
+      "image/bmp" = [ "swayimg.desktop" ];
+      "image/tiff" = [ "swayimg.desktop" ];
+      "image/avif" = [ "swayimg.desktop" ];
+
       "application/pdf" = [ "com.google.Chrome.desktop" ];
       "application/xhtml+xml" = [ "com.google.Chrome.desktop" ];
       "text/html" = [ "com.google.Chrome.desktop" ];

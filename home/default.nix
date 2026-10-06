@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ./115-life.nix
     ./desktop.nix
     ./dms.nix
     ./ghost-downloader.nix

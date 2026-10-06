@@ -17,7 +17,7 @@
 - 由 libvirt 与 virt-manager 管理的 KVM/QEMU 虚拟化环境
 - Docker 与 Distrobox，以及基于 Ubuntu 22.04 的 Vitis/Vivado 2023.2 环境
 - 通过 UDisks 与 udiskie 自动挂载可移动存储设备
-- Fish 和桌面应用，包括 WPS Office 中文个人版、Raspberry Pi Imager、Remmina、SylvaKru、Readest、115 浏览器及作为默认浏览器的 Google Chrome
+- Fish 和桌面应用，包括 WPS Office 中文个人版、Raspberry Pi Imager、Remmina、SylvaKru、Readest、115 生活、115 浏览器及作为默认浏览器的 Google Chrome
 - 声明式 MacTahoe GTK 与 Kvantum 主题，以及 nwg-look、qt5ct 和 qt6ct
 - ESP32 与 STM32 开发工具、direnv 及硬件访问规则
 - 使用 sops-nix 加密机密，并由仅存在于本机的 age 身份密钥解密
@@ -31,6 +31,7 @@
 ├── flake.lock
 ├── system
 │   ├── default.nix
+│   ├── 115-life.nix
 │   ├── desktop.nix
 │   ├── fpga.nix
 │   ├── hardware-configuration.nix
@@ -52,6 +53,7 @@
 │   │   └── config.kdl
 │   ├── packages
 │   │   ├── 115-browser.nix
+│   │   ├── 115-life.nix
 │   │   └── sylvakru.nix
 │   ├── programs.nix
 │   ├── rclone.nix
@@ -72,17 +74,15 @@
 
 ## 挂起与休眠
 
-`system/power-management.nix` 会在当前 AMD 平台恢复问题修复前禁用
-s2idle、S4、混合睡眠及“先挂起后休眠”。盒盖动作被设置为 `ignore`，DMS
-也不再显示挂起或休眠操作，以防止意外进入无法恢复的状态。
+`system/power-management.nix` 禁用 s2idle、S4、混合睡眠及“先挂起后休眠”。
+目前不再计划启用休眠，AMD 平台恢复问题也尚未解决。盒盖动作被设置为
+`ignore`，DMS 不显示挂起或休眠操作，以防止意外进入无法恢复的状态。
 
-日常内存压力仍由 zram 处理。休眠则使用 72 GiB 的
-`/var/lib/swapfile`；NixOS 会使用兼容 Btrfs 的 NOCOW 属性创建该文件。
-该文件位于 LUKS 加密的根文件系统内，因此保存到磁盘的内存映像也会加密。
+日常内存压力仅由 zram 处理。原来的 72 GiB `/var/lib/swapfile` 已从
+配置中移除，停用后可以删除；NixOS 不会根据当前配置重新创建该文件。
 
-基于 systemd 的 initrd 会保留以后重新启用 S4 时动态查找交换文件及其
-Btrfs 偏移量所需的基础设施。保持交换文件处于活动状态并不会启用休眠。
-应用配置并重启后，可执行以下命令验证禁用策略：
+基于 systemd 的 initrd 仍保持启用。应用配置后，可执行以下命令验证
+交换设备和禁用睡眠的策略：
 
 ```bash
 swapon --show
@@ -93,8 +93,8 @@ busctl call org.freedesktop.login1 /org/freedesktop/login1 \
   org.freedesktop.login1.Manager CanHibernate
 ```
 
-四个 `Allow*` 设置均应为 `false`，两个 bus 调用都应返回 `s "no"`。如果
-删除 `/var/lib/swapfile`，下次重新构建时会自动创建它。
+`swapon --show` 应只列出 `/dev/zram0`。四个 `Allow*` 设置均应为 `false`，
+两个 bus 调用都应返回 `s "no"`。
 
 ## 声明式桌面状态
 
@@ -161,6 +161,21 @@ MIME 类型。Google Chrome 继续作为默认浏览器，并默认打开 PDF �
 
 执行 `sudo nixos-rebuild switch --flake .#pisces` 应用配置后，可从应用菜单
 或使用 `wps` 启动。
+
+## 115 生活
+
+[官方 115 生活 37.3.1 Linux 版](https://115.com/115/T984564.html) 在
+`home/packages/115-life.nix` 中固定版本和 SHA-256，并通过
+`home/115-life.nix` 安装。软件包保留自带的 .NET 运行时与 ICU 库，
+为 NixOS 修补原生二进制文件，并提供 Avalonia 所需的 X11 库、
+WebKitGTK 4.1、密钥存储、通知及媒体依赖。在 Niri 下通过 XWayland 运行。
+
+可从应用菜单启动 **115生活**，或运行 `115-life`（也可使用 `115life`），
+再使用 115 账号或扫描登录二维码登录。`life115://` 协议使用同一个 Nix
+启动包装器。种子文件可通过“打开方式”选择此应用，默认关联仍由用户选择。
+
+设置及账号数据保存在用户目录中，保持可写。升级时修改软件包固定的版本
+与哈希，再重新构建 NixOS。
 
 ## 115 浏览器
 

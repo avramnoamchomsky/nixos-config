@@ -5,6 +5,15 @@ let
   sylvakru = import ./packages/sylvakru.nix { inherit pkgs; };
   readest = unstablePkgs.callPackage ./packages/readest.nix { };
 
+  # ROCm SMI otherwise searches /usr/share for pci.ids and names the iGPU
+  # "0x1002" on NixOS. Point this monitoring dependency at the packaged data.
+  rocmSmi = pkgs.rocmPackages.rocm-smi.overrideAttrs (old: {
+    postPatch = (old.postPatch or "") + ''
+      substituteInPlace src/rocm_smi.cc \
+        --replace-fail '"/usr/share/hwdata/pci.ids"' '"${pkgs.hwdata}/share/hwdata/pci.ids"'
+    '';
+  });
+
   sevenZip = pkgs.symlinkJoin {
     name = "7zip-with-7z-alias";
     paths = [ pkgs._7zz ];
@@ -124,7 +133,15 @@ in
     enableFishIntegration = true;
   };
 
-  programs.btop.enable = true;
+  programs.btop = {
+    enable = true;
+    # Enable discovery of NVML and ROCm SMI on this hybrid NVIDIA/AMD laptop.
+    package = pkgs.btop.override {
+      cudaSupport = true;
+      rocmSupport = true;
+      rocmPackages = pkgs.rocmPackages // { rocm-smi = rocmSmi; };
+    };
+  };
 
   programs.obs-studio.enable = true;
 
@@ -142,11 +159,34 @@ in
     unstablePkgs.qq
     wechat-fcitx
     wpsOffice
+    gimp
+    blender
+    audacity
+    kdePackages.kdenlive
+    drawio
+    freeplane
+    zotero
+    qalculate-gtk
+    swayimg
+    satty
+    qpwgraph
+    seahorse
+    moonlight-qt
 
     # Development tools
     unstablePkgs.codex
     nodejs
     conan
+    pnpm
+    # Keep GCC's cc/c++/cpp aliases as defaults when both toolchains exist.
+    (pkgs.lib.setPrio 15 llvmPackages.clang)
+    clang-tools
+    # The ARM toolchain also exports include/gdb/jit-reader.h. Keep its
+    # existing shared header while adding the unprefixed host debugger.
+    (pkgs.lib.lowPrio gdb)
+    shellcheck
+    shfmt
+    dtc
 
     (python3.withPackages (ps: with ps; [
       pip
@@ -183,6 +223,35 @@ in
     stlink
     tio
 
+    # Electronics, CAD, and serial-data visualization
+    kicad
+    freecad
+    serial-studio
+    ngspice
+
+    # Media commands exposed to the shell, including GStreamer's plugin search
+    # through the Nix profiles rather than a manually maintained environment.
+    ffmpeg-headless
+    imagemagick
+    gst_all_1.gstreamer
+    # The default bin output omits core elements such as typefind/fakesink.
+    gst_all_1.gstreamer.out
+    gst_all_1.gst-plugins-base
+    gst_all_1.gst-plugins-good
+    gst_all_1.gst-plugins-bad
+    gst_all_1.gst-plugins-ugly
+    gst_all_1.gst-libav
+
+    (texlive.combine {
+      inherit (texlive)
+        scheme-medium
+        collection-luatex
+        collection-xetex
+        collection-bibtexextra
+        collection-langchinese
+        ;
+    })
+
     # Wayland utilities
     wl-clipboard
     wlr-randr
@@ -200,5 +269,36 @@ in
     fastfetch
     duf
     lazygit
+    gdu
+    zellij
+    lazyjournal
+    systemctl-tui
+    wiremix
+    # NVTOP only needs NVML headers for NVIDIA monitoring. Supplying the
+    # focused development package avoids downloading the whole CUDA toolkit.
+    (nvtopPackages.full.override {
+      cudatoolkit = cudaPackages.cuda_nvml_dev;
+    })
+    amdgpu_top
+    hardinfo2
+    exfatprogs
+    clinfo
+    dmidecode
+    psmisc
+    file
+    zip
+    unzip
+
+    # Network diagnostics and command-line remote access. These packages do
+    # not start servers; capture capabilities are configured by NixOS.
+    nmap
+    zenmap
+    iperf3
+    lsof
+    sshfs
+    traceroute
+    whois
+    freerdp
+    atftp
   ];
 }

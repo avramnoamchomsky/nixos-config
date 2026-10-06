@@ -1,6 +1,8 @@
 { pkgs, unstablePkgs, ... }:
 
 let
+  zhuqueFangsong = pkgs.callPackage ../home/packages/zhuque-fangsong.nix { };
+
   rpiImagerPolicy = pkgs.writeText "com.raspberrypi.rpi-imager.policy.in" ''
     <?xml version="1.0" encoding="UTF-8"?>
     <!DOCTYPE policyconfig PUBLIC
@@ -91,6 +93,29 @@ in
     enableAudioWavelength = false;
     enableCalendarEvents = false;
   };
+
+  # Existing Niri screenshot bindings invoke DMS, which substitutes %path%
+  # with the captured file before launching the editor. Escape systemd's
+  # percent specifiers so DMS receives the literal %path% placeholder.
+  systemd.user.services.dms.environment.DMS_SCREENSHOT_EDITOR = "${pkgs.satty}/bin/satty -f %%path%%";
+
+  # PulseView includes the libsigrok udev rules for supported USB instruments.
+  programs.pulseview.enable = true;
+
+  programs.localsend = {
+    enable = true;
+    openFirewall = true;
+  };
+
+  programs.wireshark = {
+    enable = true;
+    package = pkgs.wireshark;
+    dumpcap.enable = true;
+    usbmon.enable = false;
+  };
+  users.users.chomsky.extraGroups = [ "wireshark" ];
+
+  programs.trippy.enable = true;
 
   services.greetd = {
     enable = true;
@@ -183,5 +208,13 @@ in
     noto-fonts-cjk-sans
     noto-fonts-color-emoji
     nerd-fonts.jetbrains-mono
+    inter
+    lxgw-wenkai
+    maple-mono.NF-CN
+    font-awesome
+    material-icons
+    material-symbols
+    terminus_font
+    zhuqueFangsong
   ];
 }

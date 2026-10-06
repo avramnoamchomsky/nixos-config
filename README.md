@@ -17,7 +17,8 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 - KVM/QEMU virtualization managed by libvirt and virt-manager
 - Docker and Distrobox with an Ubuntu 22.04 Vitis/Vivado 2023.2 environment
 - Automatic removable-drive mounting through UDisks and udiskie
-- Fish and desktop applications, including WPS Office Chinese personal edition, Raspberry Pi Imager, Remmina, SylvaKru, Readest, 115 Browser, and Google Chrome as the default browser
+- Creative, electronics, network-diagnostic, and typesetting tools from the reviewed bookmark inventory
+- Fish and desktop applications, including WPS Office Chinese personal edition, Raspberry Pi Imager, Remmina, SylvaKru, Readest, 115 Life, 115 Browser, and Google Chrome as the default browser
 - Declarative MacTahoe GTK and Kvantum themes with nwg-look, qt5ct, and qt6ct
 - ESP32 and STM32 development tooling with direnv and hardware access rules
 - sops-nix encrypted secrets backed by a machine-local age identity
@@ -31,6 +32,7 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 ├── flake.lock
 ├── system
 │   ├── default.nix
+│   ├── 115-life.nix
 │   ├── desktop.nix
 │   ├── fpga.nix
 │   ├── hardware-configuration.nix
@@ -52,6 +54,7 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 │   │   └── config.kdl
 │   ├── packages
 │   │   ├── 115-browser.nix
+│   │   ├── 115-life.nix
 │   │   └── sylvakru.nix
 │   ├── programs.nix
 │   ├── rclone.nix
@@ -74,19 +77,17 @@ configuration owned by the `chomsky` account.
 ## Suspend and hibernation
 
 `system/power-management.nix` disables s2idle, S4, hybrid sleep, and
-suspend-then-hibernate while the current AMD platform-resume failures remain
-unfixed. Lid-close handling is set to `ignore`, and DMS does not expose
+suspend-then-hibernate. Hibernation is no longer planned, and the AMD
+platform-resume failures remain unresolved. Lid-close handling is set to
+`ignore`, and DMS does not expose
 suspend or hibernate actions, preventing accidental entry into a broken state.
 
-Normal memory pressure continues to use zram. Hibernation instead uses the
-72 GiB `/var/lib/swapfile`, which NixOS creates with the Btrfs-compatible NOCOW
-attributes. The file resides inside the LUKS-encrypted root filesystem, so the
-saved memory image is encrypted at rest.
+Normal memory pressure uses zram only. The former 72 GiB
+`/var/lib/swapfile` is no longer configured and can be deleted after it is
+deactivated. NixOS will not recreate it from this configuration.
 
-The systemd-based initrd retains the infrastructure needed to discover the
-swap file and its Btrfs offset dynamically if S4 is re-enabled later. Keeping
-the swap file active does not enable hibernation. After applying the
-configuration and rebooting, verify the disabled policy with:
+The systemd-based initrd remains enabled. After applying the configuration,
+verify the swap and disabled sleep policy with:
 
 ```bash
 swapon --show
@@ -97,8 +98,8 @@ busctl call org.freedesktop.login1 /org/freedesktop/login1 \
   org.freedesktop.login1.Manager CanHibernate
 ```
 
-All four `Allow*` settings should be `false`, and both bus calls should return
-`s "no"`. If `/var/lib/swapfile` is removed, the next rebuild recreates it.
+Only `/dev/zram0` should appear in `swapon --show`. All four `Allow*` settings
+should be `false`, and both bus calls should return `s "no"`.
 
 ## Declarative desktop state
 
@@ -119,6 +120,40 @@ All four `Allow*` settings should be `false`, and both bus calls should return
 - The `nvim.desktop` entry launches Neovim explicitly inside Ghostty. This
   keeps Nautilus file associations working without relying on GLib to discover
   a terminal emulator in the minimal Niri session.
+
+## Reviewed software additions
+
+The [2026-10-04 software audit](docs/software-audit-2026-10-04.md) records the
+bookmark inventory, approved additions, existing dependencies, skipped tools,
+deferred integrations, and cleanup decisions. User applications and commands
+are declared in `home/programs.nix`; system permissions and fonts are declared
+in `system/desktop.nix`. The existing flake pins are retained.
+
+PulseView uses the NixOS module's libsigrok USB rules. LocalSend opens TCP/UDP
+port `53317`. Wireshark installs the full GUI/CLI package and grants network
+capture through the `wireshark` group; USB capture remains disabled. Log out
+and back in after activation to acquire the new group. Trippy runs through
+the NixOS `trip` capability wrapper.
+
+btop enables both NVIDIA NVML and AMD ROCm SMI discovery. Its ROCm dependency
+uses the packaged PCI database for GPU names. In btop, `5` and `6` toggle the
+individual GPU panels. If NVIDIA readings disappear, check `nvidia-smi` and
+the kernel's Xid messages; a reported GPU reset requirement needs driver/GPU
+recovery before either monitor can display those sensors again.
+
+The existing Niri screenshot shortcuts launch Satty through DMS's
+`DMS_SCREENSHOT_EDITOR`. Common image types open with Swayimg. FFmpeg,
+ImageMagick, and GStreamer commands and plugins are exposed to the shell.
+TeX Live uses the medium scheme with LuaTeX, XeTeX, bibliography, and Chinese
+collections.
+
+Additional fonts are available without changing the existing defaults.
+Zhuque Fangsong is pinned to the official `v0.212` technical-preview ZIP in
+`home/packages/zhuque-fangsong.nix`. Google's icon fonts use `material-icons`
+and `material-symbols`.
+
+Ventoy and the editor/desktop plugin batch are deferred. Bottles, KDiskMark,
+and wlr-randr are retained, and this change removes no applications.
 
 ## Ghost Downloader
 
@@ -193,6 +228,23 @@ default browser and opens PDF files by default.
 
 Apply the configuration with `sudo nixos-rebuild switch --flake .#pisces`, then
 launch WPS from the application menu or with `wps`.
+
+## 115 Life
+
+The [official 115 Life 37.3.1 Linux release](https://115.com/115/T984564.html)
+is pinned by version and SHA-256 in `home/packages/115-life.nix` and installed
+through `home/115-life.nix`. The package keeps the bundled .NET runtime and
+ICU libraries, patches native binaries for NixOS, and supplies Avalonia's X11
+libraries, WebKitGTK 4.1, secret storage, notifications, and media dependencies.
+Under Niri, the desktop client uses XWayland.
+
+Launch **115生活** from the application menu or run `115-life` (`115life` also
+works), then sign in with your 115 account or scan the login QR code. The
+`life115://` handler uses the same Nix wrapper. Torrent files offer the app
+through **Open With**; their default association remains a user preference.
+
+Settings and account data remain writable in your home directory. Update the
+pinned package version and hash, then rebuild NixOS to upgrade the application.
 
 ## 115 Browser
 
