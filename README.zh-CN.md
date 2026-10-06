@@ -9,7 +9,7 @@
 - 使用 NixOS flakes，并将 Home Manager 集成到系统重构流程中
 - 使用 `linuxPackages_latest`，当前固定为 Linux `7.1.8`
 - 使用 Niri，并由 Git 完整管理其 KDL 配置
-- 使用 Dank Material Shell，管理经过审阅的设置和声明式壁纸
+- 使用 Dank Material Shell，管理经过审阅的设置、声明式 Wood Whale 头像及壁纸
 - AMD + NVIDIA 混合显卡，以及可在启动时选择的 RTX 4060 VFIO 模式
 - 在 AMD 平台恢复问题修复前禁用系统睡眠
 - Fcitx5 与 Rime Ice 输入法
@@ -17,7 +17,8 @@
 - 由 libvirt 与 virt-manager 管理的 KVM/QEMU 虚拟化环境
 - Docker 与 Distrobox，以及基于 Ubuntu 22.04 的 Vitis/Vivado 2023.2 环境
 - 通过 UDisks 与 udiskie 自动挂载可移动存储设备
-- Fish 和桌面应用，包括 WPS Office 中文个人版、Raspberry Pi Imager、Remmina、SylvaKru、Readest、115 生活、115 浏览器及作为默认浏览器的 Google Chrome
+- 来自已审阅书签清单的创作、电子、网络诊断及排版工具
+- Fish 和桌面应用，包括 WPS Office 中文个人版、Ghost Downloader、Raspberry Pi Imager、Remmina、SylvaKru、Readest、115 生活、115 浏览器及作为默认浏览器的 Google Chrome
 - 声明式 MacTahoe GTK 与 Kvantum 主题，以及 nwg-look、qt5ct 和 qt6ct
 - ESP32 与 STM32 开发工具、direnv 及硬件访问规则
 - 使用 sops-nix 加密机密，并由仅存在于本机的 age 身份密钥解密
@@ -31,9 +32,9 @@
 ├── flake.lock
 ├── system
 │   ├── default.nix
-│   ├── 115-life.nix
 │   ├── desktop.nix
 │   ├── fpga.nix
+│   ├── gaming.nix
 │   ├── hardware-configuration.nix
 │   ├── hybrid-graphics.nix
 │   ├── msi-control.nix
@@ -43,10 +44,13 @@
 │   └── virtualization.nix
 ├── home
 │   ├── default.nix
+│   ├── 115-life.nix
 │   ├── desktop.nix
 │   ├── dms.nix
 │   ├── dms
-│   │   └── settings.json
+│   │   ├── settings.json
+│   │   └── Wood_Whale.jpg
+│   ├── ghost-downloader.nix
 │   ├── input-method.nix
 │   ├── niri.nix
 │   ├── niri
@@ -54,13 +58,18 @@
 │   ├── packages
 │   │   ├── 115-browser.nix
 │   │   ├── 115-life.nix
-│   │   └── sylvakru.nix
+│   │   ├── ghost-downloader.nix
+│   │   ├── readest.nix
+│   │   ├── sylvakru.nix
+│   │   └── zhuque-fangsong.nix
 │   ├── programs.nix
 │   ├── rclone.nix
 │   ├── themes.nix
 │   ├── vitis.nix
 │   └── wallpapers
 │       └── ...
+├── docs
+│   └── software-audit-2026-10-04.md
 ├── secrets
 │   └── webdav.yaml
 ├── .sops.yaml
@@ -102,6 +111,8 @@ busctl call org.freedesktop.login1 /org/freedesktop/login1 \
   `home/niri/config.kdl` 部署。
 - DMS 生成的可选 Niri 配置片段未被使用，并会被自动清理。
 - 经过审阅的 DMS 设置保存在 `home/dms/settings.json` 中。
+- DMS 头像由 `home/dms.nix` 声明，使用 `home/dms/Wood_Whale.jpg`；
+  详见下方的 [DMS 头像](#dms-头像)。
 - 指定的 DMS 会话偏好通过声明式方式合并；历史记录、检测到的设备及其他
   易变状态仍可由程序写入。
 - `home/wallpapers/` 中的壁纸会被部署到 `~/Pictures/Wallpapers`。
@@ -114,6 +125,91 @@ busctl call org.freedesktop.login1 /org/freedesktop/login1 \
   桌面应用所需的路径。
 - `nvim.desktop` 会显式地在 Ghostty 中启动 Neovim，使 Nautilus 文件关联
   无需依赖 GLib 在精简的 Niri 会话中自动发现终端模拟器。
+
+### DMS 头像
+
+Wood Whale 原始 JPEG 保存在 `home/dms/Wood_Whale.jpg` 中，并由 Git 管理；
+构建使用仓库内的副本，不依赖 `~/Downloads`。`home/dms.nix` 通过 ImageMagick
+在 Nix store 中生成 512×512 PNG，保留原图构图并移除元数据。较小的图片
+符合 AccountsService 的 1 MiB 头像限制，原始 JPEG 保持不变。
+
+Home Manager 的 `dmsProfileImage` 激活钩子通过 AccountsService 查找配置的
+用户，并设置其 `IconFile`。NixOS 原生 DMS 模块会启用 AccountsService。
+如果 `dms.service` 正在运行，钩子还会调用 DMS 的头像 IPC，立即刷新缓存
+图片；如果 shell 未运行，则会在下次启动时读取账户头像。设置窗口、仪表板、
+控制中心及锁屏共用该头像；其他读取 AccountsService 头像的应用也会看到它。
+
+如需更换声明式头像，替换 `home/dms/Wood_Whale.jpg`，或修改 `home/dms.nix`
+中的 `profileImage` 源文件，然后按照[验证与应用](#验证与应用)执行。
+如果使用新文件，应先将其加入 Git 暂存区，使 Nix 在求值 flake 时包含该文件。
+在 DMS 设置界面中选择头像只是临时修改；下次 Home Manager 激活时，会恢复
+仓库声明的图片。
+
+激活后，以普通用户执行以下命令，检查账户头像与正在运行的 shell：
+
+```bash
+account_path=$(busctl --system --json=short call \
+  org.freedesktop.Accounts /org/freedesktop/Accounts \
+  org.freedesktop.Accounts FindUserByName s "$USER" | jq -r '.data[0]')
+busctl --system get-property org.freedesktop.Accounts "$account_path" \
+  org.freedesktop.Accounts.User IconFile
+dms ipc call profile getImage
+```
+
+AccountsService 通常返回 `/var/lib/AccountsService/icons/chomsky`，该文件
+是生成 PNG 的副本。正在运行的 DMS 可能返回此路径，也可能返回 Nix store 中
+生成的 `dms-wood-whale-avatar.png` 路径；两者应显示同一张图片。
+
+## 已审阅的软件新增
+
+[2026-10-04 软件审计](docs/software-audit-2026-10-04.md)记录了书签清单、
+已批准的新增软件、现有依赖、跳过的工具、暂缓的集成及清理决策。用户应用
+和命令在 `home/programs.nix` 中声明；系统权限和字体在 `system/desktop.nix`
+中声明。现有 flake 输入保持固定。
+
+PulseView 使用 NixOS 模块提供的 libsigrok USB 规则。LocalSend 开放 TCP/UDP
+端口 `53317`。Wireshark 安装完整的图形与命令行软件包，并通过 `wireshark`
+组授予网络抓包权限；USB 抓包保持关闭。激活后需注销并重新登录，以获得新
+用户组成员身份。Trippy 通过 NixOS 的 `trip` 能力包装器运行。
+
+btop 同时启用 NVIDIA NVML 与 AMD ROCm SMI 检测；ROCm 依赖使用软件包提供
+的 PCI 数据库显示 GPU 名称。在 btop 中，`5` 和 `6` 可切换独立 GPU 面板。
+如果 NVIDIA 读数消失，请检查 `nvidia-smi` 和内核 Xid 消息；若报告需要
+GPU 重置，必须先恢复驱动或 GPU，监控工具才能再次显示传感器数据。
+
+现有 Niri 截图快捷键通过 DMS 的 `DMS_SCREENSHOT_EDITOR` 启动 Satty。
+常见图片类型默认使用 Swayimg。FFmpeg、ImageMagick，以及 GStreamer 命令
+和插件可直接在 shell 中使用。TeX Live 使用 medium 方案，并包含 LuaTeX、
+XeTeX、参考文献工具和中文集合。
+
+新增字体不会改变现有默认字体。朱雀仿宋在 `home/packages/zhuque-fangsong.nix`
+中固定为官方 `v0.212` 技术预览 ZIP。Google 图标字体使用 `material-icons`
+与 `material-symbols`。
+
+Ventoy 和编辑器及桌面插件批次暂缓。Bottles、KDiskMark 与 wlr-randr 保留，
+本次新增没有移除应用程序。
+
+## Ghost Downloader
+
+Home Manager 从官方 x86_64 AppImage 安装
+[Ghost Downloader v4.3.7](https://github.com/XiaoYouChR/Ghost-Downloader-3/releases/tag/v4.3.7)，
+SHA-256 固定在 `home/packages/ghost-downloader.nix` 中。软件包为自带的
+Python 和 Qt 库提供 FHS 环境，并提供用于媒体下载的 FFmpeg。现有 flake
+输入保持固定。
+
+可从终端运行 `ghost-downloader`，或从应用菜单启动 **Ghost Downloader**。
+`home/ghost-downloader.nix` 将 `ghostdownloader://` 协议注册到 Nix 包装器，
+使浏览器链接使用同一个可工作的启动程序。
+
+应用设置、下载历史和功能包保存在 `~/.local/share/GhostDownloader/` 中，
+保持可写。首次安装时启用 TLS 证书校验，并关闭应用更新检查。升级时修改
+软件包固定的版本和校验和，再重新构建 NixOS；后续重建会保留在应用内修改
+的设置。
+
+如需浏览器下载拦截，可安装可选的
+[Ghost Downloader for Browser 扩展](https://chromewebstore.google.com/detail/ghost-downloader-for-brow/lagbjgkmaafnlinaeonbhjchnjinjpeh)，
+并通过 Ghost Downloader 的设置向导或浏览器集成设置完成配对。桌面应用
+可以独立于该扩展运行。
 
 ## WebDAV 挂载与机密
 
@@ -492,6 +588,13 @@ NixOS 不会自动监视这些文件。每次修改配置后，请先在不执�
 
 ```bash
 nix flake check --no-build
+```
+
+如果修改了 Home Manager 配置，还应构建用户配置而不激活它，以检查头像等
+生成资源和激活软件包：
+
+```bash
+nix build --no-link .#nixosConfigurations.pisces.config.home-manager.users.chomsky.home.activationPackage
 ```
 
 在正常启动模式下进行普通的软件包、桌面或服务修改时，可应用完整的 NixOS

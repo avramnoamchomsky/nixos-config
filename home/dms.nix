@@ -1,6 +1,14 @@
 { config, lib, pkgs, ... }:
 
 let
+  # AccountsService limits copied icons to 1 MiB. Keep the original in Git
+  # and build a smaller PNG without changing the image's composition.
+  profileImage = pkgs.runCommand "dms-wood-whale-avatar.png" {
+    nativeBuildInputs = [ pkgs.imagemagick ];
+  } ''
+    magick ${./dms/Wood_Whale.jpg} -resize 512x512 -strip "$out"
+  '';
+
   # DMS keeps both preferences and volatile state in session.json. This
   # fragment is merged at activation time so wallpaper, devices, histories,
   # and launcher state remain writable and are not copied into Git.
@@ -42,6 +50,23 @@ in
   # Keep the wallpaper collection declarative while exposing it at the
   # conventional writable-user-data location expected by DMS file pickers.
   home.file."Pictures/Wallpapers".source = ./wallpapers;
+
+  # DMS reads the account icon from AccountsService, not settings.json.
+  home.activation.dmsProfileImage = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    account_path=$(${pkgs.systemd}/bin/busctl --system --json=short call \
+      org.freedesktop.Accounts /org/freedesktop/Accounts \
+      org.freedesktop.Accounts FindUserByName s \
+      ${lib.escapeShellArg config.home.username} | ${pkgs.jq}/bin/jq -r '.data[0]')
+
+    run ${pkgs.systemd}/bin/busctl --system call \
+      org.freedesktop.Accounts "$account_path" \
+      org.freedesktop.Accounts.User SetIconFile s ${profileImage}
+
+    # Refresh a running shell so its cached avatar changes immediately.
+    if ${pkgs.systemd}/bin/systemctl --user --quiet is-active dms.service; then
+      run ${pkgs.dms-shell}/bin/dms ipc call profile setImage ${profileImage}
+    fi
+  '';
 
   xdg.configFile."DankMaterialShell/clsettings.json".text = builtins.toJSON {
     disabled = false;

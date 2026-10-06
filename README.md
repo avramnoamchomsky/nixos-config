@@ -9,7 +9,7 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 - NixOS flakes with Home Manager integrated into the system rebuild
 - `linuxPackages_latest`, currently pinned to Linux `7.1.8`
 - Niri with a complete Git-owned KDL configuration
-- Dank Material Shell with reviewed settings and declarative wallpapers
+- Dank Material Shell with reviewed settings, a declarative Wood Whale avatar, and wallpapers
 - AMD + NVIDIA hybrid graphics with a boot-selectable RTX 4060 VFIO mode
 - System sleep disabled pending AMD platform-resume fixes
 - Fcitx5 with Rime Ice
@@ -18,7 +18,7 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 - Docker and Distrobox with an Ubuntu 22.04 Vitis/Vivado 2023.2 environment
 - Automatic removable-drive mounting through UDisks and udiskie
 - Creative, electronics, network-diagnostic, and typesetting tools from the reviewed bookmark inventory
-- Fish and desktop applications, including WPS Office Chinese personal edition, Raspberry Pi Imager, Remmina, SylvaKru, Readest, 115 Life, 115 Browser, and Google Chrome as the default browser
+- Fish and desktop applications, including WPS Office Chinese personal edition, Ghost Downloader, Raspberry Pi Imager, Remmina, SylvaKru, Readest, 115 Life, 115 Browser, and Google Chrome as the default browser
 - Declarative MacTahoe GTK and Kvantum themes with nwg-look, qt5ct, and qt6ct
 - ESP32 and STM32 development tooling with direnv and hardware access rules
 - sops-nix encrypted secrets backed by a machine-local age identity
@@ -32,9 +32,9 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 ├── flake.lock
 ├── system
 │   ├── default.nix
-│   ├── 115-life.nix
 │   ├── desktop.nix
 │   ├── fpga.nix
+│   ├── gaming.nix
 │   ├── hardware-configuration.nix
 │   ├── hybrid-graphics.nix
 │   ├── msi-control.nix
@@ -44,10 +44,13 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 │   └── virtualization.nix
 ├── home
 │   ├── default.nix
+│   ├── 115-life.nix
 │   ├── desktop.nix
 │   ├── dms.nix
 │   ├── dms
-│   │   └── settings.json
+│   │   ├── settings.json
+│   │   └── Wood_Whale.jpg
+│   ├── ghost-downloader.nix
 │   ├── input-method.nix
 │   ├── niri.nix
 │   ├── niri
@@ -55,13 +58,18 @@ Declarative configuration for the `pisces` laptop and the `chomsky` user environ
 │   ├── packages
 │   │   ├── 115-browser.nix
 │   │   ├── 115-life.nix
-│   │   └── sylvakru.nix
+│   │   ├── ghost-downloader.nix
+│   │   ├── readest.nix
+│   │   ├── sylvakru.nix
+│   │   └── zhuque-fangsong.nix
 │   ├── programs.nix
 │   ├── rclone.nix
 │   ├── themes.nix
 │   ├── vitis.nix
 │   └── wallpapers
 │       └── ...
+├── docs
+│   └── software-audit-2026-10-04.md
 ├── secrets
 │   └── webdav.yaml
 ├── .sops.yaml
@@ -107,6 +115,8 @@ should be `false`, and both bus calls should return `s "no"`.
   `home/niri/config.kdl`.
 - DMS-generated optional Niri fragments are unused and automatically removed.
 - Reviewed DMS settings are tracked in `home/dms/settings.json`.
+- The DMS avatar is declared in `home/dms.nix` using
+  `home/dms/Wood_Whale.jpg`; see [DMS avatar](#dms-avatar) below.
 - Selected DMS session preferences are merged declaratively while histories,
   detected devices, and other volatile state remain writable.
 - Wallpapers in `home/wallpapers/` are deployed to `~/Pictures/Wallpapers`.
@@ -120,6 +130,46 @@ should be `false`, and both bus calls should return `s "no"`.
 - The `nvim.desktop` entry launches Neovim explicitly inside Ghostty. This
   keeps Nautilus file associations working without relying on GLib to discover
   a terminal emulator in the minimal Niri session.
+
+### DMS avatar
+
+The original Wood Whale JPEG is tracked in `home/dms/Wood_Whale.jpg`; builds
+use this repository copy and do not depend on `~/Downloads`. `home/dms.nix`
+builds a 512×512 PNG in the Nix store with ImageMagick, preserving the
+composition and removing metadata. The smaller image fits AccountsService's
+1 MiB icon limit while leaving the original JPEG unchanged.
+
+Home Manager's `dmsProfileImage` activation hook finds the configured user
+through AccountsService and sets its `IconFile`. The native NixOS DMS module
+enables AccountsService. When `dms.service` is running, the hook also calls
+DMS's profile IPC to refresh the cached image immediately. When the shell is
+stopped, it reads the account icon on its next start. Settings, the dashboard,
+the control center, and the lock screen share this avatar; other applications
+that read the AccountsService icon also see it.
+
+To change the declared avatar, replace `home/dms/Wood_Whale.jpg`, or update the
+`profileImage` source in `home/dms.nix`, then follow
+[Validate and apply](#validate-and-apply). Add any new source file to Git's
+index before evaluating the flake so Nix includes it. Changing the avatar in
+the DMS settings UI is temporary: the next Home Manager activation restores
+the repository's declared image.
+
+After activation, check the account icon and the running shell as your normal
+user:
+
+```bash
+account_path=$(busctl --system --json=short call \
+  org.freedesktop.Accounts /org/freedesktop/Accounts \
+  org.freedesktop.Accounts FindUserByName s "$USER" | jq -r '.data[0]')
+busctl --system get-property org.freedesktop.Accounts "$account_path" \
+  org.freedesktop.Accounts.User IconFile
+dms ipc call profile getImage
+```
+
+AccountsService normally reports `/var/lib/AccountsService/icons/chomsky`,
+which contains a copy of the generated PNG. The running DMS shell may report
+either that path or the generated `dms-wood-whale-avatar.png` path in the Nix
+store. Both should display the same image.
 
 ## Reviewed software additions
 
@@ -590,6 +640,14 @@ change, first evaluate the complete flake without building:
 
 ```bash
 nix flake check --no-build
+```
+
+For Home Manager changes, also build the user configuration without activating
+it. This checks generated assets, including the avatar, and the activation
+package:
+
+```bash
+nix build --no-link .#nixosConfigurations.pisces.config.home-manager.users.chomsky.home.activationPackage
 ```
 
 For ordinary package, desktop, and service changes made while running the
