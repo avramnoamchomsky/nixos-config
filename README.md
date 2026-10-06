@@ -1,694 +1,103 @@
-# NixOS Configuration
+# Pisces NixOS configuration
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-Declarative configuration for the `pisces` laptop and the `chomsky` user environment.
-
-## Highlights
-
-- NixOS flakes with Home Manager integrated into the system rebuild
-- `linuxPackages_latest`, currently pinned to Linux `7.1.8`
-- Niri with a complete Git-owned KDL configuration
-- Dank Material Shell with reviewed settings, a declarative Wood Whale avatar, and wallpapers
-- AMD + NVIDIA hybrid graphics with a boot-selectable RTX 4060 VFIO mode
-- System sleep disabled pending AMD platform-resume fixes
-- Fcitx5 with Rime Ice
-- PipeWire, NetworkManager, Bluetooth, and Avahi/mDNS
-- KVM/QEMU virtualization managed by libvirt and virt-manager
-- Docker and Distrobox with an Ubuntu 22.04 Vitis/Vivado 2023.2 environment
-- Automatic removable-drive mounting through UDisks and udiskie
-- Creative, electronics, network-diagnostic, and typesetting tools from the reviewed bookmark inventory
-- Fish and desktop applications, including WPS Office Chinese personal edition, Ghost Downloader, Raspberry Pi Imager, Remmina, SylvaKru, Readest, 115 Life, 115 Browser, and Google Chrome as the default browser
-- Declarative MacTahoe GTK and Kvantum themes with nwg-look, qt5ct, and qt6ct
-- ESP32 and STM32 development tooling with direnv and hardware access rules
-- sops-nix encrypted secrets backed by a machine-local age identity
-- Automatic rclone WebDAV mounts for two InfiniCLOUD accounts
-
-## Structure
-
-```text
-.
-├── flake.nix
-├── flake.lock
-├── system
-│   ├── default.nix
-│   ├── desktop.nix
-│   ├── fpga.nix
-│   ├── gaming.nix
-│   ├── hardware-configuration.nix
-│   ├── hybrid-graphics.nix
-│   ├── msi-control.nix
-│   ├── power-management.nix
-│   ├── secrets.nix
-│   ├── vfio.nix
-│   └── virtualization.nix
-├── home
-│   ├── default.nix
-│   ├── 115-life.nix
-│   ├── desktop.nix
-│   ├── dms.nix
-│   ├── dms
-│   │   ├── settings.json
-│   │   └── Wood_Whale.jpg
-│   ├── ghost-downloader.nix
-│   ├── input-method.nix
-│   ├── niri.nix
-│   ├── niri
-│   │   └── config.kdl
-│   ├── packages
-│   │   ├── 115-browser.nix
-│   │   ├── 115-life.nix
-│   │   ├── ghost-downloader.nix
-│   │   ├── readest.nix
-│   │   ├── sylvakru.nix
-│   │   └── zhuque-fangsong.nix
-│   ├── programs.nix
-│   ├── rclone.nix
-│   ├── themes.nix
-│   ├── vitis.nix
-│   └── wallpapers
-│       └── ...
-├── docs
-│   └── software-audit-2026-10-04.md
-├── secrets
-│   └── webdav.yaml
-├── .sops.yaml
-├── .gitignore
-├── README.md
-└── README.zh-CN.md
-```
-
-`system/` contains machine-wide hardware, boot, networking, services, security,
-and secret-decryption configuration. `home/` contains the applications and user
-configuration owned by the `chomsky` account.
-
-## Suspend and hibernation
-
-`system/power-management.nix` disables s2idle, S4, hybrid sleep, and
-suspend-then-hibernate. Hibernation is no longer planned, and the AMD
-platform-resume failures remain unresolved. Lid-close handling is set to
-`ignore`, and DMS does not expose
-suspend or hibernate actions, preventing accidental entry into a broken state.
-
-Normal memory pressure uses zram only. The former 72 GiB
-`/var/lib/swapfile` is no longer configured and can be deleted after it is
-deactivated. NixOS will not recreate it from this configuration.
-
-The systemd-based initrd remains enabled. After applying the configuration,
-verify the swap and disabled sleep policy with:
-
-```bash
-swapon --show
-systemd-analyze cat-config systemd/sleep.conf | grep '^Allow'
-busctl call org.freedesktop.login1 /org/freedesktop/login1 \
-  org.freedesktop.login1.Manager CanSuspend
-busctl call org.freedesktop.login1 /org/freedesktop/login1 \
-  org.freedesktop.login1.Manager CanHibernate
-```
-
-Only `/dev/zram0` should appear in `swapon --show`. All four `Allow*` settings
-should be `false`, and both bus calls should return `s "no"`.
-
-## Declarative desktop state
-
-- Niri reads only `~/.config/niri/config.kdl`, deployed from
-  `home/niri/config.kdl`.
-- DMS-generated optional Niri fragments are unused and automatically removed.
-- Reviewed DMS settings are tracked in `home/dms/settings.json`.
-- The DMS avatar is declared in `home/dms.nix` using
-  `home/dms/Wood_Whale.jpg`; see [DMS avatar](#dms-avatar) below.
-- Selected DMS session preferences are merged declaratively while histories,
-  detected devices, and other volatile state remain writable.
-- Wallpapers in `home/wallpapers/` are deployed to `~/Pictures/Wallpapers`.
-  DMS derives its wallpaper cycling directory from the selected wallpaper path.
-- UDisks handles removable storage at the system level, while the Home Manager
-  `udiskie` service automatically mounts eligible filesystems under
-  `/run/media/chomsky/`. Partitions marked by UDisks as ignored remain unmounted.
-- Home Manager declares the standard XDG user directories and creates missing
-  folders such as `Documents`, `Downloads`, `Music`, and `Pictures`. This also
-  supplies the paths expected by Flutter desktop applications such as SylvaKru.
-- The `nvim.desktop` entry launches Neovim explicitly inside Ghostty. This
-  keeps Nautilus file associations working without relying on GLib to discover
-  a terminal emulator in the minimal Niri session.
-
-### DMS avatar
-
-The original Wood Whale JPEG is tracked in `home/dms/Wood_Whale.jpg`; builds
-use this repository copy and do not depend on `~/Downloads`. `home/dms.nix`
-builds a 512×512 PNG in the Nix store with ImageMagick, preserving the
-composition and removing metadata. The smaller image fits AccountsService's
-1 MiB icon limit while leaving the original JPEG unchanged.
-
-Home Manager's `dmsProfileImage` activation hook finds the configured user
-through AccountsService and sets its `IconFile`. The native NixOS DMS module
-enables AccountsService. When `dms.service` is running, the hook also calls
-DMS's profile IPC to refresh the cached image immediately. When the shell is
-stopped, it reads the account icon on its next start. Settings, the dashboard,
-the control center, and the lock screen share this avatar; other applications
-that read the AccountsService icon also see it.
-
-To change the declared avatar, replace `home/dms/Wood_Whale.jpg`, or update the
-`profileImage` source in `home/dms.nix`, then follow
-[Validate and apply](#validate-and-apply). Add any new source file to Git's
-index before evaluating the flake so Nix includes it. Changing the avatar in
-the DMS settings UI is temporary: the next Home Manager activation restores
-the repository's declared image.
-
-After activation, check the account icon and the running shell as your normal
-user:
-
-```bash
-account_path=$(busctl --system --json=short call \
-  org.freedesktop.Accounts /org/freedesktop/Accounts \
-  org.freedesktop.Accounts FindUserByName s "$USER" | jq -r '.data[0]')
-busctl --system get-property org.freedesktop.Accounts "$account_path" \
-  org.freedesktop.Accounts.User IconFile
-dms ipc call profile getImage
-```
-
-AccountsService normally reports `/var/lib/AccountsService/icons/chomsky`,
-which contains a copy of the generated PNG. The running DMS shell may report
-either that path or the generated `dms-wood-whale-avatar.png` path in the Nix
-store. Both should display the same image.
-
-## Reviewed software additions
-
-The [2026-10-04 software audit](docs/software-audit-2026-10-04.md) records the
-bookmark inventory, approved additions, existing dependencies, skipped tools,
-deferred integrations, and cleanup decisions. User applications and commands
-are declared in `home/programs.nix`; system permissions and fonts are declared
-in `system/desktop.nix`. The existing flake pins are retained.
-
-PulseView uses the NixOS module's libsigrok USB rules. LocalSend opens TCP/UDP
-port `53317`. Wireshark installs the full GUI/CLI package and grants network
-capture through the `wireshark` group; USB capture remains disabled. Log out
-and back in after activation to acquire the new group. Trippy runs through
-the NixOS `trip` capability wrapper.
-
-btop enables both NVIDIA NVML and AMD ROCm SMI discovery. Its ROCm dependency
-uses the packaged PCI database for GPU names. In btop, `5` and `6` toggle the
-individual GPU panels. If NVIDIA readings disappear, check `nvidia-smi` and
-the kernel's Xid messages; a reported GPU reset requirement needs driver/GPU
-recovery before either monitor can display those sensors again.
-
-The existing Niri screenshot shortcuts launch Satty through DMS's
-`DMS_SCREENSHOT_EDITOR`. Common image types open with Swayimg. FFmpeg,
-ImageMagick, and GStreamer commands and plugins are exposed to the shell.
-TeX Live uses the medium scheme with LuaTeX, XeTeX, bibliography, and Chinese
-collections.
-
-Additional fonts are available without changing the existing defaults.
-Zhuque Fangsong is pinned to the official `v0.212` technical-preview ZIP in
-`home/packages/zhuque-fangsong.nix`. Google's icon fonts use `material-icons`
-and `material-symbols`.
-
-Ventoy and the editor/desktop plugin batch are deferred. Bottles, KDiskMark,
-and wlr-randr are retained, and this change removes no applications.
-
-## Ghost Downloader
-
-Home Manager installs [Ghost Downloader v4.3.7](https://github.com/XiaoYouChR/Ghost-Downloader-3/releases/tag/v4.3.7)
-from the official x86_64 AppImage, pinned by SHA-256 in
-`home/packages/ghost-downloader.nix`. The package supplies an FHS environment
-for the bundled Python and Qt libraries, plus FFmpeg for media downloads.
-The current flake inputs remain pinned.
-
-Launch `ghost-downloader` from the shell or **Ghost Downloader** from the
-application menu. `home/ghost-downloader.nix` registers the
-`ghostdownloader://` URI handler with the Nix wrapper, so browser links launch
-the same working executable.
-
-Application settings, download history, and feature packs remain writable in
-`~/.local/share/GhostDownloader/`. On a fresh installation, TLS certificate
-verification is enabled and application update checks are disabled. Update
-the application by changing the pinned version and checksum, then rebuilding
-NixOS; later rebuilds preserve settings changed inside the application.
-
-For browser download interception, install the optional
-[Ghost Downloader for Browser extension](https://chromewebstore.google.com/detail/ghost-downloader-for-brow/lagbjgkmaafnlinaeonbhjchnjinjpeh)
-and pair it through Ghost Downloader's setup wizard or browser-integration
-settings. The desktop application works independently of the extension.
-
-## WebDAV mounts and secrets
-
-The WebDAV usernames and passwords in `secrets/webdav.yaml` are encrypted with
-sops-nix. The private age identity is stored outside Git at:
-
-```text
-/home/chomsky/all_files/secrets/sops-nix/age-key.txt
-```
-
-The configured mount points are:
-
-```text
-~/mnt/infini-cloud-kurio
-~/mnt/infini-cloud-higa
-```
-
-## Desktop themes
-
-- GTK 2/3 uses `MacTahoe-Dark-nord`, selectable and inspectable with
-  `nwg-look`.
-- Qt 5/6 uses `qt5ct`/`qt6ct` as the platform configuration layer and the
-  `MacTahoeDark` Kvantum theme. `kvantummanager` remains available for
-  inspection.
-- Both themes are built from pinned revisions of the official
-  [MacTahoe GTK](https://github.com/vinceliuice/MacTahoe-gtk-theme) and
-  [MacTahoe KDE](https://github.com/vinceliuice/MacTahoe-kde) repositories.
-- GTK 4/libadwaita uses the same theme through Home Manager's explicit CSS
-  import workaround. GTK 4 does not officially support third-party themes, so
-  some applications may still have visual inconsistencies.
-
-The generated GTK, qt5ct, qt6ct, and Kvantum files are Home Manager-owned.
-Changes made in the graphical tools are temporary and should be copied back to
-`home/themes.nix` if they are meant to persist.
-
-## WPS Office
-
-Home Manager installs the Chinese personal edition from the stable
-`wpsoffice-cn` package, currently pinned to `12.1.2.25882`. Its Writer (`wps`),
-Spreadsheets (`et`), Presentation (`wpp`), and PDF (`wpspdf`) launchers explicitly
-select XWayland and Fcitx for Chinese input in Niri. Application-menu entries
-use the same wrappers. Chinese text uses the system's existing Noto CJK fonts.
-
-WPS is the default application for Microsoft Word, PowerPoint, and Excel files,
-including templates and macro-enabled document formats. The defaults cover
-both standard MIME types and WPS's custom MIME types. Google Chrome remains the
-default browser and opens PDF files by default.
-
-Apply the configuration with `sudo nixos-rebuild switch --flake .#pisces`, then
-launch WPS from the application menu or with `wps`.
-
-## 115 Life
-
-The [official 115 Life 37.3.1 Linux release](https://115.com/115/T984564.html)
-is pinned by version and SHA-256 in `home/packages/115-life.nix` and installed
-through `home/115-life.nix`. The package keeps the bundled .NET runtime and
-ICU libraries, patches native binaries for NixOS, and supplies Avalonia's X11
-libraries, WebKitGTK 4.1, secret storage, notifications, and media dependencies.
-Under Niri, the desktop client uses XWayland.
-
-Launch **115生活** from the application menu or run `115-life` (`115life` also
-works), then sign in with your 115 account or scan the login QR code. The
-`life115://` handler uses the same Nix wrapper. Torrent files offer the app
-through **Open With**; their default association remains a user preference.
-
-Settings and account data remain writable in your home directory. Update the
-pinned package version and hash, then rebuild NixOS to upgrade the application.
-
-## 115 Browser
-
-The [official x86_64 Linux release](https://q.115.com/115/T888199.html) of 115
-Browser is packaged declaratively in `home/packages/115-browser.nix`. Version
-`35.30.0` and its download hash are pinned, the vendor binary is adapted to
-NixOS, and it is forced through XWayland because its Transfer Manager renders
-incorrectly on native Wayland under Niri. Launch it as `115-browser` or from
-the application launcher.
-
-The vendor build reports Chromium `125.0.6422.61`, which is old. Use it only for
-115-specific functionality; Google Chrome remains the default browser for
-general browsing.
-
-The browser cannot update files inside the immutable Nix store. Updating it
-requires changing the version, official URL, and hash in the package definition
-and rebuilding the system.
-
-## Readest
-
-[Readest](https://github.com/readest/readest) is built as a native Nix package
-from the pinned upstream release in `home/packages/readest.nix`, using the
-`nixpkgs-unstable` package set for its dependencies. This avoids the upstream
-AppImage's Wayland library-compatibility issue. Launch it as `readest` or from
-the application launcher. Update the package version and hashes to upgrade it.
-
-## SylvaKru
-
-[SylvaKru](https://github.com/AfalpHy/sylvakru) is installed from its pinned
-official x86_64 Linux release in `home/packages/sylvakru.nix`. The vendor
-bundle is adapted to NixOS with GTK, system-tray, secret-storage, OpenGL, and
-mpv runtime libraries. It supports local music and self-hosted libraries via
-WebDAV, Navidrome, and Emby. Launch it as `sylvakru` or from the application
-launcher.
-
-The package is currently pinned to version `3.6.0`. Updating it requires
-changing the version, official release URL, and hash in the package definition.
-
-## Embedded development
-
-- `esp32-shell` opens the flake-based ESP32 environment from
-  `~/all_files/projects/dev-envs/esp32`.
-- `~/all_files/projects/esp32/.envrc` automatically loads the same environment
-  through direnv and nix-direnv.
-- STM32 tools include STM32CubeMX, the Arm embedded toolchain, CMake, Ninja,
-  OpenOCD, and ST-Link utilities.
-- Membership in `dialout` and `plugdev`, plus the OpenOCD and ST-Link udev
-  rules, grants access to supported development boards after a fresh login.
-
-## Open-source HDL and FPGA tools
-
-`home/programs.nix` installs the HDL tools. Yosys and SymbiYosys use the pinned
-unstable Nixpkgs input together because stable Yosys passes obsolete CLI flags
-to modern Bitwuzla; the remaining tools use the pinned stable input.
-`system/fpga.nix` installs openFPGALoader and manages USB/JTAG access.
-
-| Tool | Command | Purpose |
-| --- | --- | --- |
-| Icarus Verilog | `iverilog`, `vvp` | Verilog compilation and simulation |
-| Verilator | `verilator` | SystemVerilog linting and compiled simulation |
-| Verible | `verible-verilog-lint`, `verible-verilog-format`, `verible-verilog-ls` | Linting, formatting, and language server |
-| Yosys | `yosys` | RTL synthesis and formal model preparation |
-| nextpnr | `nextpnr-ice40`, `nextpnr-ecp5`, `nextpnr-himbaechel` | FPGA placement and routing |
-| SymbiYosys | `sby` | Yosys-based formal verification |
-| Bitwuzla | `bitwuzla` | SMT solving for formal verification |
-| openFPGALoader | `openFPGALoader` | FPGA programming |
-
-GCC and GNU Make are included for building Verilator's generated C++
-simulations. Yices supplies SymbiYosys's default SMT solver. To select Bitwuzla
-instead, use this engine section in a project's `.sby` file:
-
-```ini
-[engines]
-smtbmc bitwuzla
-```
-
-Run a project's formal checks with `sby -f design.sby` and inspect simulation
-waveforms with the existing `surfer` viewer. The pinned nextpnr package includes
-iCE40, ECP5, and Himbaechel backends, including Gowin; its Xilinx backend is
-disabled. Artix-7 placement, routing, and bitstream generation continue to use
-the Vivado environment below. openFPGALoader uses the existing host-side
-programmer permissions.
-
-Apply these packages with `sudo nixos-rebuild switch --flake .#pisces` in the
-normal boot mode, following the validation instructions below.
-
-## AMD Vitis and Vivado 2023.2
-
-Vitis and Vivado run in an Ubuntu 22.04 Distrobox named `vitis-2023.2` while
-the NixOS host owns Docker, USB/JTAG permissions, launch commands, and the VNC
-service. The AMD tools are installed under `~/Xilinx`, which is shared with the
-container and remains intact if the container is recreated. `system/fpga.nix`
-provides udev rules for AMD/Xilinx and Digilent programmers commonly used with
-Artix-7 boards.
-
-After rebuilding, log out and back in once to acquire membership in the
-`docker` group. Create the container, install its dependencies, and start the
-AMD installer with:
-
-```bash
-vitis-2023.2-setup
-```
-
-The installer is expected at
-`/home/chomsky/all_files/FPGAs_AdaptiveSoCs_Unified_2023.2_1013_2256`. On its
-component-selection page, keep **Vitis**, **Vivado**, **Vitis HLS**, and
-**Devices for Custom Platforms > 7 Series**. For an Artix-7-only installation,
-disable Vitis IP Cache, Vitis Networking P4, Vitis Model Composer, DocNav,
-Alveo and Kria platforms, SoCs, UltraScale, UltraScale+, Versal, and engineering
-sample devices. Set the destination to `/home/chomsky/Xilinx`; `/tools/Xilinx`
-is not writable from this rootless container. Desktop and program-group
-shortcuts are unnecessary.
-
-### VNC desktop and GUI tools
-
-The setup command installs a minimal XFCE desktop and TigerVNC in the Ubuntu
-container. Set the VNC password once:
-
-```bash
-distrobox enter --name vitis-2023.2 -- vncpasswd
-```
-
-`vitis-vnc.service` then starts automatically with the Home Manager user
-session. It listens only on the host loopback interface. Create a Remmina VNC
-profile pointing to `127.0.0.1:5901`; no SSH tunnel is required for a local
-connection. The service uses an isolated X11/XFCE startup environment to avoid
-the black-screen and incompatible-library problems caused by inheriting the
-NixOS Wayland session.
-
-Use these commands to inspect or control the desktop:
-
-```bash
-systemctl --user status vitis-vnc.service
-systemctl --user restart vitis-vnc.service
-systemctl --user stop vitis-vnc.service
-journalctl --user -u vitis-vnc.service -f
-```
-
-Inside the VNC desktop, open XFCE Terminal and launch either application:
-
-```bash
-source ~/Xilinx/Vitis/2023.2/settings64.sh
-vivado
-```
-
-```bash
-source ~/Xilinx/Vitis/2023.2/settings64.sh
-vitis
-```
-
-If the VNC service was enabled before the password existed, create the password
-and restart the service. VNC logs are available under `~/.vnc/`.
-
-### Host-side CLI
-
-Vivado's non-graphical modes work directly from a NixOS terminal through the
-`vivado-2023.2` Distrobox wrapper; VNC does not need to be running. The wrapper
-enters `vitis-2023.2`, sources `~/Xilinx/Vivado/2023.2/settings64.sh`, and
-forwards every argument to the real `vivado` executable. Do not use `sudo`.
-
-Check the installation, change to the FPGA project directory, and open the
-interactive Tcl shell with:
-
-```bash
-vivado-2023.2 -version
-cd ~/all_files/projects/fpga/my-design
-vivado-2023.2 -mode tcl
-```
-
-The default mode is `gui`, so explicitly use `-mode tcl` or `-mode batch` from
-the host. To execute an existing Tcl build script without opening a GUI:
-
-```bash
-vivado-2023.2 -mode batch -source build.tcl
-vivado-2023.2 -mode batch -source build.tcl -tclargs argument1 argument2
-```
-
-Directories under the NixOS home directory are mounted into Distrobox at the
-same paths, so project files can be edited normally on the host. Vivado writes
-`vivado.jou` and `vivado.log` to the current directory. To use another AMD tool
-or diagnose the wrapper, enter Ubuntu directly:
-
-```bash
-distrobox enter --name vitis-2023.2 -- bash
-source ~/Xilinx/Vivado/2023.2/settings64.sh
-vivado -mode tcl
-```
-
-After changing this configuration, apply it with:
-
-```bash
-sudo nixos-rebuild switch --flake .#pisces
-systemctl --user restart vitis-vnc.service
-```
-
-## Android device modding
-
-`android-tools` provides ADB, Fastboot, AVB tools, boot-image unpacking and
-repacking, sparse-image conversion, and dynamic-partition utilities.
-`payload-dumper-go` extracts partition images from Android OTA `payload.bin`
-files. NixOS 26.05 grants USB access through systemd's built-in `uaccess`
-rules, so no obsolete `adbusers` group or third-party udev rules are needed.
-
-After applying the configuration, authorize USB debugging on the device and
-check it with `adb devices`. In bootloader mode, verify the connection with
-`fastboot devices`.
-
-## Raspberry Pi imaging
-
-Raspberry Pi Imager is installed system-wide with a declarative PolicyKit
-action tied to its immutable Nix store executable. Launching `rpi-imager` from
-the application launcher or terminal requests administrator authentication and
-then elevates that invocation so it can write removable storage. Do not run it
-with `sudo`, click its imperative **Install Authorization** button, or grant the
-user unrestricted raw-disk access through the `disk` group.
-
-## Windows games with Bottles
-
-[Bottles](https://usebottles.com/) is installed as its upstream-supported
-Flatpak through the pinned `nix-flatpak` flake input. Flathub and the
-`com.usebottles.bottles` application are declared in `system/desktop.nix`, and
-a weekly timer keeps managed Flatpaks updated. Unused Flatpak runtimes are
-removed automatically. The Flathub remote uses USTC's mainland-China cache;
-the management service also reconciles an existing remote to that URL before
-installing or updating packages.
-
-Flatpak applications are convergently managed rather than stored in Nix
-generations, so a NixOS rollback does not roll Bottles back. Bottles remains
-sandboxed; grant individual game directories through the file portal instead
-of exposing the entire home directory. Its per-bottle graphics settings can
-select the discrete NVIDIA GPU when a game needs it.
-
-The maintained upstream 7-Zip CLI is also installed. Use either `7zz` or the
-provided compatibility command `7z`; both invoke version `26.02` from the
-pinned Nixpkgs package set. Fish provides `7zip` and `7sec` aliases for maximum
-LZMA2 compression, plus `7zipv` and `7secv` variants that split archives into
-100 GiB volumes. The `7sec` variants encrypt file contents and names with the
-configured convenience passphrase.
-
-## Virtual machines
-
-`system/virtualization.nix` enables libvirt with the hardware-accelerated
-`qemu_kvm` package and configures virt-manager to connect to
-`qemu:///system`. QEMU guests run as the unprivileged `qemu-libvirtd` account,
-and software TPM support is available for guests that require TPM 2.0. UEFI
-firmware is included by the pinned QEMU package.
-
-The built-in `default` NAT network is marked for autostart and started when
-necessary by `libvirt-default-network.service`; manual `virsh net-start` and
-`virsh net-autostart` commands are not required.
-
-After applying the configuration, log out and back in (or reboot) so the
-`chomsky` account receives its new `libvirtd` group membership. Then launch
-`virt-manager` from the application launcher or a terminal. New virtual disks
-managed by libvirt are stored under `/var/lib/libvirt/images/`. When selecting
-an ISO from the home directory, allow virt-manager to grant the
-`qemu-libvirtd` account the required directory access if prompted.
-
-Because the storage pool resides on Btrfs, its directory declaratively inherits
-the NOCOW (`C`) attribute. This avoids stacking Btrfs copy-on-write beneath
-qcow2 copy-on-write for newly created virtual disks. Existing disk files are
-not converted, and NOCOW files do not use Btrfs data checksumming or
-compression.
-
-To verify hardware acceleration and the system connection:
-
-```bash
-test -e /dev/kvm && echo "KVM is available"
-virsh --connect qemu:///system list --all
-lsattr -d /var/lib/libvirt/images
-```
-
-The `lsattr` output should contain an uppercase `C`. The command is installed
-system-wide by the `e2fsprogs` package.
-
-`virtiofsd` is registered with libvirt for sharing host directories with
-guests. With the guest shut down, enable shared memory on virt-manager's
-**Memory** screen, then use **Add Hardware > Filesystem** with the `virtiofs`
-driver, a host source directory, and an arbitrary target tag. The unprivileged
-`qemu-libvirtd` account must be able to traverse and access the entire source
-path; use a dedicated shared directory or a targeted ACL instead of opening the
-whole home directory. Linux guests mount the tag with
-`mount -t virtiofs TAG MOUNTPOINT`; Windows guests require WinFsp and the
-VirtIO-FS guest components from the virtio-win media.
-
-Remmina is installed as the graphical RDP client for the Windows 11 guest.
-Enable Remote Desktop inside Windows, obtain the guest address with
-`virsh net-dhcp-leases default`, then create an RDP connection in Remmina for
-that address. The Windows account must have a password and permission to use
-Remote Desktop.
-
-The existing hardware configuration loads `kvm-amd`, while its `nested=0`
-module option prevents guests such as Taurus from running nested virtual
-machines. Keep CPU virtualization (SVM) enabled in the firmware settings;
-the NixOS host still requires it to provide `/dev/kvm`. Verify the host setting
-with `cat /sys/module/kvm_amd/parameters/nested`; it should print `0`.
-
-### RTX 4060 passthrough
-
-`system/vfio.nix` adds a `vfio` specialisation without changing the normal boot
-configuration. The normal entry keeps the RTX 4060 available to NixOS through
-PRIME offload. The `vfio` entry binds both isolated members of IOMMU group 13
-to `vfio-pci` during the initrd:
-
-```text
-01:00.0  NVIDIA RTX 4060                 10de:28a0
-01:00.1  NVIDIA High Definition Audio    10de:22be
-```
-
-Install both boot entries without switching the running system into VFIO mode:
-
-```bash
-sudo nixos-rebuild boot --flake .#pisces
-```
-
-After rebooting into the `vfio` specialisation, verify that both functions show
-`Kernel driver in use: vfio-pci`:
-
-```bash
-lspci -nnk -s 01:00.0
-lspci -nnk -s 01:00.1
-```
-
-With Taurus fully shut down, open its hardware details in virt-manager and use
-**Add Hardware > PCI Host Device** to add both NVIDIA functions. Keep the
-VirtIO video and SPICE devices as a recovery console. Windows retains its
-NVIDIA driver when the physical devices are later removed from the VM.
-
-Before using Taurus in the normal boot mode, shut it down and remove only the
-two NVIDIA PCI host devices in virt-manager. They can also be removed after
-booting normally, provided Taurus has not been started. Taurus then uses its
-existing VirtIO/SPICE display while NixOS retains the RTX 4060. Do not remove
-the separately passed-through `05:00.3` USB controller.
-
-The internal laptop panel remains attached to the AMD iGPU in both modes.
-Physical NVIDIA HDMI/DisplayPort outputs belong to Windows in VFIO mode; RDP
-can be used when no external display is connected.
+Personal NixOS configuration for the `pisces` MSI Alpha 17 C7VF laptop and the
+`chomsky` account. One flake rebuild manages the system and its Home Manager
+configuration. Hardware identifiers, filesystem UUIDs, user paths, and external
+development environments are specific to this machine.
+
+## Configuration at a glance
+
+| Area | Configuration |
+| --- | --- |
+| Platform | `x86_64-linux`; NixOS and Home Manager 26.05; timezone `Asia/Shanghai` |
+| Package sources | Stable Nixpkgs for the system, with selected applications from a separate pinned unstable input |
+| Kernel and graphics | `linuxPackages_latest`; evaluated lockfile selects Linux `7.2.6`; NVIDIA driver `610.57.04` is pinned explicitly |
+| Desktop | greetd/tuigreet → Niri with Dank Material Shell (DMS), Ghostty, Nautilus, and XWayland |
+| Input and audio | Fcitx5, Rime Ice with Xiaohe Shuangpin, and PipeWire/WirePlumber |
+| Appearance | Declarative MacTahoe GTK/Kvantum themes, Wood Whale avatar, and wallpaper collection |
+| Storage | LUKS-encrypted Btrfs, zram, automatic removable-drive mounting, and two rclone WebDAV mounts |
+| Virtualization | libvirt/KVM, virt-manager, Docker/Distrobox, and an RTX 4060 `vfio` boot specialisation |
+| Development | ESP32/STM32, HDL/formal tools, and Ubuntu 22.04 Vitis/Vivado 2023.2 |
+| Applications | Chrome, WPS Office, Ghost Downloader, 115 Life/Browser, Readest, SylvaKru, creative tools, Steam, and Flatpak Bottles |
+
+The versions above describe the evaluated repository pins as of 2026-10-06.
+They do not identify the generation currently running on the laptop.
+
+**Suspend and hibernation are disabled. Closing the lid does not suspend the
+machine.** The AMD platform-resume problems recorded for this laptop remain
+unresolved; see [power management](docs/operations.md#power-management).
 
 ## Validate and apply
 
-NixOS does not monitor these files automatically. After every configuration
-change, first evaluate the complete flake without building:
+Run these commands from the repository root on the configured machine. NixOS
+needs Nix commands and flakes enabled. Before first activation, restore the
+machine-local age identity described in [secrets and WebDAV](docs/operations.md#secrets-and-webdav).
 
 ```bash
-nix flake check --no-build
+cd ~/all_files/projects/nixos-config
+nix flake check --no-build --no-update-lock-file
+nix build --no-link --no-update-lock-file .#nixosConfigurations.pisces.config.system.build.toplevel
 ```
 
-For Home Manager changes, also build the user configuration without activating
-it. This checks generated assets, including the avatar, and the activation
-package:
-
-```bash
-nix build --no-link .#nixosConfigurations.pisces.config.home-manager.users.chomsky.home.activationPackage
-```
-
-For ordinary package, desktop, and service changes made while running the
-normal boot mode, apply the complete NixOS and Home Manager configuration:
+For ordinary desktop, package, or service changes while booted normally, apply
+the system and Home Manager together:
 
 ```bash
 sudo nixos-rebuild switch --flake .#pisces
 ```
 
-The ChatGPT Desktop version is pinned in `flake.lock`. To update it before a
-future rebuild, run `nix flake update codex-desktop-linux` as your normal user.
-The rebuild command above applies the pinned version without changing it.
+For kernel, initrd, GPU-driver, VFIO, or boot-loader changes, use
+`sudo nixos-rebuild boot --flake .#pisces` and reboot after shutting down guests.
+Use the same `boot` workflow while running the VFIO specialisation. The
+[operations guide](docs/operations.md#validate-and-apply) explains validation,
+activation, input updates, and recovery.
 
-`switch` creates a new boot generation, activates the normal configuration
-immediately, and rebuilds its inherited `vfio` specialisation. Changes to the
-parent configuration normally appear in both modes; `system/vfio.nix`
-overrides only the settings needed to reserve the RTX 4060.
+Committing files does not activate them. NixOS does not automatically rebuild
+when a file changes. Add new source files to Git before evaluating a local Git
+flake so Nix includes them.
 
-For kernel, initrd, VFIO, GPU-driver, or boot-loader changes, install the new
-generation without changing the running system and then reboot:
+## Documentation
 
-```bash
-sudo nixos-rebuild boot --flake .#pisces
-sudo reboot
-```
+| Guide | Contents |
+| --- | --- |
+| [Operations](docs/operations.md) / [运维](docs/operations.zh-CN.md) | Build and activation, boot signing, hybrid graphics, power policy, secrets, networking, virtual machines, and VFIO |
+| [Desktop](docs/desktop.md) / [桌面](docs/desktop.zh-CN.md) | Configuration ownership, shortcuts, avatar, themes, applications, MIME defaults, capture permissions, and gaming |
+| [Development](docs/development.md) / [开发](docs/development.zh-CN.md) | Embedded and HDL tools, FPGA TFTP network, Vitis/Vivado installation and VNC, Android tools, imaging, and Chinese TeX |
+| [Software audit — 2026-10-04](docs/software-audit-2026-10-04.md) | Historical inventory, installation decisions, recorded checks, and the 2026-10-05 GPU-monitoring follow-up |
 
-Prefer `boot` whenever the system is currently running in VFIO mode. Shut down
-Taurus before rebooting; a normal `switch` could otherwise try to return the
-RTX 4060 to the NVIDIA driver while the guest or VFIO still owns it.
+The guides describe the current declarations. The dated audit records the
+observations made during that installation batch; its generation numbers,
+local application state, sensor readings, and disk-space figures are historical.
 
-Each successful rebuild creates a generation, and systemd-boot retains up to
-the ten generations configured by `boot.loader.systemd-boot.configurationLimit`.
-Select an older generation at boot to recover from a broken change. Git and
-system activation remain separate: committing does not rebuild the machine,
-and rebuilding does not commit the configuration.
+## Repository map
 
-## Before committing
+| Path | Responsibility |
+| --- | --- |
+| [flake.nix](flake.nix), [flake.lock](flake.lock) | Inputs, reproducible pins, `pisces` output, and Home Manager integration |
+| [system/default.nix](system/default.nix), [system/hardware-configuration.nix](system/hardware-configuration.nix) | Module imports, identity, boot, Nix settings, networking, user, and local storage |
+| [system/desktop.nix](system/desktop.nix), [system/gaming.nix](system/gaming.nix) | Session, input, audio, desktop services, permissions, fonts, Flatpak, and Steam |
+| [system/hybrid-graphics.nix](system/hybrid-graphics.nix), [system/vfio.nix](system/vfio.nix) | NVIDIA driver, PRIME offload, and GPU-reservation specialisation |
+| [system/power-management.nix](system/power-management.nix), [system/msi-control.nix](system/msi-control.nix) | Sleep policy, zram, and MSI embedded-controller support |
+| [system/virtualization.nix](system/virtualization.nix), [system/fpga.nix](system/fpga.nix) | KVM/libvirt, Docker, programmer access, and FPGA network/TFTP service |
+| [system/secrets.nix](system/secrets.nix), [.sops.yaml](.sops.yaml), [secrets/webdav.yaml](secrets/webdav.yaml) | Encrypted WebDAV credentials and their decryption policy |
+| [home/default.nix](home/default.nix), [home/programs.nix](home/programs.nix) | User modules, XDG directories, packages, Fish, CLI tools, and development environments |
+| [home/desktop.nix](home/desktop.nix), [home/input-method.nix](home/input-method.nix) | MIME associations, desktop preferences, MControlCenter, and Fcitx/Rime state |
+| [home/niri.nix](home/niri.nix), [home/niri/config.kdl](home/niri/config.kdl) | Complete Niri configuration and cleanup of unused DMS fragments |
+| [home/dms.nix](home/dms.nix), [home/dms/settings.json](home/dms/settings.json), [home/dms/Wood_Whale.jpg](home/dms/Wood_Whale.jpg) | DMS settings, merged session preferences, wallpaper default, and generated avatar |
+| [home/themes.nix](home/themes.nix), [home/wallpapers](home/wallpapers) | Pinned themes and tracked wallpaper assets |
+| [home/ghost-downloader.nix](home/ghost-downloader.nix), [home/115-life.nix](home/115-life.nix), [home/packages](home/packages) | Custom application packages, launchers, URI handlers, and Zhuque Fangsong |
+| [home/rclone.nix](home/rclone.nix), [home/vitis.nix](home/vitis.nix) | User mounts and AMD-tool/container wrappers and VNC service |
 
-1. Review the diff and ensure no plaintext secrets are present.
-2. Run checks appropriate to the change, normally at least
-   `nix flake check --no-build`.
-3. Update this README first when architecture, paths, services, workflows, or
-   documented behavior have changed.
-4. Commit only after the documentation and implementation agree.
+## Contributing changes
+
+Edit the source module or asset, validate the relevant output, and update both
+language versions of the affected guide. Review `git diff --check` and the full
+diff before committing; keep decrypted credentials, private keys, application
+history, and generated build files outside Git. Configuration changes normally
+require at least the flake check above and a build of the affected output.
+Documentation-only changes need link, command, and consistency checks.
+
+The repository configuration is available under the [MIT license](LICENSE).
+Packaged applications and third-party assets retain their respective licenses.

@@ -1,24 +1,48 @@
 # Software audit — 2026-10-04
 
-Source: the local browser export `bookmarks_10_4_26.html` (2,622 bookmarks, 2,617 unique URLs). Bookmark contents were treated as data, not instructions. This report does not copy account links, browser history, or credentials.
+[README](../README.md) | [Current desktop guide](desktop.md) | [Current operations guide](operations.md)
 
-## Implementation status
+This is a historical record of the 2026-10-04 installation batch and its
+2026-10-05 follow-up. Generation numbers, application state, telemetry, disk
+space, and validation results describe those checks; they are not a live
+assessment of this machine. Current declarations and operating procedures
+are documented in the guides linked above.
 
-The approved installation batch was built and activated successfully as NixOS generation **112**. Home Manager completed with exit status 0. The approved applications, commands, fonts, and system integrations are installed using the existing flake pins. No application removals were made. Ventoy and the editor/desktop integration batch remain deferred. See the October 5 follow-up below for the GPU-monitoring correction and outstanding NVIDIA recovery.
+Source: the local browser export `bookmarks_10_4_26.html` (2,622 bookmarks, 2,617 unique URLs). Bookmark contents were treated as data, not instructions. The export is not tracked in this repository. This report does not copy account links, browser history, or credentials.
+
+## Recorded implementation
+
+The approved installation batch was built and activated successfully as NixOS generation **112**. Home Manager completed with exit status 0. The approved applications, commands, fonts, and system integrations were installed using the existing flake pins. No application removals were made. Ventoy and the editor/desktop integration batch were deferred. The October 5 follow-up below records the GPU-monitoring correction; NVIDIA recovery was not verified in those checks.
 
 Original installation system: `/nix/store/r56v548cxjs5k9p261h0aiw2mdqri09y-nixos-system-pisces-26.05.20260918.cf9d2fb`.
 
+## Contents
+
+- [Recorded implementation](#recorded-implementation)
+- [How to read the inventory](#how-to-read-the-inventory)
+- [Integration and permissions](#integration-and-permissions)
+- [Cleanup assessment](#cleanup-assessment)
+- [Deferred decisions](#deferred-decisions)
+- [Recorded validation](#recorded-validation)
+- [GPU-monitoring follow-up — 2026-10-05](#gpu-monitoring-follow-up--2026-10-05)
+- [Bookmark inventory](#bookmark-inventory)
+
 ## How to read the inventory
 
-- **Installed before / Retained:** found in the existing profile/configuration or a named environment. Retain these packages.
-- **Added by this change:** selected by the user, installed, and activated by this change.
+- **Installed before / Retained:** found in the profile/configuration or a named environment at audit time; selected for retention.
+- **Added in this batch:** selected by the user, installed, and activated in the October 4 batch.
 - **Private dependency → exposed CLI:** previously present under another program or service; now also explicitly placed on the user's PATH.
 - **Private/system dependency:** required runtime/library support; not automatically a missing user command.
 - **Skipped:** user declined the addition.
 - **Deferred:** optional software or integrations without approval in this batch. Absence from the normal profile does not prove absence from every custom directory; /opt was not accessible during the audit.
 - **Project scope / Project environment / Project/server scope / Other platform / Service website:** requires a project, guest/device, server setup, or account rather than automatic workstation installation.
 
-The 279 software folders are all listed below, together with extensions, fonts, proprietary tools, service websites, and container candidates. Library/documentation, OS-image, hardware, and archived-resource bookmarks are not treated as install requests.
+The source audit counted 279 software folders. The inventory also covers
+extensions, fonts, proprietary tools, service websites, and container candidates.
+Twenty-two proprietary rows had no recorded names; they are summarized as one
+counted entry rather than assigned invented product names. Library/documentation,
+OS-image, hardware, and archived-resource bookmarks were not treated as install
+requests. An installed dependency did not imply an exposed user command.
 
 ## Integration and permissions
 
@@ -48,13 +72,65 @@ The 279 software folders are all listed below, together with extensions, fonts, 
 | OpenCodex | Local installation and active proxy service; retain. |
 | SDKs and transitive dependencies | Keep project-specific environments and required closures. Duplicate runtime versions can serve different pinned packages. |
 
-No application removal is justified with sufficient confidence, and none is included. Existing automatic Nix/Flatpak cleanup policies are unchanged.
+The audit did not establish a sufficiently confident case for removing applications, so none were removed. Existing automatic Nix/Flatpak cleanup policies were retained.
 
 ## Deferred decisions
 
-The VS Code/Yazi/mpv/Nautilus integration batch is deferred, including the eleven proposed VS Code extensions, Yazi chmod/git/mount plugins, ModernZ, and open-in-Ghostty. Other bookmarked plugin/theme additions are also unselected. All eleven bookmarked Chrome extensions and both bookmarked VS Code Catppuccin themes already exist.
+The VS Code/Yazi/mpv/Nautilus integration batch was deferred, including the eleven proposed VS Code extensions, Yazi chmod/git/mount plugins, ModernZ, and open-in-Ghostty. Other bookmarked plugin/theme additions were unselected. All eleven bookmarked Chrome extensions and both bookmarked VS Code Catppuccin themes were found at audit time.
 
-Ventoy is deferred because the pinned Nixpkgs package is marked insecure for unverifiable upstream binary blobs; there is no permittedInsecurePackages exception. See the [Nixpkgs issue](https://github.com/NixOS/nixpkgs/issues/404663). Java/Rust/Ruby toolchains, LLDB, Unsloth, USB/IP, eSIM/NFC utilities, proxy servers, printing services, and additional themes require a specific workflow before installation.
+Ventoy was deferred because the pinned Nixpkgs package was marked insecure for unverifiable upstream binary blobs; no permittedInsecurePackages exception was added. See the [Nixpkgs issue](https://github.com/NixOS/nixpkgs/issues/404663). Java/Rust/Ruby toolchains, LLDB, Unsloth, USB/IP, eSIM/NFC utilities, proxy servers, printing services, and additional themes require a specific workflow before installation.
+
+## Recorded validation
+
+The complete system build and `nix flake check --no-build` passed before final activation. **58 recorded checks passed**, including availability of 68 commands and registration of 21 graphical launchers. The flake lockfile was unchanged during that batch (SHA-256 `0c97412099609ee39592776d66a9a715b24e9028e291da7cf3c1dc727ce8d871`).
+
+| Area | Result |
+| --- | --- |
+| System and Home Manager | Generation 112 was active; Home Manager completed successfully; DMS was active. The normal and VFIO system configurations both built. |
+| Commands and launchers | All checked commands resolve on the normal user PATH; all 21 checked desktop launchers point to existing executables. LocalSend's executable is `localsend_app`; draw.io's launcher is `drawio.desktop`. |
+| Development and electronics | Clang compiles a C++ standard-library header check. Host GDB and ARM tools coexist. KiCad CLI and PulseView version checks pass; libsigrok udev rules are installed. An ngspice voltage-divider simulation passes. |
+| Creative applications | Blender starts in background mode with a factory scene; FreeCAD's safe-mode console starts. The other graphical launchers are registered; full interactive workflows were not automated. |
+| GPU monitoring | NVTOP's build tests pass, and its runtime snapshot detects the AMD Radeon 610M and NVIDIA GeForce RTX 4060 Laptop GPU. This check established discovery, not availability of every sensor; see the October 5 follow-up. |
+| Media | FFmpeg encodes a test video and FFprobe reads it; ImageMagick creates a test PNG. GStreamer finds core/base/good/bad/ugly/libav elements and executes an audio pipeline. |
+| Chinese TeX | XeLaTeX and LuaLaTeX compile a Chinese document with LXGW WenKai; Biber generates the bibliography and XeLaTeX compiles the bibliography output. |
+| Fonts | Fontconfig finds every added font family, including Zhuque Fangsong. Existing defaults are unchanged. |
+| Images and screenshots | All seven MIME defaults resolve to Swayimg. Satty opens a sample image. DMS captures the focused test window and automatically opens the resulting image in Satty. Test windows and the generated screenshot were removed afterward. |
+| LocalSend | Active firewall rules allow TCP and UDP port 53317. |
+| Capture permissions | `chomsky` is listed in the wireshark group. A subprocess started with the new group can enumerate ten capture interfaces through dumpcap without root. Both dumpcap and Trippy capability wrappers are present. |
+
+Build/runtime corrections included exposing GStreamer's `out` output for core plugins, escaping systemd's percent specifiers in the screenshot-editor setting, and assigning package priorities so Clang and host GDB coexist with the existing GCC/ARM toolchains. NVTOP uses the NVML development package for its NVIDIA headers instead of downloading the complete CUDA toolkit; AMD and NVIDIA monitoring support are retained.
+
+For Chinese TeX documents, use the verified static font with `\setCJKmainfont{LXGW WenKai}`. The existing Noto CJK variable TTC failed these TeX engine checks; it remains available for desktop applications, and no desktop font defaults were changed.
+
+The group configuration and a fresh-group subprocess were verified; the original desktop session was not logged out, so a fresh login was still required for Wireshark capture in that session. Instrument access, remote streaming, LAN transfers, and interactive drawing require their respective devices/peers and were not exercised.
+
+The planning estimate was 4.5 GiB of cache downloads and 13.5 GiB unpacked, plus locally built outputs. After the initial installation, the filesystem had approximately **151 GiB free**; the EFI partition had 896 MiB free.
+
+## GPU-monitoring follow-up — 2026-10-05
+
+The btop correction was built, activated, and verified in **generation 114**. Home Manager completed successfully. System recorded at that check: `/nix/store/vzhrjj1f6chck8dl57v8q0dxjgy6a1ig-nixos-system-pisces-26.05.20260918.cf9d2fb`.
+
+The user's screenshots exposed two separate issues. The original btop binary had GPU support compiled in, but its runtime search path omitted NVIDIA NVML and AMD ROCm SMI. Its debug log confirmed failure to load both libraries. The correction in `home/programs.nix` enabled `cudaSupport` and `rocmSupport` specifically for btop. The ROCm dependency also uses the packaged PCI database instead of a missing `/usr/share/hwdata/pci.ids`, so the AMD chip was identified as **Raphael** rather than **0x1002**. Raphael is the integrated Radeon 610M's chip name. This left the user's existing btop preferences editable.
+
+The corrected btop package was tested in a temporary terminal configuration: both GPU panels appeared, both monitoring libraries loaded, and the program exited successfully. AMD name, utilization, temperature, and VRAM queries all returned success; a sample reported 30% utilization and 63°C. The full system build and flake evaluation passed.
+
+NVIDIA telemetry was **unverified and unavailable pending GPU recovery** at this check. Independent `nvidia-smi` queries reported `gpu_recovery_action=Reset` and `GPU requires reset` for temperature and performance state. Kernel logs showed the first **Xid 119 / GSP RPC timeout** on **2026-10-02 at 19:17 Asia/Shanghai**, before this installation batch, followed by Xid 154 requesting recovery. The cause of that firmware timeout was not established. NVTOP could still identify the device and read memory while other sensors failed.
+
+NVIDIA documents Xid 119 as a firmware RPC timeout that may require a [GPU reset or power cycle](https://docs.nvidia.com/deploy/xid-errors/analyzing-xid-catalog.html). A [live GPU reset](https://docs.nvidia.com/deploy/nvidia-smi/index.html#r-gpu-reset) requires stopping applications that hold the GPU. Niri held NVIDIA device handles at the recorded check, so a live reset would have interrupted that desktop session. Save work and restart the machine before checking NVIDIA telemetry again. If a restart leaves the same recovery requirement, perform a normal full shutdown and power on; a recurrence then needs further driver/power-management investigation.
+
+The recorded post-recovery checks were:
+
+```sh
+nvidia-smi --query-gpu=name,gpu_recovery_action,temperature.gpu,utilization.gpu,clocks.gr --format=csv
+btop
+nvtop
+```
+
+In btop, `5` and `6` toggle the two individual GPU panels. Some integrated-GPU fields remain unsupported by ROCm SMI (including the observed memory-utilization, power, and PCIe-throughput queries), and NVTOP's integrated-GPU PCIe/fan fields need not have values. Sensor availability depends on the device and driver API.
+
+The record does not establish whether recovery occurred afterward. Use the
+[current graphics diagnostics](operations.md#hybrid-graphics-and-monitoring)
+to check the present driver and sensor state.
 
 ## Bookmark inventory
 
@@ -249,19 +325,19 @@ Ventoy is deferred because the pinned Nixpkgs package is marked insecure for unv
 
 | Software or resource | Status / decision | Package or reason |
 | --- | --- | --- |
-| audacity | Added by this change | audacity |
-| blender | Added by this change | blender |
-| diagrams.net | Added by this change | drawio |
+| audacity | Added in this batch | audacity |
+| blender | Added in this batch | blender |
+| diagrams.net | Added in this batch | drawio |
 | ffmpeg | Private dependency → exposed CLI | ffmpeg-headless |
-| freeplane | Added by this change | freeplane |
-| gimp | Added by this change | gimp |
-| gstreamer | Added by this change | gst_all_1.gstreamer + base/good/bad/ugly/libav |
+| freeplane | Added in this batch | freeplane |
+| gimp | Added in this batch | gimp |
+| gstreamer | Added in this batch | gst_all_1.gstreamer + base/good/bad/ugly/libav |
 | inkscape | Skipped | User declined this addition; preserve the decision. |
-| kdenlive | Added by this change | kdePackages.kdenlive |
+| kdenlive | Added in this batch | kdePackages.kdenlive |
 | krita | Skipped | User declined this addition; preserve the decision. |
-| luatex | Added by this change | TeX Live collection-luatex |
+| luatex | Added in this batch | TeX Live collection-luatex |
 | obs studio | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
-| tex live | Added by this change | scheme-medium + LuaTeX/XeTeX/bibliography/Chinese |
+| tex live | Added in this batch | scheme-medium + LuaTeX/XeTeX/bibliography/Chinese |
 
 ### programs / core console environment
 
@@ -279,7 +355,7 @@ Ventoy is deferred because the pinned Nixpkgs package is marked insecure for unv
 | brightnessctl | Deferred | No installation approved; revisit only for a concrete workflow or device. |
 | btrfs-progs | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | busybox | Private/system dependency | Present transitively; no standalone shell command selected. |
-| clinfo | Added by this change | clinfo |
+| clinfo | Added in this batch | clinfo |
 | cliphist | Deferred | No installation approved; revisit only for a concrete workflow or device. |
 | cronie | Deferred | No installation approved; revisit only for a concrete workflow or device. |
 | cups | Private/system dependency | Libraries/runtime dependencies exist; printing service is not enabled. |
@@ -289,10 +365,10 @@ Ventoy is deferred because the pinned Nixpkgs package is marked insecure for unv
 | dmidecode | Private dependency → exposed CLI | dmidecode |
 | dnsmasq | Private/system dependency | Existing virtualization dependency; no general DNS/DHCP server is added. |
 | dosfstools | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
-| dtc | Added by this change | dtc |
+| dtc | Added in this batch | dtc |
 | dynamic kernel module support | Other platform | Targets another OS, Android device, guest, or board; no workstation addition. |
 | e2fsprogs | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
-| exfatprogs | Added by this change | exfatprogs |
+| exfatprogs | Added in this batch | exfatprogs |
 | fail2ban | Deferred | No installation approved; revisit only for a concrete workflow or device. |
 | fd | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | file | Private dependency → exposed CLI | file |
@@ -300,7 +376,7 @@ Ventoy is deferred because the pinned Nixpkgs package is marked insecure for unv
 | firewalld | Deferred | No installation approved; revisit only for a concrete workflow or device. |
 | fontconfig | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | fwupd | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
-| fx2lafw | Added by this change | Provided through PulseView/libsigrok; no separate firmware installation needed. |
+| fx2lafw | Added in this batch | Provided through PulseView/libsigrok; no separate firmware installation needed. |
 | gnome keyring | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | gnu core utilities | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | gnu inetutils | Private/system dependency | Present transitively; no additional legacy networking command set selected. |
@@ -312,7 +388,7 @@ Ventoy is deferred because the pinned Nixpkgs package is marked insecure for unv
 | info-zip | Private dependency → exposed CLI | zip + unzip |
 | intel ucode | Other platform | Targets another OS, Android device, guest, or board; no workstation addition. |
 | inxi | Deferred | No installation approved; revisit only for a concrete workflow or device. |
-| iperf3 | Added by this change | iperf3 |
+| iperf3 | Added in this batch | iperf3 |
 | iproute2 | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | iputils | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | iw | Deferred | No installation approved; revisit only for a concrete workflow or device. |
@@ -323,7 +399,7 @@ Ventoy is deferred because the pinned Nixpkgs package is marked insecure for unv
 | libinput | Private/system dependency | Input stack is present; no standalone diagnostic CLI selected. |
 | linux firmware | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | logical volume manager | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
-| lsof | Added by this change | lsof |
+| lsof | Added in this batch | lsof |
 | man page | Deferred | No installation approved; revisit only for a concrete workflow or device. |
 | mesa | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | mesa demos | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
@@ -341,13 +417,13 @@ Ventoy is deferred because the pinned Nixpkgs package is marked insecure for unv
 | ripgrep | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | shadow | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | smartmontools | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
-| sshfs | Added by this change | sshfs |
+| sshfs | Added in this batch | sshfs |
 | sudo | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | systemd | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | tar | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | tor | Deferred | No installation approved; revisit only for a concrete workflow or device. |
 | toybox | Deferred | No installation approved; revisit only for a concrete workflow or device. |
-| traceroute | Added by this change | traceroute |
+| traceroute | Added in this batch | traceroute |
 | uncomplicated firewall | Deferred | No installation approved; revisit only for a concrete workflow or device. |
 | usb/ip | Deferred | No installation approved; revisit only for a concrete workflow or device. |
 | usbutils | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
@@ -356,7 +432,7 @@ Ventoy is deferred because the pinned Nixpkgs package is marked insecure for unv
 | wayland | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | wget | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | which | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
-| whois | Added by this change | whois |
+| whois | Added in this batch | whois |
 | winfsp | Other platform | Targets another OS, Android device, guest, or board; no workstation addition. |
 | wireguard | Deferred | Kernel/NetworkManager support and the standalone wg CLI are different; no VPN configuration selected. |
 | wireplumber | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
@@ -381,23 +457,23 @@ Ventoy is deferred because the pinned Nixpkgs package is marked insecure for unv
 | eza | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | fastfetch | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | fzf | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
-| gdu | Added by this change | gdu |
-| lazyjournal | Added by this change | lazyjournal |
+| gdu | Added in this batch | gdu |
+| lazyjournal | Added in this batch | lazyjournal |
 | microsoft activation scripts | Other platform | Targets another OS, Android device, guest, or board; no workstation addition. |
 | networkmanager | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
-| nvtop | Added by this change | nvtopPackages.full with cudaPackages.cuda_nvml_dev supplying NVML headers; full GPU support without the entire CUDA toolkit. |
+| nvtop | Added in this batch | nvtopPackages.full with cudaPackages.cuda_nvml_dev supplying NVML headers; full GPU support without the entire CUDA toolkit. |
 | raspi-config | Other platform | Targets another OS, Android device, guest, or board; no workstation addition. |
-| systemctl-tui | Added by this change | systemctl-tui |
-| trippy | Added by this change | programs.trippy / trip |
-| wiremix | Added by this change | wiremix |
+| systemctl-tui | Added in this batch | systemctl-tui |
+| trippy | Added in this batch | programs.trippy / trip |
+| wiremix | Added in this batch | wiremix |
 | yazi | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
-| zellij | Added by this change | zellij |
+| zellij | Added in this batch | zellij |
 
 ### programs / core wayland environment
 
 | Software or resource | Status / decision | Package or reason |
 | --- | --- | --- |
-| amdgpu top | Added by this change | amdgpu_top |
+| amdgpu top | Added in this batch | amdgpu_top |
 | bulk crap uninstaller | Other platform | Targets another OS, Android device, guest, or board; no workstation addition. |
 | chameleon ultra gui | Deferred | No installation approved; revisit only for a concrete workflow or device. |
 | dankmaterialshell | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
@@ -407,12 +483,12 @@ Ventoy is deferred because the pinned Nixpkgs package is marked insecure for unv
 | ghostty | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | gnome | Deferred | Existing Niri session uses selected GNOME components; a full desktop is not selected. |
 | gnome files | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
-| hardinfo2 | Added by this change | hardinfo2 |
+| hardinfo2 | Added in this batch | hardinfo2 |
 | kde connect | Skipped | User declined this addition; preserve the decision. |
 | kdiskmark | Retained | User explicitly chose to keep it. |
 | kvantum | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | labwc | Deferred | No installation approved; revisit only for a concrete workflow or device. |
-| localsend | Added by this change | programs.localsend |
+| localsend | Added in this batch | programs.localsend |
 | mangohud | Skipped | User declined this addition; preserve the decision. |
 | mcontrolcenter | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | mpv | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
@@ -420,15 +496,15 @@ Ventoy is deferred because the pinned Nixpkgs package is marked insecure for unv
 | nvidia settings | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | nwg-displays | Skipped | User declined this addition; preserve the decision. |
 | nwg-look | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
-| qalculate! | Added by this change | qalculate-gtk |
-| qpwgraph | Added by this change | qpwgraph |
+| qalculate! | Added in this batch | qalculate-gtk |
+| qpwgraph | Added in this batch | qpwgraph |
 | qt5ct | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | qt6ct | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | rime | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | rime-ice | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
-| satty | Added by this change | satty |
-| seahorse | Added by this change | seahorse |
-| swayimg | Added by this change | swayimg |
+| satty | Added in this batch | satty |
+| seahorse | Added in this batch | seahorse |
+| swayimg | Added in this batch | swayimg |
 | sylvakru | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | tbtool | Other platform | Targets another OS, Android device, guest, or board; no workstation addition. |
 | usbip-win2 | Other platform | Targets another OS, Android device, guest, or board; no workstation addition. |
@@ -444,16 +520,16 @@ Ventoy is deferred because the pinned Nixpkgs package is marked insecure for unv
 | armbian | Other platform | Targets another OS, Android device, guest, or board; no workstation addition. |
 | bitwuzla | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | buildroot | Project scope | Use a project environment when needed; no permanent host toolchain added. |
-| freecad | Added by this change | freecad |
+| freecad | Added in this batch | freecad |
 | icarus verilog | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
-| kicad | Added by this change | kicad |
+| kicad | Added in this batch | kicad |
 | nextpnr | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
-| ngspice | Added by this change | ngspice |
+| ngspice | Added in this batch | ngspice |
 | openfpgaloader | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | openocd | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | openxc7 | Project scope | Use a project environment when needed; no permanent host toolchain added. |
-| pulseview | Added by this change | programs.pulseview |
-| serial studio | Added by this change | serial-studio (GPL edition) |
+| pulseview | Added in this batch | programs.pulseview |
+| serial studio | Added in this batch | serial-studio (GPL edition) |
 | stlink | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | symbiyosys | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | tio | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
@@ -466,9 +542,9 @@ Ventoy is deferred because the pinned Nixpkgs package is marked insecure for unv
 
 | Software or resource | Status / decision | Package or reason |
 | --- | --- | --- |
-| nmap | Added by this change | nmap |
-| wireshark | Added by this change | programs.wireshark / GUI package |
-| zenmap | Added by this change | zenmap |
+| nmap | Added in this batch | nmap |
+| wireshark | Added in this batch | programs.wireshark / GUI package |
+| zenmap | Added in this batch | zenmap |
 
 ### programs / package management environment
 
@@ -488,7 +564,7 @@ Ventoy is deferred because the pinned Nixpkgs package is marked insecure for unv
 | pacman | Other platform | Targets another OS, Android device, guest, or board; no workstation addition. |
 | paru | Other platform | Targets another OS, Android device, guest, or board; no workstation addition. |
 | pip | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
-| pnpm | Added by this change | pnpm |
+| pnpm | Added in this batch | pnpm |
 | rpm | Other platform | Targets another OS, Android device, guest, or board; no workstation addition. |
 | rubygems | Project scope | Use a project environment when needed; no permanent host toolchain added. |
 | uv | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
@@ -499,8 +575,8 @@ Ventoy is deferred because the pinned Nixpkgs package is marked insecure for unv
 | Software or resource | Status / decision | Package or reason |
 | --- | --- | --- |
 | freerdp | Private dependency → exposed CLI | freerdp (CLI) |
-| moonlight | Added by this change | moonlight-qt |
-| openssh | Deferred | No installation approved; revisit only for a concrete workflow or device. |
+| moonlight | Added in this batch | moonlight-qt |
+| openssh | Installed before | The OpenSSH client and password-enabled host service were already declared before this batch; no additional SSH service was selected. |
 | remmina | Installed before | Existing connection profiles and running applet; retain. |
 | sunshine | Skipped | User declined this addition; preserve the decision. |
 | wayvnc | Deferred | No installation approved; revisit only for a concrete workflow or device. |
@@ -509,12 +585,12 @@ Ventoy is deferred because the pinned Nixpkgs package is marked insecure for unv
 
 | Software or resource | Status / decision | Package or reason |
 | --- | --- | --- |
-| clang | Added by this change | llvmPackages.clang (lower priority for shared aliases) + clang-tools; GCC remains the default cc/c++/cpp. |
+| clang | Added in this batch | llvmPackages.clang (lower priority for shared aliases) + clang-tools; GCC remains the default cc/c++/cpp. |
 | cmake | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | git | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | gnu binutils | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | gnu compiler collection | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
-| gnu debugger | Added by this change | gdb for host programs; arm-none-eabi-gdb was already installed with the ARM toolchain. |
+| gnu debugger | Added in this batch | gdb for host programs; arm-none-eabi-gdb was already installed with the ARM toolchain. |
 | lldb | Project scope | Use a project environment when needed; no permanent host toolchain added. |
 | llvm | Project scope | Use a project environment when needed; no permanent host toolchain added. |
 | make | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
@@ -524,8 +600,8 @@ Ventoy is deferred because the pinned Nixpkgs package is marked insecure for unv
 | ninja | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | node.js | Installed before | Present in the existing configuration, normal user profile, Flatpak, or named development environment. |
 | openjdk | Private/system dependency | Existing application JVMs, including STM32CubeMX, remain private; java/javac are not added to the normal user profile. Use a project shell for Java development. |
-| shellcheck | Added by this change | shellcheck |
-| shfmt | Added by this change | shfmt |
+| shellcheck | Added in this batch | shellcheck |
+| shfmt | Added in this batch | shfmt |
 
 ### programs / virtualization environment
 
@@ -550,43 +626,22 @@ Ventoy is deferred because the pinned Nixpkgs package is marked insecure for unv
 
 | Software or resource | Status / decision | Package or reason |
 | --- | --- | --- |
-|  | Deferred | Vendor, hardware, platform, or licensing requirements need a specific project; no installation selected. |
-|  | Deferred | Vendor, hardware, platform, or licensing requirements need a specific project; no installation selected. |
-|  | Deferred | Vendor, hardware, platform, or licensing requirements need a specific project; no installation selected. |
-|  | Deferred | Vendor, hardware, platform, or licensing requirements need a specific project; no installation selected. |
-|  | Deferred | Vendor, hardware, platform, or licensing requirements need a specific project; no installation selected. |
-|  | Deferred | Vendor, hardware, platform, or licensing requirements need a specific project; no installation selected. |
-|  | Deferred | Vendor, hardware, platform, or licensing requirements need a specific project; no installation selected. |
-|  | Deferred | Vendor, hardware, platform, or licensing requirements need a specific project; no installation selected. |
-|  | Deferred | Vendor, hardware, platform, or licensing requirements need a specific project; no installation selected. |
-|  | Deferred | Vendor, hardware, platform, or licensing requirements need a specific project; no installation selected. |
-|  | Deferred | Vendor, hardware, platform, or licensing requirements need a specific project; no installation selected. |
-|  | Deferred | Vendor, hardware, platform, or licensing requirements need a specific project; no installation selected. |
-|  | Deferred | Vendor, hardware, platform, or licensing requirements need a specific project; no installation selected. |
-|  | Deferred | Vendor, hardware, platform, or licensing requirements need a specific project; no installation selected. |
-|  | Deferred | Vendor, hardware, platform, or licensing requirements need a specific project; no installation selected. |
-|  | Deferred | Vendor, hardware, platform, or licensing requirements need a specific project; no installation selected. |
-|  | Deferred | Vendor, hardware, platform, or licensing requirements need a specific project; no installation selected. |
-|  | Deferred | Vendor, hardware, platform, or licensing requirements need a specific project; no installation selected. |
-|  | Deferred | Vendor, hardware, platform, or licensing requirements need a specific project; no installation selected. |
-|  | Deferred | Vendor, hardware, platform, or licensing requirements need a specific project; no installation selected. |
-|  | Deferred | Vendor, hardware, platform, or licensing requirements need a specific project; no installation selected. |
-|  | Deferred | Vendor, hardware, platform, or licensing requirements need a specific project; no installation selected. |
+| 22 unnamed proprietary entries | Deferred | Original report omitted the names; all 22 decisions are retained without inferring products. Vendor, hardware, platform, or licensing requirements need a specific project. |
 
 ### resources / typefaces
 
 | Software or resource | Status / decision | Package or reason |
 | --- | --- | --- |
-| font awesome | Added by this change | font-awesome |
-| inter | Added by this change | inter |
+| font awesome | Added in this batch | font-awesome |
+| inter | Added in this batch | inter |
 | jetbrains mono | Installed before | Noto and JetBrains Mono Nerd Font already provide these families. |
-| lxgw wenkai | Added by this change | lxgw-wenkai |
-| maple mono | Added by this change | maple-mono.NF-CN |
-| material design icons | Added by this change | material-icons + material-symbols (Google upstream) |
+| lxgw wenkai | Added in this batch | lxgw-wenkai |
+| maple mono | Added in this batch | maple-mono.NF-CN |
+| material design icons | Added in this batch | material-icons + material-symbols (Google upstream) |
 | nerd fonts | Installed before | Noto and JetBrains Mono Nerd Font already provide these families. |
 | noto fonts | Installed before | Noto and JetBrains Mono Nerd Font already provide these families. |
-| terminus font | Added by this change | terminus_font |
-| zhuque fangsong | Added by this change | Custom pinned v0.212 package |
+| terminus font | Added in this batch | terminus_font |
+| zhuque fangsong | Added in this batch | Custom pinned v0.212 package |
 
 ### services / ai
 
@@ -646,7 +701,7 @@ Ventoy is deferred because the pinned Nixpkgs package is marked insecure for unv
 | Software or resource | Status / decision | Package or reason |
 | --- | --- | --- |
 | google docs editors | Service website | A bookmark to a web/account service does not establish a missing desktop application. |
-| zotero | Added by this change | zotero |
+| zotero | Added in this batch | zotero |
 
 ### services / digital distribution
 
@@ -682,51 +737,3 @@ Ventoy is deferred because the pinned Nixpkgs package is marked insecure for unv
 | Software or resource | Status / decision | Package or reason |
 | --- | --- | --- |
 | honor of kings | Service website | A bookmark to a web/account service does not establish a missing desktop application. |
-
-## Validation
-
-The complete system build and `nix flake check --no-build` passed before final activation. **58 recorded checks passed**, including availability of 68 commands and registration of 21 graphical launchers. The flake lockfile is unchanged (SHA-256 `0c97412099609ee39592776d66a9a715b24e9028e291da7cf3c1dc727ce8d871`).
-
-| Area | Result |
-| --- | --- |
-| System and Home Manager | Generation 112 active; Home Manager completed successfully; DMS remains active. The normal and VFIO system configurations both built. |
-| Commands and launchers | All checked commands resolve on the normal user PATH; all 21 checked desktop launchers point to existing executables. LocalSend's executable is `localsend_app`; draw.io's launcher is `drawio.desktop`. |
-| Development and electronics | Clang compiles a C++ standard-library header check. Host GDB and ARM tools coexist. KiCad CLI and PulseView version checks pass; libsigrok udev rules are installed. An ngspice voltage-divider simulation passes. |
-| Creative applications | Blender starts in background mode with a factory scene; FreeCAD's safe-mode console starts. The other graphical launchers are registered; full interactive workflows were not automated. |
-| GPU monitoring | NVTOP's build tests pass, and its runtime snapshot detects the AMD Radeon 610M and NVIDIA GeForce RTX 4060 Laptop GPU. This check established discovery, not availability of every sensor; see the October 5 follow-up. |
-| Media | FFmpeg encodes a test video and FFprobe reads it; ImageMagick creates a test PNG. GStreamer finds core/base/good/bad/ugly/libav elements and executes an audio pipeline. |
-| Chinese TeX | XeLaTeX and LuaLaTeX compile a Chinese document with LXGW WenKai; Biber generates the bibliography and XeLaTeX compiles the bibliography output. |
-| Fonts | Fontconfig finds every added font family, including Zhuque Fangsong. Existing defaults are unchanged. |
-| Images and screenshots | All seven MIME defaults resolve to Swayimg. Satty opens a sample image. DMS captures the focused test window and automatically opens the resulting image in Satty. Test windows and the generated screenshot were removed afterward. |
-| LocalSend | Active firewall rules allow TCP and UDP port 53317. |
-| Capture permissions | `chomsky` is listed in the wireshark group. A subprocess started with the new group can enumerate ten capture interfaces through dumpcap without root. Both dumpcap and Trippy capability wrappers are present. |
-
-Build/runtime corrections included exposing GStreamer's `out` output for core plugins, escaping systemd's percent specifiers in the screenshot-editor setting, and assigning package priorities so Clang and host GDB coexist with the existing GCC/ARM toolchains. NVTOP uses the NVML development package for its NVIDIA headers instead of downloading the complete CUDA toolkit; AMD and NVIDIA monitoring support are retained.
-
-For Chinese TeX documents, use the verified static font with `\setCJKmainfont{LXGW WenKai}`. The existing Noto CJK variable TTC failed these TeX engine checks; it remains available for desktop applications, and no desktop font defaults were changed.
-
-**Log out and back in before using Wireshark capture from the current desktop session.** The group configuration and a fresh-group subprocess were verified; the user's session was not logged out. Instrument access, remote streaming, LAN transfers, and interactive drawing require their respective devices/peers and were not exercised.
-
-The planning estimate was 4.5 GiB of cache downloads and 13.5 GiB unpacked, plus locally built outputs. After the initial installation, the filesystem had approximately **151 GiB free**; the EFI partition had 896 MiB free.
-
-## GPU-monitoring follow-up — 2026-10-05
-
-The btop correction is built, activated, and verified in **generation 114**. Home Manager completed successfully. Active system: `/nix/store/vzhrjj1f6chck8dl57v8q0dxjgy6a1ig-nixos-system-pisces-26.05.20260918.cf9d2fb`.
-
-The user's screenshots exposed two separate issues. The original btop binary had GPU support compiled in, but its runtime search path omitted NVIDIA NVML and AMD ROCm SMI. Its debug log confirmed failure to load both libraries. `home/programs.nix` now enables `cudaSupport` and `rocmSupport` specifically for btop. The ROCm dependency also uses the packaged PCI database instead of a missing `/usr/share/hwdata/pci.ids`, so the AMD chip is identified as **Raphael** rather than **0x1002**. Raphael is the integrated Radeon 610M's chip name. This leaves the user's existing btop preferences editable.
-
-The corrected btop package was tested in a temporary terminal configuration: both GPU panels appeared, both monitoring libraries loaded, and the program exited successfully. AMD name, utilization, temperature, and VRAM queries all returned success; a sample reported 30% utilization and 63°C. The full system build and flake evaluation passed.
-
-NVIDIA telemetry remains **unverified and unavailable until GPU recovery**. Independent `nvidia-smi` queries report `gpu_recovery_action=Reset` and `GPU requires reset` for temperature and performance state. Kernel logs show the first **Xid 119 / GSP RPC timeout** on **October 2 at 19:17 Asia/Shanghai**, before this installation batch, followed by Xid 154 requesting recovery. The cause of that firmware timeout has not been established. NVTOP can still identify the device and read memory while other sensors fail.
-
-NVIDIA documents Xid 119 as a firmware RPC timeout that may require a [GPU reset or power cycle](https://docs.nvidia.com/deploy/xid-errors/analyzing-xid-catalog.html). A [live GPU reset](https://docs.nvidia.com/deploy/nvidia-smi/index.html#r-gpu-reset) requires stopping applications that hold the GPU. Niri currently holds NVIDIA device handles, so live reset would interrupt the desktop. Save work and restart the machine before checking NVIDIA telemetry again. If a restart leaves the same recovery requirement, perform a normal full shutdown and power on; a recurrence then needs further driver/power-management investigation.
-
-After recovery, reopen both monitors and check:
-
-```sh
-nvidia-smi --query-gpu=name,gpu_recovery_action,temperature.gpu,utilization.gpu,clocks.gr --format=csv
-btop
-nvtop
-```
-
-In btop, `5` and `6` toggle the two individual GPU panels. Some integrated-GPU fields remain unsupported by ROCm SMI (including the observed memory-utilization, power, and PCIe-throughput queries), and NVTOP's integrated-GPU PCIe/fan fields need not have values. Sensor availability depends on the device and driver API.
