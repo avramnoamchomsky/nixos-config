@@ -186,6 +186,9 @@ in
     xwayland-satellite
     adwaita-icon-theme
 
+    # Proxy tools
+    sing-box
+
     # Hardware access and administration
     rpiImager
     stlink

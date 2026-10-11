@@ -132,6 +132,7 @@ installation decisions; the Nix modules define what is installed now.
 | Creative work | GIMP, Blender, Audacity, Kdenlive, OBS Studio, draw.io, Freeplane, and Zotero |
 | Electronics | KiCad, FreeCAD, Serial Studio, ngspice, and PulseView; PulseView supplies libsigrok USB rules |
 | Networking | LocalSend (`localsend_app`, TCP/UDP `53317`), Nmap/Zenmap, iperf3, Wireshark, Trippy (`trip`), SSHFS, FreeRDP, Remmina, and Moonlight |
+| Proxy core | sing-box CLI installed system-wide from stable Nixpkgs; no proxy service is configured |
 | Capture permissions | Wireshark's `dumpcap` wrapper permits members of `wireshark` to capture network traffic; USB capture is disabled. Trippy uses the NixOS capability wrapper |
 | Monitoring | btop with NVML and ROCm SMI, NVTOP, amdgpu_top, and HardInfo2; see [graphics diagnostics](operations.md#hybrid-graphics-and-monitoring) |
 | Media CLI | FFmpeg/FFprobe, ImageMagick, GStreamer and base/good/bad/ugly/libav plugins |

@@ -123,6 +123,7 @@ AccountsService 通常返回 `/var/lib/AccountsService/icons/chomsky`，该文�
 | 创作 | GIMP、Blender、Audacity、Kdenlive、OBS Studio、draw.io、Freeplane 与 Zotero |
 | 电子 | KiCad、FreeCAD、Serial Studio、ngspice 与 PulseView；PulseView 提供 libsigrok USB 规则 |
 | 网络 | LocalSend（`localsend_app`，TCP/UDP `53317`）、Nmap/Zenmap、iperf3、Wireshark、Trippy（`trip`）、SSHFS、FreeRDP、Remmina 与 Moonlight |
+| 代理核心 | 从稳定版 Nixpkgs 系统级安装 sing-box 命令行工具；未配置代理服务 |
 | 抓包权限 | Wireshark 的 `dumpcap` 包装器允许 `wireshark` 组成员抓取网络流量；USB 抓包关闭。Trippy 使用 NixOS 能力包装器 |
 | 监控 | 启用 NVML/ROCm SMI 的 btop、NVTOP、amdgpu_top 与 HardInfo2；见[显卡诊断](operations.zh-CN.md#混合显卡与监控) |
 | 媒体命令 | FFmpeg/FFprobe、ImageMagick、GStreamer 及 base/good/bad/ugly/libav 插件 |
