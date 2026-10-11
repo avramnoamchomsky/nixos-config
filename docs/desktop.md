@@ -13,7 +13,8 @@ start `bash` from Fish before the avatar example below.
 - [Everyday shortcuts](#everyday-shortcuts)
 - [Applications and system integrations](#applications-and-system-integrations)
 - [Desktop themes](#desktop-themes)
-- [WPS Office](#wps-office), [Ghost Downloader](#ghost-downloader), [115 Life](#115-life), and [115 Browser](#115-browser)
+- [WPS Office](#wps-office) and [Ghost Downloader](#ghost-downloader)
+- [Baidu Netdisk](#baidu-netdisk), [115 Life](#115-life), and [115 Browser](#115-browser)
 - [Readest](#readest) and [SylvaKru](#sylvakru)
 - [Steam and Bottles](#steam-and-bottles)
 - [Fish and archive commands](#fish-and-archive-commands)
@@ -198,6 +199,25 @@ For browser download interception, install the optional
 [Ghost Downloader for Browser extension](https://chromewebstore.google.com/detail/ghost-downloader-for-brow/lagbjgkmaafnlinaeonbhjchnjinjpeh)
 and pair it through Ghost Downloader's setup wizard or browser-integration
 settings. The desktop application works independently of the extension.
+
+## Baidu Netdisk
+
+Home Manager installs the [official Baidu Netdisk Linux client](https://pan.baidu.com/download),
+version `8.7.0`, from the x86_64 Debian package pinned by SHA-256 in
+`home/packages/baidunetdisk.nix`. The package retains the bundled Electron and
+native transfer libraries, patches their NixOS runtime dependencies, and
+supplies both GTK 2 and GTK 3 libraries. The launcher selects XWayland and
+Fcitx for Chinese input under Niri and preserves the vendor's `--no-sandbox`
+launch flag.
+
+After applying the configuration, launch **Baidu Netdisk** (**百度网盘**) from
+the application menu or run `baidunetdisk`, then sign in with your Baidu account
+or scan the login QR code. `home/baidunetdisk.nix` registers
+`baiduyunguanjia://` links with the same packaged desktop launcher.
+
+Account data, settings, and download history remain writable in your home
+directory and outside Git. Upgrade by changing the pinned version and hash,
+then rebuilding NixOS.
 
 ## 115 Life
 

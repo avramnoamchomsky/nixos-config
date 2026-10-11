@@ -19,7 +19,7 @@
 | 存储 | LUKS 加密 Btrfs、zram、可移动存储自动挂载及两个 rclone WebDAV 挂载 |
 | 虚拟化 | libvirt/KVM、virt-manager、Docker/Distrobox 及 RTX 4060 `vfio` 启动 specialisation |
 | 开发 | ESP32/STM32、HDL/形式化工具及 Ubuntu 22.04 Vitis/Vivado 2023.2 |
-| 应用 | Chrome、WPS Office、Ghost Downloader、115 生活/浏览器、Readest、SylvaKru、创作工具、Steam 及 Flatpak Bottles |
+| 应用 | Chrome、WPS Office、Ghost Downloader、百度网盘、115 生活/浏览器、Readest、SylvaKru、创作工具、Steam 及 Flatpak Bottles |
 
 以上版本对应 2026-10-06 仓库固定输入的求值结果，并不代表笔记本当前运行的 generation。
 
@@ -80,7 +80,7 @@ generation 编号、本地应用状态、传感器读数及剩余磁盘空间均
 | [home/niri.nix](home/niri.nix)、[home/niri/config.kdl](home/niri/config.kdl) | 完整 Niri 配置及未使用 DMS 片段的清理 |
 | [home/dms.nix](home/dms.nix)、[home/dms/settings.json](home/dms/settings.json)、[home/dms/Wood_Whale.jpg](home/dms/Wood_Whale.jpg) | DMS 设置、会话偏好合并、默认壁纸及生成头像 |
 | [home/themes.nix](home/themes.nix)、[home/wallpapers](home/wallpapers) | 固定主题及已跟踪壁纸资源 |
-| [home/ghost-downloader.nix](home/ghost-downloader.nix)、[home/115-life.nix](home/115-life.nix)、[home/packages](home/packages) | 自定义应用包、启动器、URI 处理及朱雀仿宋 |
+| [home/ghost-downloader.nix](home/ghost-downloader.nix)、[home/baidunetdisk.nix](home/baidunetdisk.nix)、[home/115-life.nix](home/115-life.nix)、[home/packages](home/packages) | 自定义应用包、启动器、URI 处理及朱雀仿宋 |
 | [home/rclone.nix](home/rclone.nix)、[home/vitis.nix](home/vitis.nix) | 用户挂载、AMD 工具/容器包装命令及 VNC 服务 |
 
 ## 修改与提交

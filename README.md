@@ -20,7 +20,7 @@ development environments are specific to this machine.
 | Storage | LUKS-encrypted Btrfs, zram, automatic removable-drive mounting, and two rclone WebDAV mounts |
 | Virtualization | libvirt/KVM, virt-manager, Docker/Distrobox, and an RTX 4060 `vfio` boot specialisation |
 | Development | ESP32/STM32, HDL/formal tools, and Ubuntu 22.04 Vitis/Vivado 2023.2 |
-| Applications | Chrome, WPS Office, Ghost Downloader, 115 Life/Browser, Readest, SylvaKru, creative tools, Steam, and Flatpak Bottles |
+| Applications | Chrome, WPS Office, Ghost Downloader, Baidu Netdisk, 115 Life/Browser, Readest, SylvaKru, creative tools, Steam, and Flatpak Bottles |
 
 The versions above describe the evaluated repository pins as of 2026-10-06.
 They do not identify the generation currently running on the laptop.
@@ -87,7 +87,7 @@ local application state, sensor readings, and disk-space figures are historical.
 | [home/niri.nix](home/niri.nix), [home/niri/config.kdl](home/niri/config.kdl) | Complete Niri configuration and cleanup of unused DMS fragments |
 | [home/dms.nix](home/dms.nix), [home/dms/settings.json](home/dms/settings.json), [home/dms/Wood_Whale.jpg](home/dms/Wood_Whale.jpg) | DMS settings, merged session preferences, wallpaper default, and generated avatar |
 | [home/themes.nix](home/themes.nix), [home/wallpapers](home/wallpapers) | Pinned themes and tracked wallpaper assets |
-| [home/ghost-downloader.nix](home/ghost-downloader.nix), [home/115-life.nix](home/115-life.nix), [home/packages](home/packages) | Custom application packages, launchers, URI handlers, and Zhuque Fangsong |
+| [home/ghost-downloader.nix](home/ghost-downloader.nix), [home/baidunetdisk.nix](home/baidunetdisk.nix), [home/115-life.nix](home/115-life.nix), [home/packages](home/packages) | Custom application packages, launchers, URI handlers, and Zhuque Fangsong |
 | [home/rclone.nix](home/rclone.nix), [home/vitis.nix](home/vitis.nix) | User mounts and AMD-tool/container wrappers and VNC service |
 
 ## Contributing changes

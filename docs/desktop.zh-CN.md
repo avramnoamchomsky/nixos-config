@@ -13,7 +13,8 @@ Home Manager 管理本指南中的桌面文件与资源。请通过
 - [常用快捷键](#常用快捷键)
 - [应用与系统集成](#应用与系统集成)
 - [桌面主题](#桌面主题)
-- [WPS Office](#wps-office)、[Ghost Downloader](#ghost-downloader)、[115 生活](#115-生活)与 [115 浏览器](#115-浏览器)
+- [WPS Office](#wps-office)与 [Ghost Downloader](#ghost-downloader)
+- [百度网盘](#百度网盘)、[115 生活](#115-生活)与 [115 浏览器](#115-浏览器)
 - [Readest](#readest) 与 [SylvaKru](#sylvakru)
 - [Steam 与 Bottles](#steam-与-bottles)
 - [Fish 与归档命令](#fish-与归档命令)
@@ -181,6 +182,23 @@ Python 和 Qt 库提供 FHS 环境，并提供用于媒体下载的 FFmpeg。
 [Ghost Downloader for Browser 扩展](https://chromewebstore.google.com/detail/ghost-downloader-for-brow/lagbjgkmaafnlinaeonbhjchnjinjpeh)，
 并通过 Ghost Downloader 的设置向导或浏览器集成设置完成配对。桌面应用
 可以独立于该扩展运行。
+
+## 百度网盘
+
+Home Manager 从 x86_64 Debian 软件包安装
+[官方百度网盘 Linux 客户端](https://pan.baidu.com/download) `8.7.0`，
+SHA-256 固定在 `home/packages/baidunetdisk.nix` 中。软件包保留自带的
+Electron 与原生传输库，修补 NixOS 运行时依赖，并同时提供 GTK 2 和 GTK 3
+库。启动器在 Niri 下选择 XWayland 和 Fcitx，以支持中文输入，并保留厂商
+默认的 `--no-sandbox` 启动参数。
+
+应用配置后，可从应用菜单启动 **百度网盘**（**Baidu Netdisk**），或运行
+`baidunetdisk`，再使用百度账号或扫描登录二维码登录。
+`home/baidunetdisk.nix` 将 `baiduyunguanjia://` 链接注册到同一个打包的
+桌面启动器。
+
+账号数据、设置和下载历史保存在用户目录中，保持可写且不进入 Git。升级时
+修改固定的软件包版本与哈希，再重新构建 NixOS。
 
 ## 115 生活
 
