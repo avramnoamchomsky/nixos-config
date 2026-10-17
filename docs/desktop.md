@@ -157,6 +157,11 @@ Chinese TeX setup is covered in the [development guide](development.md#chinese-t
 - GTK 4/libadwaita uses the same theme through Home Manager's explicit CSS
   import workaround. GTK 4 does not officially support third-party themes, so
   some applications may still have visual inconsistencies.
+- KiCad and its editors use [WhiteSur](https://github.com/vinceliuice/WhiteSur-gtk-theme)
+  (`WhiteSur-Dark`) through package wrappers in `home/programs.nix`, including
+  application-menu and file-association launches. Only those launchers set
+  `GTK_THEME` and add WhiteSur's data directory; the theme is not installed in
+  the shared profile, and other applications keep the desktop theme above.
 
 The generated GTK, qt5ct, qt6ct, and Kvantum files are Home Manager-owned.
 Make persistent changes in `home/themes.nix`; graphical tools may be unable
@@ -204,9 +209,10 @@ settings. The desktop application works independently of the extension.
 
 Home Manager installs the [official Baidu Netdisk Linux client](https://pan.baidu.com/download),
 version `8.7.0`, from the x86_64 Debian package pinned by SHA-256 in
-`home/packages/baidunetdisk.nix`. The package retains the bundled Electron and
-native transfer libraries, patches their NixOS runtime dependencies, and
-supplies both GTK 2 and GTK 3 libraries. The launcher selects XWayland and
+`home/packages/baidunetdisk.nix`. The package retains the bundled Electron,
+patches executable interpreters for NixOS, and supplies both GTK 2 and GTK 3
+dependencies through the launcher. Bundled shared libraries remain unmodified
+because the native startup integrity check exits if they change. The launcher selects XWayland and
 Fcitx for Chinese input under Niri and preserves the vendor's `--no-sandbox`
 launch flag.
 

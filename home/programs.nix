@@ -5,6 +5,20 @@ let
   sylvakru = import ./packages/sylvakru.nix { inherit pkgs; };
   readest = unstablePkgs.callPackage ./packages/readest.nix { };
 
+  whiteSurGtk = pkgs.whitesur-gtk-theme.override {
+    colorVariants = [ "dark" ];
+    opacityVariants = [ "normal" ];
+  };
+
+  # Keep WhiteSur private to KiCad and its editors, including desktop launches.
+  # The theme is a wrapper dependency, not a global GTK or session setting.
+  kicadWhiteSur = pkgs.kicad.overrideAttrs (old: {
+    makeWrapperArgs = old.makeWrapperArgs ++ [
+      "--set GTK_THEME WhiteSur-Dark"
+      "--prefix XDG_DATA_DIRS : ${whiteSurGtk}/share"
+    ];
+  });
+
   # ROCm SMI otherwise searches /usr/share for pci.ids and names the iGPU
   # "0x1002" on NixOS. Point this monitoring dependency at the packaged data.
   rocmSmi = pkgs.rocmPackages.rocm-smi.overrideAttrs (old: {
@@ -224,7 +238,7 @@ in
     tio
 
     # Electronics, CAD, and serial-data visualization
-    kicad
+    kicadWhiteSur
     freecad
     serial-studio
     ngspice

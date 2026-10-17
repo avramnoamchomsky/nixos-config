@@ -145,6 +145,10 @@ GPU 传感器均已验证。中文 TeX 设置见[开发指南](development.zh-CN
   revision 构建。
 - GTK 4/libadwaita 通过 Home Manager 的显式 CSS 导入变通方案使用同一
   主题。GTK 4 并不正式支持第三方主题，因此部分应用仍可能存在显示差异。
+- KiCad 及其编辑器通过 `home/programs.nix` 中的软件包启动器单独使用
+  [WhiteSur](https://github.com/vinceliuice/WhiteSur-gtk-theme)（`WhiteSur-Dark`），
+  包括应用菜单和文件关联启动。仅这些启动器设置 `GTK_THEME` 并加入 WhiteSur
+  的数据目录；该主题不会安装到共享 profile，其他应用继续使用上述桌面主题。
 
 生成的 GTK、qt5ct、qt6ct 与 Kvantum 文件均由 Home Manager 管理。持久修改应写入
 `home/themes.nix`；图形工具可能无法直接保存到这些受管理文件。
@@ -188,8 +192,9 @@ Python 和 Qt 库提供 FHS 环境，并提供用于媒体下载的 FFmpeg。
 Home Manager 从 x86_64 Debian 软件包安装
 [官方百度网盘 Linux 客户端](https://pan.baidu.com/download) `8.7.0`，
 SHA-256 固定在 `home/packages/baidunetdisk.nix` 中。软件包保留自带的
-Electron 与原生传输库，修补 NixOS 运行时依赖，并同时提供 GTK 2 和 GTK 3
-库。启动器在 Niri 下选择 XWayland 和 Fcitx，以支持中文输入，并保留厂商
+Electron，为 NixOS 修补可执行文件的解释器，并通过启动器提供 GTK 2 和 GTK 3
+依赖。自带的共享库保持原样，因为原生启动完整性检查会在库文件被修改时退出。
+启动器在 Niri 下选择 XWayland 和 Fcitx，以支持中文输入，并保留厂商
 默认的 `--no-sandbox` 启动参数。
 
 应用配置后，可从应用菜单启动 **百度网盘**（**Baidu Netdisk**），或运行

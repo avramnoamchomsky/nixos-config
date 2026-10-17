@@ -60,9 +60,9 @@ pkgs.stdenvNoCC.mkDerivation (finalAttrs: {
   };
 
   nativeBuildInputs = with pkgs; [
-    autoPatchelfHook
     dpkg
     makeWrapper
+    patchelf
     wrapGAppsHook3
   ];
 
@@ -71,6 +71,7 @@ pkgs.stdenvNoCC.mkDerivation (finalAttrs: {
   dontConfigure = true;
   dontBuild = true;
   dontStrip = true;
+  dontPatchELF = true;
   dontWrapGApps = true;
 
   unpackPhase = ''
@@ -85,6 +86,14 @@ pkgs.stdenvNoCC.mkDerivation (finalAttrs: {
     install -d "$out/bin" "$out/libexec" "$out/share"
     cp -a opt/baidunetdisk "$out/libexec/baidunetdisk"
     cp -a usr/share/applications usr/share/icons "$out/share/"
+
+    # The native browser engine exits during startup if the bundled shared
+    # libraries change. Preserve them byte-for-byte and patch only executable
+    # interpreters; the wrapper supplies their dependencies through LD_LIBRARY_PATH.
+    for executable in baidunetdisk baidunetdiskhost netdisk_service chrome_crashpad_handler chrome-sandbox; do
+      patchelf --set-interpreter ${pkgs.stdenv.cc.bintools.dynamicLinker} \
+        "$out/libexec/baidunetdisk/$executable"
+    done
 
     # Upstream ships node-gyp build tools, including an unused Python 3.6
     # executable. Keep the compiled native modules, not these build artifacts.
@@ -115,8 +124,8 @@ pkgs.stdenvNoCC.mkDerivation (finalAttrs: {
 
   postFixup = ''
     # Baidu's native transfer/browser libraries use GTK 2 alongside Electron's
-    # GTK 3 runtime. Native modules inside app.asar also need this path because
-    # autoPatchelf cannot inspect them; uiohook loads libXt and libXtst here.
+    # GTK 3 runtime. Native modules inside app.asar also need this path;
+    # uiohook loads libXt and libXtst here.
     makeWrapper "$out/libexec/baidunetdisk/baidunetdisk" "$out/bin/baidunetdisk" \
       "''${gappsWrapperArgs[@]}" \
       --chdir "$out/libexec/baidunetdisk" \
