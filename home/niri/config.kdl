@@ -95,10 +95,10 @@ binds {
     }
 
     XF86AudioRaiseVolume allow-when-locked=true {
-        spawn "dms" "ipc" "call" "audio" "increment" "10";
+        spawn "dms" "ipc" "call" "audio" "increment" "5";
     }
     XF86AudioLowerVolume allow-when-locked=true {
-        spawn "dms" "ipc" "call" "audio" "decrement" "10";
+        spawn "dms" "ipc" "call" "audio" "decrement" "5";
     }
     XF86AudioMute allow-when-locked=true {
         spawn "dms" "ipc" "call" "audio" "mute";
