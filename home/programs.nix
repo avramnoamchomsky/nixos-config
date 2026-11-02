@@ -4,6 +4,7 @@ let
   browser115 = import ./packages/115-browser.nix { inherit pkgs; };
   sylvakru = import ./packages/sylvakru.nix { inherit pkgs; };
   readest = unstablePkgs.callPackage ./packages/readest.nix { };
+  wechat = import ./packages/wechat.nix { inherit pkgs; };
 
   whiteSurGtk = pkgs.whitesur-gtk-theme.override {
     colorVariants = [ "dark" ];
@@ -37,8 +38,8 @@ let
   };
 
   wechat-fcitx = pkgs.symlinkJoin {
-    name = "wechat-fcitx";
-    paths = [ pkgs.wechat ];
+    name = "wechat-fcitx-${wechat.version}";
+    paths = [ wechat ];
     nativeBuildInputs = [ pkgs.makeWrapper ];
 
     postBuild = ''

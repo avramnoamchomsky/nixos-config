@@ -13,7 +13,7 @@ Home Manager 管理本指南中的桌面文件与资源。请通过
 - [常用快捷键](#常用快捷键)
 - [应用与系统集成](#应用与系统集成)
 - [桌面主题](#桌面主题)
-- [WPS Office](#wps-office)与 [Ghost Downloader](#ghost-downloader)
+- [微信](#微信)、[WPS Office](#wps-office)与 [Ghost Downloader](#ghost-downloader)
 - [百度网盘](#百度网盘)、[115 生活](#115-生活)与 [115 浏览器](#115-浏览器)
 - [Readest](#readest) 与 [SylvaKru](#sylvakru)
 - [Steam 与 Bottles](#steam-与-bottles)
@@ -152,6 +152,17 @@ GPU 传感器均已验证。中文 TeX 设置见[开发指南](development.zh-CN
 
 生成的 GTK、qt5ct、qt6ct 与 Kvantum 文件均由 Home Manager 管理。持久修改应写入
 `home/themes.nix`；图形工具可能无法直接保存到这些受管理文件。
+
+## 微信
+
+Home Manager 安装官方[微信 Linux 版](https://linux.weixin.qq.com/)的
+`4.1.13.26` x86_64 AppImage，版本与 SHA-256 固定在
+`home/packages/wechat.nix` 中，并复用 Nixpkgs 的微信 AppImage 打包方式和
+FHS 运行环境。腾讯会在发布更新时替换下载链接对应的文件；升级时应同时
+更新版本与哈希。
+
+`wechat` 启动器选择 XWayland 和 Fcitx，以支持 Niri 中的中文输入。
+应用配置后，完全退出并重新打开微信即可使用新版本。
 
 ## WPS Office
 

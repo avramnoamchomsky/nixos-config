@@ -13,7 +13,7 @@ start `bash` from Fish before the avatar example below.
 - [Everyday shortcuts](#everyday-shortcuts)
 - [Applications and system integrations](#applications-and-system-integrations)
 - [Desktop themes](#desktop-themes)
-- [WPS Office](#wps-office) and [Ghost Downloader](#ghost-downloader)
+- [WeChat](#wechat), [WPS Office](#wps-office), and [Ghost Downloader](#ghost-downloader)
 - [Baidu Netdisk](#baidu-netdisk), [115 Life](#115-life), and [115 Browser](#115-browser)
 - [Readest](#readest) and [SylvaKru](#sylvakru)
 - [Steam and Bottles](#steam-and-bottles)
@@ -166,6 +166,18 @@ Chinese TeX setup is covered in the [development guide](development.md#chinese-t
 The generated GTK, qt5ct, qt6ct, and Kvantum files are Home Manager-owned.
 Make persistent changes in `home/themes.nix`; graphical tools may be unable
 to save directly to the managed files.
+
+## WeChat
+
+Home Manager installs the official [WeChat Linux](https://linux.weixin.qq.com/)
+`4.1.13.26` x86_64 AppImage, pinned by version and SHA-256 in
+`home/packages/wechat.nix`. It reuses Nixpkgs' WeChat AppImage packaging and
+FHS runtime. Tencent replaces the file at its download URL when releasing an
+update; update the version and hash together when upgrading.
+
+The `wechat` launcher selects XWayland and Fcitx for Chinese input in Niri.
+After applying the configuration, fully exit and reopen WeChat to use the new
+version.
 
 ## WPS Office
 
