@@ -47,6 +47,13 @@ in
       [ "" "screenshot-path null" ]
       (builtins.head withWindowRules)
     + "\ndebug {${builtins.head withRecentWindows}\n"
+    # The installed cursor theme is Adwaita; Niri's implicit "default" theme
+    # has no icons on this system. Keep this before DMS's cursor overrides.
+    + ''
+      cursor {
+          xcursor-theme "Adwaita"
+      }
+    ''
     + lib.replaceStrings
       [ ''include optional=true "dms/layout.kdl"'' ]
       [ "include optional=true \"dms/windowrules.kdl\"\ninclude optional=true \"dms/layout.kdl\"" ]
