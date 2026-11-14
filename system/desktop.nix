@@ -1,6 +1,7 @@
 { desktopShell, pkgs, unstablePkgs, ... }:
 
 let
+  codex = pkgs.callPackage ../home/packages/codex.nix { };
   zhuqueFangsong = pkgs.callPackage ../home/packages/zhuque-fangsong.nix { };
 
   rpiImagerPolicy = pkgs.writeText "com.raspberrypi.rpi-imager.policy.in" ''
@@ -154,7 +155,7 @@ in
 
   programs.codexDesktopLinux = {
     enable = true;
-    cliPackage = unstablePkgs.codex;
+    cliPackage = codex;
   };
 
   environment.sessionVariables = {

@@ -2,6 +2,7 @@
 
 let
   browser115 = import ./packages/115-browser.nix { inherit pkgs; };
+  codex = pkgs.callPackage ./packages/codex.nix { };
   sylvakru = import ./packages/sylvakru.nix { inherit pkgs; };
   readest = unstablePkgs.callPackage ./packages/readest.nix { };
   wechat = import ./packages/wechat.nix { inherit pkgs; };
@@ -204,7 +205,7 @@ in
     moonlight-qt
 
     # Development tools
-    unstablePkgs.codex
+    codex
     nodejs
     conan
     pnpm

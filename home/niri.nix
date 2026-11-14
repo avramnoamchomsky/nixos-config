@@ -53,6 +53,12 @@ in
       cursor {
           xcursor-theme "Adwaita"
       }
+
+      // Disable primary-selection paste from mouse middle-click and
+      // touchpad three-finger tap while keeping the buttons usable.
+      clipboard {
+          disable-primary
+      }
     ''
     + lib.replaceStrings
       [ ''include optional=true "dms/layout.kdl"'' ]
