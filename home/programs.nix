@@ -123,6 +123,7 @@ in
     settings = {
       font-family = "JetBrainsMono Nerd Font";
       theme = "Gruvbox Dark";
+      background-opacity = 0.82;
       custom-shader = "${./ghostty/cursor-trail.glsl}";
       custom-shader-animation = true;
     };
