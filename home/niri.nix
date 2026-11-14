@@ -11,8 +11,13 @@ let
   withRecentWindows = lib.splitString "\n// Override to disable super+tab\n" (builtins.elemAt withDebug 1);
   withIncludes = lib.splitString "\n// Include dms files\n" (builtins.elemAt withRecentWindows 1);
 
+  # On Niri, DMS window capture already copies the image via the compositor.
+  # Skip DMS's second clipboard copy; DMS still saves the file and notifies.
+  windowCapture = ''spawn "dms" "screenshot" "window";'';
+  windowCaptureOnce = ''spawn "dms" "screenshot" "window" "--no-clipboard";'';
+
   stockBinds = pkgs.writeText "dms-niri-stock-binds.kdl" (
-    lib.replaceStrings [ "{{TERMINAL_COMMAND}}" ] [ "ghostty" ] (
+    lib.replaceStrings [ "{{TERMINAL_COMMAND}}" windowCapture ] [ "ghostty" windowCaptureOnce ] (
       builtins.readFile "${defaults}/niri-binds.kdl"
     )
     + "\n${builtins.head withIncludes}"
@@ -34,8 +39,11 @@ in
   xdg.configFile."niri/resize-presets.kdl".source = ./niri/resize-presets.kdl;
   xdg.configFile."niri/config.kdl".text =
     lib.replaceStrings
-      [ "        // Enable numlock on startup, omitting this setting disables it.\n        numlock\n" ]
-      [ "" ]
+      [
+        "        // Enable numlock on startup, omitting this setting disables it.\n        numlock\n"
+        ''screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"''
+      ]
+      [ "" "screenshot-path null" ]
       (builtins.head withWindowRules)
     + "\ndebug {${builtins.head withRecentWindows}\n"
     + lib.replaceStrings
@@ -67,6 +75,14 @@ in
         touch "$dmsNiriDir/outputs.kdl" "$dmsNiriDir/cursor.kdl"
         install -D /dev/null "$dmsNiriResetStamp"
       fi
+    fi
+  '';
+
+  # Update only the stock window capture actions in existing writable bindings.
+  home.activation.dmsWindowCapture = lib.hm.dag.entryAfter [ "dmsNiriDefaults" ] ''
+    binds=${lib.escapeShellArg "${config.xdg.configHome}/niri/dms/binds.kdl"}
+    if [[ ! -v DRY_RUN && -f "$binds" ]] && ${pkgs.gnugrep}/bin/grep -Fq ${lib.escapeShellArg windowCapture} "$binds"; then
+      ${pkgs.gnused}/bin/sed -i ${lib.escapeShellArg "s|${windowCapture}|${windowCaptureOnce}|g"} "$binds"
     fi
   '';
 }

@@ -92,6 +92,9 @@ in
 
   programs.fish = {
     enable = true;
+    interactiveShellInit = ''
+      set -g fish_greeting
+    '';
 
     shellAliases = {
       "7sec" = "7z a -t7z -m0=lzma2 -mx=9 -mmt=(nproc) -pcoffee -mhe=on";
@@ -117,6 +120,16 @@ in
   programs.ghostty = {
     enable = true;
     enableFishIntegration = true;
+    settings = {
+      font-family = "JetBrainsMono Nerd Font";
+      theme = "Gruvbox Dark";
+    };
+  };
+
+  programs.starship = {
+    enable = true;
+    enableFishIntegration = true;
+    presets = [ "gruvbox-rainbow" ];
   };
 
   programs.neovim = {
