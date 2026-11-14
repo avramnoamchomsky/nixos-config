@@ -9,7 +9,7 @@ start `bash` from Fish before the avatar example below.
 
 ## Contents
 
-- [Declarative desktop state](#declarative-desktop-state) and [DMS avatar](#dms-avatar)
+- [Desktop configuration](#desktop-configuration)
 - [Everyday shortcuts](#everyday-shortcuts)
 - [Applications and system integrations](#applications-and-system-integrations)
 - [Desktop themes](#desktop-themes)
@@ -19,107 +19,42 @@ start `bash` from Fish before the avatar example below.
 - [Steam and Bottles](#steam-and-bottles)
 - [Fish and archive commands](#fish-and-archive-commands)
 
-## Declarative desktop state
+## Desktop configuration
 
-- Niri reads only `~/.config/niri/config.kdl`, deployed from
-  `home/niri/config.kdl`.
-- DMS-generated optional Niri fragments are unused and automatically removed.
-- Reviewed DMS settings are tracked in `home/dms/settings.json`.
-- The DMS avatar is declared in `home/dms.nix` using
-  `home/dms/Wood_Whale.jpg`; see [DMS avatar](#dms-avatar) below.
-- Selected DMS session preferences are merged declaratively while histories,
-  detected devices, and other volatile state remain writable.
-- Wallpapers in `home/wallpapers/` are deployed to `~/Pictures/Wallpapers`.
-  DMS derives its wallpaper cycling directory from the selected wallpaper path.
-- UDisks handles removable storage at the system level, while the Home Manager
-  `udiskie` service automatically mounts eligible filesystems under
-  `/run/media/chomsky/`. Partitions marked by UDisks as ignored remain unmounted.
-- Home Manager declares the standard XDG user directories and creates missing
-  folders such as `Documents`, `Downloads`, `Music`, and `Pictures`. This also
-  supplies the paths expected by Flutter desktop applications such as SylvaKru.
-- The `nvim.desktop` entry launches Neovim explicitly inside Ghostty. This
-  keeps Nautilus file associations working without relying on GLib to discover
-  a terminal emulator in the minimal Niri session.
+The flake pins Dux Modular Shell (DMS) to the official stable release. Home
+Manager installs the release's Niri configuration and sets up writable fragments
+under `~/.config/niri/dms/`. DMS manages shortcuts, window rules, input devices,
+cursor, displays, layout, colors, recent windows, and wallpaper integration.
+Use the DMS Settings app to change them.
 
-The managed paths and writable state have different update rules:
+The first activation backs up previous DMS preferences and Niri fragments in
+sibling `*-before-stock.*` directories and starts with the stock configuration.
+Later rebuilds leave edits from DMS in place. The Wood Whale account avatar and
+pink rose wallpaper are retained. Home Manager installs the avatar through
+AccountsService and links the wallpaper collection under `~/Pictures/Wallpapers`.
 
-| State | Source and behavior |
-| --- | --- |
-| Niri configuration | `home/niri/config.kdl` is deployed as a read-only Home Manager link |
-| DMS settings and clipboard preferences | `home/dms/settings.json` and `home/dms.nix` produce read-only configuration files |
-| DMS session | `~/.local/state/DankMaterialShell/session.json` stays writable; activation restores the declared theme/night-mode preferences and pink-rose wallpaper while preserving other fields |
-| Themes, input method, MIME defaults, and MSI preferences | Edit `home/themes.nix`, `home/input-method.nix`, or `home/desktop.nix`; generated files are managed by Home Manager |
-| Application data | Browser profiles, accounts, libraries, and download history remain outside Git |
-
-An invalid existing DMS session JSON makes activation stop rather than replace
-it. Inspect and back up the state file before repairing it. To persist a new
-wallpaper default, change `wallpaperPath` in `home/dms.nix` and add the asset to
-`home/wallpapers/`.
-
-### DMS avatar
-
-The original Wood Whale JPEG is tracked in `home/dms/Wood_Whale.jpg`; builds
-use this repository copy and do not depend on `~/Downloads`. `home/dms.nix`
-uses ImageMagick to build a PNG in the Nix store, resized to fit within
-512×512 pixels while preserving the composition and removing metadata. The smaller image fits AccountsService's
-1 MiB icon limit while leaving the original JPEG unchanged.
-
-Home Manager's `dmsProfileImage` activation hook finds the configured user
-through AccountsService and sets its `IconFile`. The native NixOS DMS module
-enables AccountsService. When `dms.service` is running, the hook also calls
-DMS's profile IPC to refresh the cached image immediately. When the shell is
-stopped, it reads the account icon on its next start. Settings, the dashboard,
-the control center, and the lock screen share this avatar; other applications
-that read the AccountsService icon also see it.
-
-To change the declared avatar, replace `home/dms/Wood_Whale.jpg`, or update the
-`profileImage` source in `home/dms.nix`, then follow
-[Validate and apply](operations.md#validate-and-apply). Add any new source
-file to Git's index before evaluating the flake so Nix includes it. Changing the avatar in
-the DMS settings UI is temporary: the next Home Manager activation restores
-the repository's declared image.
-
-After activation, check the account icon and the running shell as your normal
-user:
-
-```bash
-account_path=$(busctl --system --json=short call \
-  org.freedesktop.Accounts /org/freedesktop/Accounts \
-  org.freedesktop.Accounts FindUserByName s "$USER" | jq -r '.data[0]')
-busctl --system get-property org.freedesktop.Accounts "$account_path" \
-  org.freedesktop.Accounts.User IconFile
-dms ipc call profile getImage
-```
-
-AccountsService normally reports `/var/lib/AccountsService/icons/chomsky`,
-which contains a copy of the generated PNG. The running DMS shell may report
-either that path or the generated `dms-wood-whale-avatar.png` path in the Nix
-store. Both should display the same image.
+UDisks and the Home Manager `udiskie` service mount eligible removable storage
+under `/run/media/chomsky/`. Home Manager also creates the standard XDG user
+directories and provides the `nvim.desktop` launcher for Neovim in Ghostty.
 
 ## Everyday shortcuts
 
-The key names below match `home/niri/config.kdl`. Open Niri's shortcut overlay
-with `Mod+Shift+Slash` for the complete binding list.
+Use `Mod+Shift+Slash` to open the DMS cheatsheet or `Mod+Comma` to open Settings.
+On the Niri desktop, `Mod` is Super by default.
 
 | Shortcut | Action |
 | --- | --- |
-| `Mod+T` | Open Ghostty |
-| `Mod+D` | Toggle the DMS application launcher |
-| `Super+Alt+L` | Lock the screen |
-| `Mod+O` | Toggle the overview |
-| `Mod+Q` | Close the focused window |
-| `Mod+H/J/K/L` or `Mod+Arrow` | Focus an adjacent column/window |
-| `Mod+Ctrl+H/J/K/L` or `Mod+Ctrl+Arrow` | Move the focused column/window |
+| `Mod+T` or `Mod+Return` | Open Ghostty |
+| `Mod+Space` | Open the application launcher |
+| `Mod+D` | Toggle the dashboard |
+| `Mod+V` | Toggle the clipboard manager |
+| `Mod+Alt+L` | Lock the screen |
+| `Mod+O` or `Mod+Tab` | Toggle the overview |
+| `Alt+Tab` | Switch recent windows |
 | `Mod+1` through `Mod+9` | Focus a workspace |
-| `Mod+Ctrl+1` through `Mod+Ctrl+9` | Move a column to a workspace |
-| `Mod+F` / `Mod+Shift+F` | Maximize the column / fullscreen the window |
-| `Mod+V` | Toggle floating |
-| `Print` / `Ctrl+Print` / `Alt+Print` | DMS interactive / screen / window screenshot, followed by Satty |
+| `Mod+Shift+1` through `Mod+Shift+9` | Move a column to a workspace |
+| `Print` / `Ctrl+Print` / `Alt+Print` | Use DMS to capture a region / screen / window |
 | `Mod+Shift+P` | Turn off monitors |
-| `Mod+Shift+E` or `Ctrl+Alt+Delete` | Quit Niri |
-
-Monitor power-off leaves the system running. Volume, media, microphone-mute,
-and brightness keys use DMS IPC and are also available while locked.
 
 ## Applications and system integrations
 

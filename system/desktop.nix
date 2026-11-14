@@ -1,4 +1,4 @@
-{ pkgs, unstablePkgs, ... }:
+{ desktopShell, pkgs, unstablePkgs, ... }:
 
 let
   zhuqueFangsong = pkgs.callPackage ../home/packages/zhuque-fangsong.nix { };
@@ -78,26 +78,19 @@ in
     useNautilus = true;
   };
 
-  programs.dms-shell = {
+  programs.dank-material-shell = {
     enable = true;
+    inherit (desktopShell) package;
+    quickshell.package = desktopShell.quickshell;
 
     systemd = {
       enable = true;
       restartIfChanged = true;
     };
-
-    enableSystemMonitoring = true;
-    enableVPN = true;
-    enableDynamicTheming = true;
-    enableClipboardPaste = true;
-    enableAudioWavelength = false;
-    enableCalendarEvents = false;
   };
 
-  # Existing Niri screenshot bindings invoke DMS, which substitutes %path%
-  # with the captured file before launching the editor. Escape systemd's
-  # percent specifiers so DMS receives the literal %path% placeholder.
-  systemd.user.services.dms.environment.DMS_SCREENSHOT_EDITOR = "${pkgs.satty}/bin/satty -f %%path%%";
+  # Retain I²C access for external display brightness control.
+  hardware.i2c.enable = true;
 
   # PulseView includes the libsigrok udev rules for supported USB instruments.
   programs.pulseview.enable = true;
@@ -172,8 +165,6 @@ in
   };
 
   environment.sessionVariables = {
-    XCURSOR_THEME = "Adwaita";
-    XCURSOR_SIZE = "24";
     NIXOS_OZONE_WL = "1";
     _JAVA_AWT_WM_NONREPARENTING = "1";
     AWT_TOOLKIT = "MToolkit";

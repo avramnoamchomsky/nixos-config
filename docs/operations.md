@@ -193,9 +193,8 @@ busctl call org.freedesktop.login1 /org/freedesktop/login1 \
 Only `/dev/zram0` should appear in `swapon --show`. All four `Allow*` settings
 should be `false`, and both bus calls should return `s "no"`.
 
-The tracked DMS settings also set automatic lock and suspend timeouts to zero.
-Use `Super+Alt+L` to lock manually; turning off monitors is separate from system
-sleep.
+Use `Mod+Alt+L` to lock manually. Change lock and display timeouts in DMS
+Settings. Turning off monitors is separate from system sleep.
 
 ## MSI controls and trackpad
 

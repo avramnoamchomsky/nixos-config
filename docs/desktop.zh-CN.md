@@ -9,7 +9,7 @@ Home Manager 管理本指南中的桌面文件与资源。请通过
 
 ## 目录
 
-- [声明式桌面状态](#声明式桌面状态)与 [DMS 头像](#dms-头像)
+- [桌面配置](#桌面配置)
 - [常用快捷键](#常用快捷键)
 - [应用与系统集成](#应用与系统集成)
 - [桌面主题](#桌面主题)
@@ -19,99 +19,39 @@ Home Manager 管理本指南中的桌面文件与资源。请通过
 - [Steam 与 Bottles](#steam-与-bottles)
 - [Fish 与归档命令](#fish-与归档命令)
 
-## 声明式桌面状态
+## 桌面配置
 
-- Niri 仅读取 `~/.config/niri/config.kdl`，该文件由
-  `home/niri/config.kdl` 部署。
-- DMS 生成的可选 Niri 配置片段未被使用，并会被自动清理。
-- 经过审阅的 DMS 设置保存在 `home/dms/settings.json` 中。
-- DMS 头像由 `home/dms.nix` 声明，使用 `home/dms/Wood_Whale.jpg`；
-  详见下方的 [DMS 头像](#dms-头像)。
-- 指定的 DMS 会话偏好通过声明式方式合并；历史记录、检测到的设备及其他
-  易变状态仍可由程序写入。
-- `home/wallpapers/` 中的壁纸会被部署到 `~/Pictures/Wallpapers`。
-  DMS 根据当前所选壁纸的路径确定壁纸轮换目录。
-- UDisks 在系统层处理可移动存储，Home Manager 的 `udiskie` 服务会将符合
-  条件的文件系统自动挂载到 `/run/media/chomsky/`；被 UDisks 标记为忽略的
-  分区不会自动挂载。
-- Home Manager 会声明标准 XDG 用户目录，并创建缺失的 `Documents`、
-  `Downloads`、`Music` 和 `Pictures` 等目录；这也会提供 SylvaKru 等 Flutter
-  桌面应用所需的路径。
-- `nvim.desktop` 会显式地在 Ghostty 中启动 Neovim，使 Nautilus 文件关联
-  无需依赖 GLib 在精简的 Niri 会话中自动发现终端模拟器。
+Flake 固定使用 Dux Modular Shell（DMS）的官方稳定版。Home Manager 部署该版本的
+Niri 配置，并在 `~/.config/niri/dms/` 下创建可写配置片段。快捷键、窗口规则、输入设备、
+光标、显示器、布局、配色、最近窗口和壁纸集成都可以在 DMS 设置中管理。
 
-受管理路径与可写状态采用不同的更新规则：
+首次激活会将原有 DMS 偏好和 Niri 配置片段备份到同级 `*-before-stock.*` 目录，
+然后启用官方默认配置。后续重建保留在 DMS 中所做的修改。Wood Whale 头像和粉色玫瑰
+壁纸会保留；Home Manager 通过 AccountsService 设置头像，并将壁纸目录链接到
+`~/Pictures/Wallpapers`。
 
-| 状态 | 来源与行为 |
-| --- | --- |
-| Niri 配置 | `home/niri/config.kdl` 部署为只读 Home Manager 链接 |
-| DMS 设置与剪贴板偏好 | `home/dms/settings.json` 与 `home/dms.nix` 生成只读配置文件 |
-| DMS 会话 | `~/.local/state/DankMaterialShell/session.json` 保持可写；激活时恢复声明的主题/夜间模式偏好及粉色玫瑰壁纸，保留其他字段 |
-| 主题、输入法、MIME 默认值与 MSI 偏好 | 编辑 `home/themes.nix`、`home/input-method.nix` 或 `home/desktop.nix`；生成文件由 Home Manager 管理 |
-| 应用数据 | 浏览器 profile、账户、资料库及下载历史保留在 Git 之外 |
-
-已有 DMS 会话 JSON 无效时，激活会停止而不是替换它；修复前请检查并备份该状态文件。
-要持久修改默认壁纸，请修改 `home/dms.nix` 中的 `wallpaperPath`，并将图片加入
-`home/wallpapers/`。
-
-### DMS 头像
-
-Wood Whale 原始 JPEG 保存在 `home/dms/Wood_Whale.jpg` 中，并由 Git 管理；
-构建使用仓库内的副本，不依赖 `~/Downloads`。`home/dms.nix` 通过 ImageMagick
-在 Nix store 中生成尺寸不超过 512×512 的 PNG，保留原图构图并移除元数据。较小的图片
-符合 AccountsService 的 1 MiB 头像限制，原始 JPEG 保持不变。
-
-Home Manager 的 `dmsProfileImage` 激活钩子通过 AccountsService 查找配置的
-用户，并设置其 `IconFile`。NixOS 原生 DMS 模块会启用 AccountsService。
-如果 `dms.service` 正在运行，钩子还会调用 DMS 的头像 IPC，立即刷新缓存
-图片；如果 shell 未运行，则会在下次启动时读取账户头像。设置窗口、仪表板、
-控制中心及锁屏共用该头像；其他读取 AccountsService 头像的应用也会看到它。
-
-如需更换声明式头像，替换 `home/dms/Wood_Whale.jpg`，或修改 `home/dms.nix`
-中的 `profileImage` 源文件，然后按照[验证与应用](operations.zh-CN.md#验证与应用)执行。
-如果使用新文件，应先将其加入 Git 暂存区，使 Nix 在求值 flake 时包含该文件。
-在 DMS 设置界面中选择头像只是临时修改；下次 Home Manager 激活时，会恢复
-仓库声明的图片。
-
-激活后，以普通用户执行以下命令，检查账户头像与正在运行的 shell：
-
-```bash
-account_path=$(busctl --system --json=short call \
-  org.freedesktop.Accounts /org/freedesktop/Accounts \
-  org.freedesktop.Accounts FindUserByName s "$USER" | jq -r '.data[0]')
-busctl --system get-property org.freedesktop.Accounts "$account_path" \
-  org.freedesktop.Accounts.User IconFile
-dms ipc call profile getImage
-```
-
-AccountsService 通常返回 `/var/lib/AccountsService/icons/chomsky`，该文件
-是生成 PNG 的副本。正在运行的 DMS 可能返回此路径，也可能返回 Nix store 中
-生成的 `dms-wood-whale-avatar.png` 路径；两者应显示同一张图片。
+UDisks 和 Home Manager 的 `udiskie` 服务会将符合条件的可移动存储挂载到
+`/run/media/chomsky/`。Home Manager 也会创建标准 XDG 用户目录，并提供通过 Ghostty
+启动 Neovim 的 `nvim.desktop` 条目。
 
 ## 常用快捷键
 
-以下按键名称与 `home/niri/config.kdl` 一致。使用 `Mod+Shift+Slash` 打开 Niri
-快捷键提示，查看完整列表。
+`Mod+Shift+Slash` 打开 DMS 快捷键列表，`Mod+Comma` 打开设置。
+在 Niri 桌面中，`Mod` 默认为 Super。
 
 | 快捷键 | 操作 |
 | --- | --- |
-| `Mod+T` | 打开 Ghostty |
-| `Mod+D` | 切换 DMS 应用启动器 |
-| `Super+Alt+L` | 锁屏 |
-| `Mod+O` | 切换概览 |
-| `Mod+Q` | 关闭当前窗口 |
-| `Mod+H/J/K/L` 或 `Mod+Arrow` | 切换相邻列/窗口的焦点 |
-| `Mod+Ctrl+H/J/K/L` 或 `Mod+Ctrl+Arrow` | 移动当前列/窗口 |
+| `Mod+T` 或 `Mod+Return` | 打开 Ghostty |
+| `Mod+Space` | 打开应用启动器 |
+| `Mod+D` | 切换仪表板 |
+| `Mod+V` | 切换剪贴板管理器 |
+| `Mod+Alt+L` | 锁屏 |
+| `Mod+O` 或 `Mod+Tab` | 切换概览 |
+| `Alt+Tab` | 切换最近窗口 |
 | `Mod+1` 至 `Mod+9` | 切换工作区 |
-| `Mod+Ctrl+1` 至 `Mod+Ctrl+9` | 将列移至工作区 |
-| `Mod+F` / `Mod+Shift+F` | 最大化列 / 窗口全屏 |
-| `Mod+V` | 切换浮动状态 |
-| `Print` / `Ctrl+Print` / `Alt+Print` | DMS 交互式 / 屏幕 / 窗口截图，然后由 Satty 编辑 |
+| `Mod+Shift+1` 至 `Mod+Shift+9` | 将列移至工作区 |
+| `Print` / `Ctrl+Print` / `Alt+Print` | 使用 DMS 截取区域 / 屏幕 / 窗口 |
 | `Mod+Shift+P` | 关闭显示器 |
-| `Mod+Shift+E` 或 `Ctrl+Alt+Delete` | 退出 Niri |
-
-关闭显示器后系统仍继续运行。音量、媒体、麦克风静音及亮度键使用 DMS IPC，
-锁屏时也可使用。
 
 ## 应用与系统集成
 

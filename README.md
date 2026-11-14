@@ -14,7 +14,7 @@ development environments are specific to this machine.
 | Platform | `x86_64-linux`; NixOS and Home Manager 26.05; timezone `Asia/Shanghai` |
 | Package sources | Stable Nixpkgs for the system, with selected applications from a separate pinned unstable input |
 | Kernel and graphics | `linuxPackages_latest`; evaluated lockfile selects Linux `7.2.6`; NVIDIA driver `610.57.04` is pinned explicitly |
-| Desktop | greetd/tuigreet → Niri with Dank Material Shell (DMS), Ghostty, Nautilus, and XWayland |
+| Desktop | greetd/tuigreet → Niri with Dux Modular Shell (DMS), Ghostty, Nautilus, and XWayland |
 | Input and audio | Fcitx5, Rime Ice with Xiaohe Shuangpin, and PipeWire/WirePlumber |
 | Appearance | Declarative MacTahoe GTK/Kvantum themes, Wood Whale avatar, and wallpaper collection |
 | Storage | LUKS-encrypted Btrfs, zram, automatic removable-drive mounting, and two rclone WebDAV mounts |
@@ -84,8 +84,8 @@ local application state, sensor readings, and disk-space figures are historical.
 | [system/secrets.nix](system/secrets.nix), [.sops.yaml](.sops.yaml), [secrets/webdav.yaml](secrets/webdav.yaml) | Encrypted WebDAV credentials and their decryption policy |
 | [home/default.nix](home/default.nix), [home/programs.nix](home/programs.nix) | User modules, XDG directories, packages, Fish, CLI tools, and development environments |
 | [home/desktop.nix](home/desktop.nix), [home/input-method.nix](home/input-method.nix) | MIME associations, desktop preferences, MControlCenter, and Fcitx/Rime state |
-| [home/niri.nix](home/niri.nix), [home/niri/config.kdl](home/niri/config.kdl) | Complete Niri configuration and cleanup of unused DMS fragments |
-| [home/dms.nix](home/dms.nix), [home/dms/settings.json](home/dms/settings.json), [home/dms/Wood_Whale.jpg](home/dms/Wood_Whale.jpg) | DMS settings, merged session preferences, wallpaper default, and generated avatar |
+| [home/niri.nix](home/niri.nix) | Official Niri defaults and writable DMS configuration |
+| [home/dms.nix](home/dms.nix), [home/dms/Wood_Whale.jpg](home/dms/Wood_Whale.jpg) | DMS settings reset, retained wallpaper, and account avatar |
 | [home/themes.nix](home/themes.nix), [home/wallpapers](home/wallpapers) | Pinned themes and tracked wallpaper assets |
 | [home/ghost-downloader.nix](home/ghost-downloader.nix), [home/baidunetdisk.nix](home/baidunetdisk.nix), [home/115-life.nix](home/115-life.nix), [home/packages](home/packages) | Custom application packages, launchers, URI handlers, and Zhuque Fangsong |
 | [home/rclone.nix](home/rclone.nix), [home/vitis.nix](home/vitis.nix) | User mounts and AMD-tool/container wrappers and VNC service |

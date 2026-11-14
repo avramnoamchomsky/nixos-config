@@ -172,8 +172,8 @@ busctl call org.freedesktop.login1 /org/freedesktop/login1 \
 `swapon --show` 应只列出 `/dev/zram0`。四个 `Allow*` 设置均应为 `false`，
 两个 bus 调用都应返回 `s "no"`。
 
-已跟踪的 DMS 设置还将自动锁屏与挂起超时设为零。请使用 `Super+Alt+L` 手动
-锁屏；关闭显示器与系统睡眠是不同操作。
+使用 `Mod+Alt+L` 手动锁屏。锁屏和显示器超时可在 DMS 设置中修改；
+关闭显示器与系统睡眠是不同操作。
 
 ## MSI 控制与触控板
 

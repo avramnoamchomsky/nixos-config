@@ -13,6 +13,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    dms.url = "github:duxlabs-dev/dux-shell/v2.1.2";
+
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
 
     # Pinned to a mature revision whose helper has a smaller, reliable build
@@ -32,6 +34,7 @@
       nixpkgs,
       nixpkgs-unstable,
       home-manager,
+      dms,
       nix-flatpak,
       sops-nix,
       lanzaboote,
@@ -40,6 +43,13 @@
     }:
     let
       system = "x86_64-linux";
+
+      # Keep DMS and Quickshell on the same Qt package set.
+      desktopShell = {
+        package = dms.packages.${system}.default;
+        quickshell = dms.inputs.nixpkgs.legacyPackages.${system}.quickshell;
+        source = dms.outPath;
+      };
 
       unstablePkgs = import nixpkgs-unstable {
         inherit system;
@@ -53,10 +63,11 @@
 
           # Make an unstable package set available to NixOS and Home Manager.
           # This does NOT move the NixOS system itself to unstable.
-          specialArgs = { inherit unstablePkgs; };
+          specialArgs = { inherit desktopShell unstablePkgs; };
 
           modules = [
             ./system
+            dms.nixosModules.default
             codex-desktop-linux.nixosModules.default
             nix-flatpak.nixosModules.nix-flatpak
             sops-nix.nixosModules.sops
@@ -67,7 +78,7 @@
               home-manager = {
                 useGlobalPkgs = true;
                 useUserPackages = true;
-                extraSpecialArgs = { inherit unstablePkgs; };
+                extraSpecialArgs = { inherit desktopShell unstablePkgs; };
                 users.chomsky = ./home;
               };
             }

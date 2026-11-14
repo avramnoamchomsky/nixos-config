@@ -183,7 +183,6 @@ in
     zotero
     qalculate-gtk
     swayimg
-    satty
     qpwgraph
     seahorse
     moonlight-qt
