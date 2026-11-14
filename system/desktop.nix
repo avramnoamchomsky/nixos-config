@@ -110,17 +110,8 @@ in
 
   programs.trippy.enable = true;
 
-  services.greetd = {
-    enable = true;
-    settings.default_session = {
-      command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --cmd ${pkgs.niri}/bin/niri-session";
-      user = "greeter";
-    };
-  };
-
   security.polkit.enable = true;
   services.gnome.gnome-keyring.enable = true;
-  security.pam.services.greetd.enableGnomeKeyring = true;
   security.pam.services.login.enableGnomeKeyring = true;
   programs.dconf.enable = true;
 

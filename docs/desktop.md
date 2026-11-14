@@ -21,6 +21,9 @@ start `bash` from Fish before the avatar example below.
 
 ## Desktop configuration
 
+Log in as `chomsky` on `tty1` to start Niri and DMS. Exiting Niri returns to
+the login prompt. Use `Ctrl+Alt+F2` for a console that stays in Fish.
+
 The flake pins Dux Modular Shell (DMS) to the official stable release. Home
 Manager installs the release's Niri configuration and sets up writable fragments
 under `~/.config/niri/dms/`. DMS manages shortcuts, window rules, input devices,
@@ -53,6 +56,7 @@ On the Niri desktop, `Mod` is Super by default.
 | `Alt+Tab` | Switch recent windows |
 | `Mod+1` through `Mod+9` | Focus a workspace |
 | `Mod+Shift+1` through `Mod+Shift+9` | Move a column to a workspace |
+| `Mod+R` / `Mod+Shift+R` | Cycle column width (50% / 95%) or window height (50% / 100%) |
 | `Print` / `Ctrl+Print` / `Alt+Print` | Use DMS to capture a region / screen / window |
 | `Mod+Shift+P` | Turn off monitors |
 

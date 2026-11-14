@@ -13,7 +13,7 @@
 | 平台 | `x86_64-linux`；NixOS 与 Home Manager 26.05；时区 `Asia/Shanghai` |
 | 软件包来源 | 系统使用稳定版 Nixpkgs，部分应用使用独立且固定的 unstable 输入 |
 | 内核与显卡 | `linuxPackages_latest`；当前 lockfile 求值结果为 Linux `7.2.6`；NVIDIA 驱动显式固定为 `610.57.04` |
-| 桌面 | greetd/tuigreet → Niri，配合 Dux Modular Shell（DMS）、Ghostty、Nautilus 与 XWayland |
+| 桌面 | 在 `tty1` 控制台登录后启动 Niri，配合 Dux Modular Shell（DMS）、Ghostty、Nautilus 与 XWayland |
 | 输入与音频 | Fcitx5、Rime Ice 小鹤双拼及 PipeWire/WirePlumber |
 | 外观 | 声明式 MacTahoe GTK/Kvantum 主题、Wood Whale 头像及壁纸集合 |
 | 存储 | LUKS 加密 Btrfs、zram、可移动存储自动挂载及两个 rclone WebDAV 挂载 |

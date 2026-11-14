@@ -22,6 +22,16 @@ let
   );
 in
 {
+  # Only the primary local console launches the desktop. Replacing the
+  # shell returns to the login prompt when Niri exits or fails.
+  programs.fish.loginShellInit = ''
+    if status is-interactive; and test "$(${pkgs.coreutils}/bin/tty)" = /dev/tty1
+      and test -z "$SSH_CONNECTION"; and test -z "$WAYLAND_DISPLAY"; and test -z "$DISPLAY"
+      exec ${pkgs.niri}/bin/niri-session
+    end
+  '';
+
+  xdg.configFile."niri/resize-presets.kdl".source = ./niri/resize-presets.kdl;
   xdg.configFile."niri/config.kdl".text =
     lib.replaceStrings
       [ "        // Enable numlock on startup, omitting this setting disables it.\n        numlock\n" ]
@@ -34,6 +44,7 @@ in
       (builtins.elemAt withIncludes 1)
     + ''
       include optional=true "dms/wpblur.kdl"
+      include "resize-presets.kdl"
     '';
 
   # Wait for Home Manager to stop the old unit that deleted niri/dms.

@@ -21,6 +21,9 @@ Home Manager 管理本指南中的桌面文件与资源。请通过
 
 ## 桌面配置
 
+在 `tty1` 上以 `chomsky` 登录即可启动 Niri 和 DMS。退出 Niri 后会返回登录提示。
+按 `Ctrl+Alt+F2` 可切换到登录后停留在 Fish 的控制台。
+
 Flake 固定使用 Dux Modular Shell（DMS）的官方稳定版。Home Manager 部署该版本的
 Niri 配置，并在 `~/.config/niri/dms/` 下创建可写配置片段。快捷键、窗口规则、输入设备、
 光标、显示器、布局、配色、最近窗口和壁纸集成都可以在 DMS 设置中管理。
@@ -50,6 +53,7 @@ UDisks 和 Home Manager 的 `udiskie` 服务会将符合条件的可移动存储
 | `Alt+Tab` | 切换最近窗口 |
 | `Mod+1` 至 `Mod+9` | 切换工作区 |
 | `Mod+Shift+1` 至 `Mod+Shift+9` | 将列移至工作区 |
+| `Mod+R` / `Mod+Shift+R` | 循环切换列宽（50% / 95%）或窗口高度（50% / 100%） |
 | `Print` / `Ctrl+Print` / `Alt+Print` | 使用 DMS 截取区域 / 屏幕 / 窗口 |
 | `Mod+Shift+P` | 关闭显示器 |
 

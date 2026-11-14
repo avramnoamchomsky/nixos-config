@@ -14,7 +14,7 @@ development environments are specific to this machine.
 | Platform | `x86_64-linux`; NixOS and Home Manager 26.05; timezone `Asia/Shanghai` |
 | Package sources | Stable Nixpkgs for the system, with selected applications from a separate pinned unstable input |
 | Kernel and graphics | `linuxPackages_latest`; evaluated lockfile selects Linux `7.2.6`; NVIDIA driver `610.57.04` is pinned explicitly |
-| Desktop | greetd/tuigreet → Niri with Dux Modular Shell (DMS), Ghostty, Nautilus, and XWayland |
+| Desktop | Console login on `tty1` → Niri with Dux Modular Shell (DMS), Ghostty, Nautilus, and XWayland |
 | Input and audio | Fcitx5, Rime Ice with Xiaohe Shuangpin, and PipeWire/WirePlumber |
 | Appearance | Declarative MacTahoe GTK/Kvantum themes, Wood Whale avatar, and wallpaper collection |
 | Storage | LUKS-encrypted Btrfs, zram, automatic removable-drive mounting, and two rclone WebDAV mounts |
