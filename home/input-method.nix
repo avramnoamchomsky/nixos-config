@@ -11,7 +11,7 @@
       # Layout
       Default Layout=us
       # Default Input Method
-      DefaultIM=rime
+      DefaultIM=msime
 
       [Groups/0/Items/0]
       # Name
@@ -20,6 +20,12 @@
       Layout=
 
       [Groups/0/Items/1]
+      # Name
+      Name=msime
+      # Layout
+      Layout=
+
+      [Groups/0/Items/2]
       # Name
       Name=rime
       # Layout

@@ -27,6 +27,11 @@
     };
 
     codex-desktop-linux.url = "github:ilysenko/codex-desktop-linux";
+
+    msime = {
+      url = "github:metasequoiaime/msime/21aacdded83643576e4a0318803e34b6e7d258bc";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -39,6 +44,7 @@
       sops-nix,
       lanzaboote,
       codex-desktop-linux,
+      msime,
       ...
     }:
     let
@@ -69,6 +75,19 @@
             ./system
             dms.nixosModules.default
             codex-desktop-linux.nixosModules.default
+            msime.nixosModules.default
+            (
+              { pkgs, ... }:
+              {
+                programs.msime.package = (pkgs.extend msime.overlays.default).msime-fcitx5.overrideAttrs {
+                  # The candidate canvas tests need fonts inside the build sandbox.
+                  FONTCONFIG_FILE = pkgs.makeFontsConf {
+                    fontDirectories = [ pkgs.dejavu_fonts pkgs.noto-fonts-cjk-sans ];
+                  };
+                  CTEST_OUTPUT_ON_FAILURE = "1";
+                };
+              }
+            )
             nix-flatpak.nixosModules.nix-flatpak
             sops-nix.nixosModules.sops
             lanzaboote.nixosModules.lanzaboote

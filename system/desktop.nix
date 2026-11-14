@@ -44,7 +44,9 @@ let
   };
 in
 {
-  # Input method: Fcitx5 + Rime Ice + Xiaohe Shuangpin.
+  # MSIME uses the system's Fcitx5 ABI; retain Rime Ice as a fallback.
+  programs.msime.enable = true;
+
   i18n.inputMethod = {
     enable = true;
     type = "fcitx5";
