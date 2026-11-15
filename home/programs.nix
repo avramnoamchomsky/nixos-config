@@ -120,12 +120,21 @@ in
       fi
     '';
     initExtra = lib.mkOrder 2100 ''
-      [[ ! ''${BLE_VERSION-} || ''${BLE_ATTACHED-} ]] || ble-attach
+      if [[ ''${BLE_VERSION-} ]]; then
+        _ble_contrib_fzf_base=${pkgs.fzf}/share/fzf
+        ble-import -d integration/fzf-completion
+        ble-import -d integration/fzf-key-bindings
+        ble-import -d integration/zoxide
+        [[ ''${BLE_ATTACHED-} ]] || ble-attach
+      elif [[ $TERM != dumb ]]; then
+        eval "$(${lib.getExe pkgs.fzf} --bash)"
+      fi
     '';
   };
 
   programs.direnv = {
     enable = true;
+    enableBashIntegration = true;
     nix-direnv.enable = true;
   };
 
@@ -144,6 +153,7 @@ in
         unlink "$out/share/nautilus-python/extensions/ghostty.py"
       '';
     };
+    enableBashIntegration = true;
     enableFishIntegration = true;
     settings = {
       font-family = "JetBrainsMono Nerd Font";
@@ -170,6 +180,7 @@ in
 
   programs.eza = {
     enable = true;
+    enableBashIntegration = true;
     enableFishIntegration = true;
   };
 
@@ -187,15 +198,28 @@ in
 
   programs.fzf = {
     enable = true;
-    # Keep ble.sh in charge of Bash completion and line editing.
+    # Bash loads fzf through ble.sh when the editor is available.
     enableBashIntegration = false;
     enableFishIntegration = true;
   };
 
   programs.zoxide = {
     enable = true;
+    enableBashIntegration = true;
     enableFishIntegration = true;
   };
+
+  xdg.configFile."swayimg/config".text = ''
+    # RGBA: the last byte, 66, is 40% opacity.
+    [viewer]
+    window = #28282866
+
+    [slideshow]
+    window = #28282866
+
+    [gallery]
+    window = #28282866
+  '';
 
   programs.btop = {
     enable = true;

@@ -38,6 +38,7 @@ in
 
   xdg.configFile."niri/resize-presets.kdl".source = ./niri/resize-presets.kdl;
   xdg.configFile."niri/ghostty-blur.kdl".source = ./niri/ghostty-blur.kdl;
+  xdg.configFile."niri/swayimg-blur.kdl".source = ./niri/swayimg-blur.kdl;
   xdg.configFile."niri/config.kdl".text =
     lib.replaceStrings
       [
@@ -68,6 +69,7 @@ in
       include optional=true "dms/wpblur.kdl"
       include "resize-presets.kdl"
       include "ghostty-blur.kdl"
+      include "swayimg-blur.kdl"
     '';
 
   # Wait for Home Manager to stop the old unit that deleted niri/dms.
