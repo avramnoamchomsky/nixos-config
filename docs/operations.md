@@ -2,7 +2,7 @@
 
 [English](operations.md) | [简体中文](operations.zh-CN.md) | [README](../README.md)
 
-These procedures target `pisces` and `chomsky`. Run Nix commands from the
+These procedures target `Pisces` and `chomsky`. Run Nix commands from the
 repository root. Shell examples use Bash; commands without Bash-specific syntax
 also work in the configured Fish shell.
 
@@ -20,7 +20,7 @@ also work in the configured Fish shell.
 
 ## Validate and apply
 
-Home Manager is integrated into `nixosConfigurations.pisces`. A system rebuild
+Home Manager is integrated into `nixosConfigurations.Pisces`. A system rebuild
 also builds and activates the `chomsky` environment. `system.stateVersion` and
 `home.stateVersion` are compatibility settings, both `26.05`; changing them is
 not an input-update procedure.
@@ -36,13 +36,13 @@ not an input-update procedure.
 3. Build the complete system without activating it:
 
    ```bash
-   nix build --no-link --no-update-lock-file .#nixosConfigurations.pisces.config.system.build.toplevel
+   nix build --no-link --no-update-lock-file .#nixosConfigurations.Pisces.config.system.build.toplevel
    ```
 
    For a focused Home Manager check, build its activation package instead:
 
    ```bash
-   nix build --no-link --no-update-lock-file .#nixosConfigurations.pisces.config.home-manager.users.chomsky.home.activationPackage
+   nix build --no-link --no-update-lock-file .#nixosConfigurations.Pisces.config.home-manager.users.chomsky.home.activationPackage
    ```
 
 The flake check evaluates outputs; it does not compile packages or run the
@@ -54,9 +54,9 @@ Choose activation according to the change and the current boot mode:
 
 | Situation | Apply with | Effect |
 | --- | --- | --- |
-| Ordinary package, desktop, or service change in normal mode | `sudo nixos-rebuild switch --flake .#pisces` | Install a generation and activate the normal system and Home Manager immediately |
-| Kernel, initrd, GPU-driver, VFIO, or boot-loader change | `sudo nixos-rebuild boot --flake .#pisces` | Install the next boot generation; use it after reboot |
-| Currently booted into VFIO | `sudo nixos-rebuild boot --flake .#pisces` | Keep the running GPU ownership until a controlled reboot |
+| Ordinary package, desktop, or service change in normal mode | `sudo nixos-rebuild switch --flake .#Pisces` | Install a generation and activate the normal system and Home Manager immediately |
+| Kernel, initrd, GPU-driver, VFIO, or boot-loader change | `sudo nixos-rebuild boot --flake .#Pisces` | Install the next boot generation; use it after reboot |
+| Currently booted into VFIO | `sudo nixos-rebuild boot --flake .#Pisces` | Keep the running GPU ownership until a controlled reboot |
 
 Shut down guests before rebooting, then run `sudo reboot`. A normal `switch`
 while VFIO or a guest owns the RTX 4060 may try to return the device to NVIDIA.
@@ -265,7 +265,7 @@ mounts; they are not supplied by a clone of this repository.
 
 ## Networking and host services
 
-NetworkManager manages the host connections. Avahi advertises `pisces.local`,
+NetworkManager manages the host connections. Avahi advertises `Pisces.local`,
 publishes the workstation/address records, and resolves IPv4 `.local` names.
 Bluetooth, UPower, fwupd, fstrim, PipeWire, the GNOME keyring, GVfs, and UDisks
 are enabled. The Home Manager udiskie service provides removable-drive
@@ -355,7 +355,7 @@ during the initrd:
 Install both boot entries without switching the running system into VFIO mode:
 
 ```bash
-sudo nixos-rebuild boot --flake .#pisces
+sudo nixos-rebuild boot --flake .#Pisces
 ```
 
 After rebooting into the `vfio` specialisation, verify that both functions show

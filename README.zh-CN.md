@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-用于 `pisces` MSI Alpha 17 C7VF 笔记本及 `chomsky` 账户的个人 NixOS 配置。
+用于 `Pisces` MSI Alpha 17 C7VF 笔记本及 `chomsky` 账户的个人 NixOS 配置。
 一次 flake 重构同时管理系统与 Home Manager。硬件标识、文件系统 UUID、用户路径
 及外部开发环境均针对本机设置。
 
@@ -35,17 +35,17 @@
 ```bash
 cd ~/all_files/projects/nixos-config
 nix flake check --no-build --no-update-lock-file
-nix build --no-link --no-update-lock-file .#nixosConfigurations.pisces.config.system.build.toplevel
+nix build --no-link --no-update-lock-file .#nixosConfigurations.Pisces.config.system.build.toplevel
 ```
 
 在正常启动模式下修改普通桌面、软件包或服务后，同时应用系统与 Home Manager：
 
 ```bash
-sudo nixos-rebuild switch --flake .#pisces
+sudo nixos-rebuild switch --flake .#Pisces
 ```
 
 修改内核、initrd、显卡驱动、VFIO 或引导程序时，请使用
-`sudo nixos-rebuild boot --flake .#pisces`，关闭客户机后重启。当前处于 VFIO
+`sudo nixos-rebuild boot --flake .#Pisces`，关闭客户机后重启。当前处于 VFIO
 specialisation 时也应使用 `boot`。完整的验证、激活、输入更新及恢复流程见
 [运维指南](docs/operations.zh-CN.md#验证与应用)。
 
@@ -68,7 +68,7 @@ generation 编号、本地应用状态、传感器读数及剩余磁盘空间均
 
 | 路径 | 职责 |
 | --- | --- |
-| [flake.nix](flake.nix)、[flake.lock](flake.lock) | 输入、可复现版本、`pisces` 输出及 Home Manager 集成 |
+| [flake.nix](flake.nix)、[flake.lock](flake.lock) | 输入、可复现版本、`Pisces` 输出及 Home Manager 集成 |
 | [system/default.nix](system/default.nix)、[system/hardware-configuration.nix](system/hardware-configuration.nix) | 模块导入、身份、启动、Nix 设置、网络、用户及本机存储 |
 | [system/desktop.nix](system/desktop.nix)、[system/gaming.nix](system/gaming.nix) | 会话、输入、音频、桌面服务、权限、字体、Flatpak 及 Steam |
 | [system/hybrid-graphics.nix](system/hybrid-graphics.nix)、[system/vfio.nix](system/vfio.nix) | NVIDIA 驱动、PRIME offload 及 GPU 预留 specialisation |

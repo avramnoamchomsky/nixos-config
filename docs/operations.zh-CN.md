@@ -2,7 +2,7 @@
 
 [English](operations.md) | [简体中文](operations.zh-CN.md) | [README](../README.zh-CN.md)
 
-本流程适用于 `pisces` 与 `chomsky`。在仓库根目录执行 Nix 命令。
+本流程适用于 `Pisces` 与 `chomsky`。在仓库根目录执行 Nix 命令。
 Shell 示例使用 Bash；不含 Bash 特有语法的命令也可在配置的 Fish 中运行。
 
 ## 目录
@@ -19,7 +19,7 @@ Shell 示例使用 Bash；不含 Bash 特有语法的命令也可在配置的 Fi
 
 ## 验证与应用
 
-Home Manager 已集成到 `nixosConfigurations.pisces`，系统重构也会构建并激活
+Home Manager 已集成到 `nixosConfigurations.Pisces`，系统重构也会构建并激活
 `chomsky` 用户环境。`system.stateVersion` 与 `home.stateVersion` 均为 `26.05`，
 用于兼容性设置；修改它们并不是更新输入的步骤。
 
@@ -34,13 +34,13 @@ Home Manager 已集成到 `nixosConfigurations.pisces`，系统重构也会构�
 3. 构建完整系统，但不激活：
 
    ```bash
-   nix build --no-link --no-update-lock-file .#nixosConfigurations.pisces.config.system.build.toplevel
+   nix build --no-link --no-update-lock-file .#nixosConfigurations.Pisces.config.system.build.toplevel
    ```
 
    如需单独验证 Home Manager，可改为构建其激活包：
 
    ```bash
-   nix build --no-link --no-update-lock-file .#nixosConfigurations.pisces.config.home-manager.users.chomsky.home.activationPackage
+   nix build --no-link --no-update-lock-file .#nixosConfigurations.Pisces.config.home-manager.users.chomsky.home.activationPackage
    ```
 
 flake 检查会求值输出，并不编译软件包或执行激活钩子。成功构建表明请求的输出
@@ -51,9 +51,9 @@ flake 检查会求值输出，并不编译软件包或执行激活钩子。成�
 
 | 情况 | 命令 | 效果 |
 | --- | --- | --- |
-| 正常模式下修改普通软件包、桌面或服务 | `sudo nixos-rebuild switch --flake .#pisces` | 安装 generation，立即激活正常系统与 Home Manager |
-| 修改内核、initrd、显卡驱动、VFIO 或引导程序 | `sudo nixos-rebuild boot --flake .#pisces` | 安装下次启动 generation，重启后生效 |
-| 当前处于 VFIO 模式 | `sudo nixos-rebuild boot --flake .#pisces` | 在受控重启前保持当前 GPU 归属 |
+| 正常模式下修改普通软件包、桌面或服务 | `sudo nixos-rebuild switch --flake .#Pisces` | 安装 generation，立即激活正常系统与 Home Manager |
+| 修改内核、initrd、显卡驱动、VFIO 或引导程序 | `sudo nixos-rebuild boot --flake .#Pisces` | 安装下次启动 generation，重启后生效 |
+| 当前处于 VFIO 模式 | `sudo nixos-rebuild boot --flake .#Pisces` | 在受控重启前保持当前 GPU 归属 |
 
 重启前先关闭客户机，然后执行 `sudo reboot`。在 VFIO 或客户机占用 RTX 4060 时
 执行正常配置的 `switch`，可能尝试把设备交还给 NVIDIA。两种方式都会构建继承的
@@ -236,7 +236,7 @@ journalctl --user -b -u 'rclone-mount:@infini-cloud-kurio.service'
 
 ## 网络与主机服务
 
-NetworkManager 管理主机连接。Avahi 发布 `pisces.local`、工作站与地址记录，并
+NetworkManager 管理主机连接。Avahi 发布 `Pisces.local`、工作站与地址记录，并
 解析 IPv4 `.local` 名称。蓝牙、UPower、fwupd、fstrim、PipeWire、GNOME keyring、
 GVfs 与 UDisks 均已启用；Home Manager 的 udiskie 服务为 Niri 提供可移动存储自动挂载。
 
@@ -312,7 +312,7 @@ initrd 阶段将两个 NVIDIA 功能绑定到 `vfio-pci`：
 可使用以下命令安装两个启动项，而不将当前运行的系统切换到 VFIO 模式：
 
 ```bash
-sudo nixos-rebuild boot --flake .#pisces
+sudo nixos-rebuild boot --flake .#Pisces
 ```
 
 重启并选择 `vfio` specialisation 后，请检查两个功能是否都显示

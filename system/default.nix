@@ -15,7 +15,7 @@
   ];
 
   # Identity and locale
-  networking.hostName = "pisces";
+  networking.hostName = "Pisces";
   time.timeZone = "Asia/Shanghai";
   i18n.defaultLocale = "en_US.UTF-8";
 
@@ -116,7 +116,7 @@
 
   networking.networkmanager.enable = true;
 
-  # Local hostname and service discovery. This advertises pisces.local and
+  # Local hostname and service discovery. This advertises Pisces.local and
   # allows resolving other IPv4 .local hosts on the LAN.
   services.avahi = {
     enable = true;

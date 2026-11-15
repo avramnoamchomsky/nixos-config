@@ -63,7 +63,7 @@
       };
     in
     {
-      nixosConfigurations.pisces =
+      nixosConfigurations.Pisces =
         nixpkgs.lib.nixosSystem {
           inherit system;
 

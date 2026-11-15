@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-Personal NixOS configuration for the `pisces` MSI Alpha 17 C7VF laptop and the
+Personal NixOS configuration for the `Pisces` MSI Alpha 17 C7VF laptop and the
 `chomsky` account. One flake rebuild manages the system and its Home Manager
 configuration. Hardware identifiers, filesystem UUIDs, user paths, and external
 development environments are specific to this machine.
@@ -38,18 +38,18 @@ machine-local age identity described in [secrets and WebDAV](docs/operations.md#
 ```bash
 cd ~/all_files/projects/nixos-config
 nix flake check --no-build --no-update-lock-file
-nix build --no-link --no-update-lock-file .#nixosConfigurations.pisces.config.system.build.toplevel
+nix build --no-link --no-update-lock-file .#nixosConfigurations.Pisces.config.system.build.toplevel
 ```
 
 For ordinary desktop, package, or service changes while booted normally, apply
 the system and Home Manager together:
 
 ```bash
-sudo nixos-rebuild switch --flake .#pisces
+sudo nixos-rebuild switch --flake .#Pisces
 ```
 
 For kernel, initrd, GPU-driver, VFIO, or boot-loader changes, use
-`sudo nixos-rebuild boot --flake .#pisces` and reboot after shutting down guests.
+`sudo nixos-rebuild boot --flake .#Pisces` and reboot after shutting down guests.
 Use the same `boot` workflow while running the VFIO specialisation. The
 [operations guide](docs/operations.md#validate-and-apply) explains validation,
 activation, input updates, and recovery.
@@ -75,7 +75,7 @@ local application state, sensor readings, and disk-space figures are historical.
 
 | Path | Responsibility |
 | --- | --- |
-| [flake.nix](flake.nix), [flake.lock](flake.lock) | Inputs, reproducible pins, `pisces` output, and Home Manager integration |
+| [flake.nix](flake.nix), [flake.lock](flake.lock) | Inputs, reproducible pins, `Pisces` output, and Home Manager integration |
 | [system/default.nix](system/default.nix), [system/hardware-configuration.nix](system/hardware-configuration.nix) | Module imports, identity, boot, Nix settings, networking, user, and local storage |
 | [system/desktop.nix](system/desktop.nix), [system/gaming.nix](system/gaming.nix) | Session, input, audio, desktop services, permissions, fonts, Flatpak, and Steam |
 | [system/hybrid-graphics.nix](system/hybrid-graphics.nix), [system/vfio.nix](system/vfio.nix) | NVIDIA driver, PRIME offload, and GPU-reservation specialisation |
