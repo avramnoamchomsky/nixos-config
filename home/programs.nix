@@ -1,4 +1,4 @@
-{ pkgs, unstablePkgs, ... }:
+{ lib, pkgs, unstablePkgs, ... }:
 
 let
   browser115 = import ./packages/115-browser.nix { inherit pkgs; };
@@ -109,6 +109,21 @@ in
     '';
   };
 
+  programs.bash = {
+    enable = true;
+    enableCompletion = true;
+
+    # Let Starship register its ble.sh hooks before attaching the editor.
+    bashrcExtra = ''
+      if [[ $- == *i* && -t 0 && -t 1 && -t 2 && $TERM != dumb && ! ''${BLE_VERSION-} ]]; then
+        source ${pkgs.blesh}/share/blesh/ble.sh --attach=none
+      fi
+    '';
+    initExtra = lib.mkOrder 2100 ''
+      [[ ! ''${BLE_VERSION-} || ''${BLE_ATTACHED-} ]] || ble-attach
+    '';
+  };
+
   programs.direnv = {
     enable = true;
     nix-direnv.enable = true;
@@ -132,6 +147,7 @@ in
 
   programs.starship = {
     enable = true;
+    enableBashIntegration = true;
     enableFishIntegration = true;
     presets = [ "gruvbox-rainbow" ];
   };
@@ -152,6 +168,8 @@ in
 
   programs.fzf = {
     enable = true;
+    # Keep ble.sh in charge of Bash completion and line editing.
+    enableBashIntegration = false;
     enableFishIntegration = true;
   };
 
