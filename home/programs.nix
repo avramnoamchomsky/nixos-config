@@ -166,6 +166,16 @@ in
 
   programs.bat.enable = true;
 
+  programs.mpv = {
+    enable = true;
+    scripts = [ pkgs.mpvScripts.modernz ];
+    config = {
+      osc = false;
+      # ModernZ moves subtitles above the controls while they are visible.
+      watch-later-options-remove = "sub-pos";
+    };
+  };
+
   programs.fzf = {
     enable = true;
     # Keep ble.sh in charge of Bash completion and line editing.
@@ -201,7 +211,6 @@ in
     google-chrome
     readest
     sylvakru
-    mpv
     remmina
     kdiskmark
     vscode
