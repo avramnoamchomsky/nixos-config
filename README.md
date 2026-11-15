@@ -15,7 +15,7 @@ development environments are specific to this machine.
 | Package sources | Stable Nixpkgs for the system, with selected applications from a separate pinned unstable input |
 | Kernel and graphics | `linuxPackages_latest`; evaluated lockfile selects Linux `7.2.6`; NVIDIA driver `610.57.04` is pinned explicitly |
 | Desktop | Console login on `tty1` → Niri with Dux Modular Shell (DMS), Ghostty, Nautilus, and XWayland |
-| Input and audio | Fcitx5, Rime Ice with Xiaohe Shuangpin, and PipeWire/WirePlumber |
+| Input and audio | Fcitx5 with MSIME, and PipeWire/WirePlumber |
 | Appearance | Declarative MacTahoe GTK/Kvantum themes, Wood Whale avatar, and wallpaper collection |
 | Storage | LUKS-encrypted Btrfs, zram, automatic removable-drive mounting, and two rclone WebDAV mounts |
 | Virtualization | libvirt/KVM, virt-manager, Docker/Distrobox, and an RTX 4060 `vfio` boot specialisation |
@@ -83,7 +83,7 @@ local application state, sensor readings, and disk-space figures are historical.
 | [system/virtualization.nix](system/virtualization.nix), [system/fpga.nix](system/fpga.nix) | KVM/libvirt, Docker, programmer access, and FPGA network/TFTP service |
 | [system/secrets.nix](system/secrets.nix), [.sops.yaml](.sops.yaml), [secrets/webdav.yaml](secrets/webdav.yaml) | Encrypted WebDAV credentials and their decryption policy |
 | [home/default.nix](home/default.nix), [home/programs.nix](home/programs.nix) | User modules, XDG directories, packages, Fish, CLI tools, and development environments |
-| [home/desktop.nix](home/desktop.nix), [home/input-method.nix](home/input-method.nix) | MIME associations, desktop preferences, MControlCenter, and Fcitx/Rime state |
+| [home/desktop.nix](home/desktop.nix), [home/input-method.nix](home/input-method.nix) | MIME associations, desktop preferences, MControlCenter, and the Fcitx5 input profile |
 | [home/niri.nix](home/niri.nix) | Official Niri defaults and writable DMS configuration |
 | [home/dms.nix](home/dms.nix), [home/dms/Wood_Whale.jpg](home/dms/Wood_Whale.jpg) | DMS settings reset, retained wallpaper, and account avatar |
 | [home/themes.nix](home/themes.nix), [home/wallpapers](home/wallpapers) | Pinned themes and tracked wallpaper assets |

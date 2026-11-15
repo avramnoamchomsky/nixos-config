@@ -45,21 +45,14 @@ let
   };
 in
 {
-  # MSIME uses the system's Fcitx5 ABI; retain Rime Ice as a fallback.
+  # MSIME uses the system's Fcitx5 ABI.
   programs.msime.enable = true;
 
   i18n.inputMethod = {
     enable = true;
     type = "fcitx5";
 
-    fcitx5 = {
-      waylandFrontend = true;
-      addons = with pkgs; [
-        (fcitx5-rime.override {
-          rimeDataPkgs = [ rime-ice ];
-        })
-      ];
-    };
+    fcitx5.waylandFrontend = true;
   };
 
   console.keyMap = "us";

@@ -14,7 +14,7 @@
 | 软件包来源 | 系统使用稳定版 Nixpkgs，部分应用使用独立且固定的 unstable 输入 |
 | 内核与显卡 | `linuxPackages_latest`；当前 lockfile 求值结果为 Linux `7.2.6`；NVIDIA 驱动显式固定为 `610.57.04` |
 | 桌面 | 在 `tty1` 控制台登录后启动 Niri，配合 Dux Modular Shell（DMS）、Ghostty、Nautilus 与 XWayland |
-| 输入与音频 | Fcitx5、Rime Ice 小鹤双拼及 PipeWire/WirePlumber |
+| 输入与音频 | Fcitx5（MSIME）及 PipeWire/WirePlumber |
 | 外观 | 声明式 MacTahoe GTK/Kvantum 主题、Wood Whale 头像及壁纸集合 |
 | 存储 | LUKS 加密 Btrfs、zram、可移动存储自动挂载及两个 rclone WebDAV 挂载 |
 | 虚拟化 | libvirt/KVM、virt-manager、Docker/Distrobox 及 RTX 4060 `vfio` 启动 specialisation |
@@ -76,7 +76,7 @@ generation 编号、本地应用状态、传感器读数及剩余磁盘空间均
 | [system/virtualization.nix](system/virtualization.nix)、[system/fpga.nix](system/fpga.nix) | KVM/libvirt、Docker、下载器访问及 FPGA 网络/TFTP 服务 |
 | [system/secrets.nix](system/secrets.nix)、[.sops.yaml](.sops.yaml)、[secrets/webdav.yaml](secrets/webdav.yaml) | 加密 WebDAV 凭据及其解密策略 |
 | [home/default.nix](home/default.nix)、[home/programs.nix](home/programs.nix) | 用户模块、XDG 目录、软件包、Fish、命令行工具及开发环境 |
-| [home/desktop.nix](home/desktop.nix)、[home/input-method.nix](home/input-method.nix) | MIME 关联、桌面偏好、MControlCenter 及 Fcitx/Rime 状态 |
+| [home/desktop.nix](home/desktop.nix)、[home/input-method.nix](home/input-method.nix) | MIME 关联、桌面偏好、MControlCenter 及 Fcitx5 输入法配置 |
 | [home/niri.nix](home/niri.nix) | 官方 Niri 默认配置及 DMS 可写配置 |
 | [home/dms.nix](home/dms.nix)、[home/dms/Wood_Whale.jpg](home/dms/Wood_Whale.jpg) | DMS 设置重置、保留的壁纸与账户头像 |
 | [home/themes.nix](home/themes.nix)、[home/wallpapers](home/wallpapers) | 固定主题及已跟踪壁纸资源 |

@@ -25,25 +25,8 @@
       # Layout
       Layout=
 
-      [Groups/0/Items/2]
-      # Name
-      Name=rime
-      # Layout
-      Layout=
-
       [GroupOrder]
       0=Default
-    '';
-  };
-
-  xdg.dataFile."fcitx5/rime/default.custom.yaml" = {
-    force = true;
-    text = ''
-      patch:
-        __include: rime_ice_suggestion:/
-
-        schema_list:
-          - schema: double_pinyin_flypy
     '';
   };
 }
