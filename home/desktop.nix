@@ -51,6 +51,11 @@
   dconf.settings = {
     "org/gnome/desktop/interface".color-scheme = "prefer-dark";
     "org/gnome/nautilus/preferences".show-delete-permanently = true;
+    "com/github/stunkymonkey/nautilus-open-any-terminal" = {
+      # Pass the folder explicitly, even when Ghostty is already running.
+      custom-local-command = "ghostty --gtk-single-instance=false --working-directory=%s";
+      custom-remote-command = "ghostty --gtk-single-instance=false -e %s";
+    };
     "org/gtk/gtk4/settings/file-chooser".show-hidden = true;
   };
 

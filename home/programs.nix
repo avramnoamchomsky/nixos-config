@@ -135,6 +135,15 @@ in
 
   programs.ghostty = {
     enable = true;
+    # Let Open Any Terminal supply the sole Nautilus terminal menu item.
+    package = pkgs.symlinkJoin {
+      name = "ghostty-without-nautilus-extension";
+      paths = [ pkgs.ghostty ];
+      inherit (pkgs.ghostty) meta passthru;
+      postBuild = ''
+        unlink "$out/share/nautilus-python/extensions/ghostty.py"
+      '';
+    };
     enableFishIntegration = true;
     settings = {
       font-family = "JetBrainsMono Nerd Font";
@@ -184,11 +193,6 @@ in
   };
 
   programs.zoxide = {
-    enable = true;
-    enableFishIntegration = true;
-  };
-
-  programs.yazi = {
     enable = true;
     enableFishIntegration = true;
   };

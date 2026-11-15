@@ -13,6 +13,7 @@
     ./rclone.nix
     ./themes.nix
     ./vitis.nix
+    ./yazi.nix
   ];
 
   home = {

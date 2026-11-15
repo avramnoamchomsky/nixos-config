@@ -74,6 +74,12 @@ in
     useNautilus = true;
   };
 
+  services.gnome.sushi.enable = true;
+  programs.nautilus-open-any-terminal = {
+    enable = true;
+    terminal = "custom";
+  };
+
   programs.dank-material-shell = {
     enable = true;
     inherit (desktopShell) package;
