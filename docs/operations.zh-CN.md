@@ -220,6 +220,9 @@ SOPS_AGE_KEY_FILE=/home/chomsky/all_files/secrets/sops-nix/age-key.txt nix shell
 将访问限制为当前用户。本地写入可能仍等待远程上传，停止有待上传数据的挂载前
 请检查日志。
 
+GVfs 不会在侧边栏自动列出这两个挂载，避免本地文件对话框打开时探测它们。
+两个共享仍可通过上表中的路径访问，也可以在文件管理器或文件对话框中直接打开 `~/mnt`。
+
 检查用户配置服务与两个挂载服务：
 
 ```bash

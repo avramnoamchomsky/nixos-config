@@ -247,6 +247,10 @@ five-minute directory cache, and polling disabled. The `077` umask restricts
 access to the user. A local write may still be waiting for remote upload;
 inspect mount logs before stopping a mount with pending writes.
 
+GVfs hides these two mount entries from the automatic drive list so local
+file dialogs do not probe them on open. Both shares remain at the paths above;
+open `~/mnt` directly in Files or a file chooser to browse them.
+
 Check the user configuration service and the two mount services:
 
 ```bash

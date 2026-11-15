@@ -1,4 +1,4 @@
-{ desktopShell, pkgs, unstablePkgs, ... }:
+{ desktopShell, lib, pkgs, unstablePkgs, ... }:
 
 let
   codex = pkgs.callPackage ../home/packages/codex.nix { };
@@ -79,6 +79,14 @@ in
     enable = true;
     terminal = "custom";
   };
+
+  # Tell GVfs not to probe these as sidebar drives when local dialogs open.
+  # Home Manager still mounts them; fstab only supplies the visibility hint.
+  environment.etc.fstab.text = lib.mkAfter (
+    lib.concatMapStrings (name: ''
+      ${name}: /home/chomsky/mnt/${name} fuse.rclone noauto,nofail,x-gvfs-hide 0 0
+    '') [ "infini-cloud-kurio" "infini-cloud-higa" ]
+  );
 
   programs.dank-material-shell = {
     enable = true;
