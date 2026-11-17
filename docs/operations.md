@@ -102,6 +102,20 @@ these pins.
 Bottles follows the declared Flatpak weekly updater, and Ubuntu packages inside
 the Vitis container follow apt. Those updates are separate from Nix generations.
 
+The optional daily Codex automation runs `./scripts/update-openai-desktop`.
+The script checks OpenAI's stable Codex CLI release and signed ChatGPT Linux
+repository, then builds and installs each update in a separate user Nix
+profile. ChatGPT uses the community NixOS adapter. The updater uses the
+repository's pinned adapter or checks for a newer one, and builds it only when
+its ChatGPT package pin matches OpenAI's signed release. It does not modify the
+system configuration, restart the running app, or touch OpenCodex.
+
+You can run the script manually. Open a new terminal or quit and reopen the
+desktop app to use an update. To roll one back, run
+`nix-env --profile "${XDG_STATE_HOME:-$HOME/.local/state}/openai-updates/cli" --rollback`
+(use `desktop` in place of `cli` for ChatGPT). Pause the automation first so it
+doesn't reapply the update on its next run.
+
 ## Boot signing and recovery
 
 `system/default.nix` uses Lanzaboote `v1.1.0` to install systemd-boot with unified

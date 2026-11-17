@@ -1,0 +1,133 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# != 0 || $(uname -m) != x86_64 ]]; then
+  echo 'Usage: update-openai-desktop (on x86_64 NixOS)' >&2
+  exit 2
+fi
+
+export OPENAI_UPDATE_REPO
+OPENAI_UPDATE_REPO=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)
+state="${XDG_STATE_HOME:-$HOME/.local/state}/openai-updates"
+bin="$HOME/.local/bin"
+apps="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
+mkdir -p -- "$state" "$bin" "$apps"
+exec 9>"$state/lock"
+flock --nonblock 9
+work=$(mktemp -d)
+trap 'rm -rf -- "$work"' EXIT
+
+check_link() {
+  if [[ -e $2 || -L $2 ]]; then
+    if [[ ! -L $2 || $(readlink -- "$2") != "$1" ]]; then
+      echo "Refusing to replace existing launcher: $2" >&2
+      return 1
+    fi
+  fi
+}
+
+install_link() {
+  if [[ ! -L $2 ]]; then
+    ln -sT -- "$1" "$2"
+  fi
+}
+
+build() {
+  nix build --file "$OPENAI_UPDATE_REPO/scripts/openai-desktop-update.nix" \
+    --out-link "$work/$1" "$1"
+}
+
+activate() {
+  nix-env --profile "$state/$1" --set "$(readlink "$work/$1")"
+  nix-env --profile "$state/$1" --delete-generations +2
+}
+
+update_cli() {
+  local profile="$state/cli" version installed
+  check_link "$profile/bin/codex" "$bin/codex"
+  curl --fail --silent --show-error --location --max-time 45 \
+    https://api.github.com/repos/openai/codex/releases/latest >"$work/cli.json"
+  export OPENAI_UPDATE_CLI_VERSION OPENAI_UPDATE_CLI_HASH
+  OPENAI_UPDATE_CLI_VERSION=$(jq -er '.tag_name | capture("^rust-v(?<version>[0-9]+\\.[0-9]+\\.[0-9]+)$").version' "$work/cli.json")
+  OPENAI_UPDATE_CLI_HASH=$(jq -er '.assets[] | select(.name == "codex-package-x86_64-unknown-linux-musl.tar.gz") |
+    .digest | capture("^sha256:(?<hash>[a-f0-9]{64})$").hash' "$work/cli.json")
+  version=$OPENAI_UPDATE_CLI_VERSION
+  if [[ -x $profile/bin/codex ]]; then
+    installed=$("$profile/bin/codex" --version)
+    if [[ $installed == "codex-cli $version" ]]; then
+      install_link "$profile/bin/codex" "$bin/codex"
+      echo "Codex CLI is up to date ($version)."
+      return
+    fi
+  fi
+  build cli
+  [[ $("$work/cli/bin/codex" --version) == "codex-cli $version" ]]
+  activate cli
+  install_link "$profile/bin/codex" "$bin/codex"
+  echo "Codex CLI updated to $version."
+}
+
+update_desktop() {
+  local profile="$state/desktop" source adapter desktop_file bin_path version build_id
+  bin_path="$profile/bin/codex-desktop"
+  desktop_file="$profile/share/applications/codex-desktop.desktop"
+  check_link "$bin_path" "$bin/codex-desktop"
+  check_link "$desktop_file" "$apps/codex-desktop.desktop"
+  source=$(nix eval --impure --raw --expr \
+    '(builtins.getFlake (builtins.getEnv "OPENAI_UPDATE_REPO")).inputs.codex-desktop-linux.outPath')
+  local watchdog=scripts/automation/upstream-linux-package-watchdog/watchdog.js
+  CODEX_UPSTREAM_LINUX_REPOSITORY=https://persistent.oaistatic.com/codex-app-prod/linux/deb \
+    nix shell --inputs-from "$OPENAI_UPDATE_REPO" nixpkgs#nodejs nixpkgs#gnupg \
+      --command timeout 90 node "$source/$watchdog" --json >"$work/desktop.json"
+  jq -eS '.latest | {version, amd64}' "$work/desktop.json" >"$work/pins.json"
+  version=$(jq -er '.version' "$work/pins.json")
+
+  # The adapter audits the ELF layout of a specific official release. Use
+  # the maintained adapter for the signed release, without bypassing its audit.
+  adapter=$source
+  if ! adapter_matches_release "$adapter"; then
+    adapter=$(nix flake metadata --refresh --no-write-lock-file --json \
+      github:ilysenko/codex-desktop-linux | jq -er '.path')
+    if ! adapter_matches_release "$adapter"; then
+      echo "The NixOS adapter has not caught up to signed ChatGPT release $version." >&2
+      return 1
+    fi
+  fi
+  export OPENAI_UPDATE_ADAPTER="$adapter"
+
+  build_id=$(
+    {
+      printf '%s\n' "$adapter"
+      sha256sum <"$work/pins.json"
+      sha256sum <"$OPENAI_UPDATE_REPO/scripts/openai-desktop-update.nix"
+    } | sha256sum | cut -d ' ' -f 1
+  )
+  if [[ ! -x $bin_path || $(readlink -f "$profile") != *-codex-desktop-"$version" ]] ||
+    [[ ! -f $state/desktop-build-id || $(cat "$state/desktop-build-id") != "$build_id" ]]; then
+    build desktop
+    [[ -x $work/desktop/bin/codex-desktop ]]
+    [[ -s $work/desktop/share/applications/codex-desktop.desktop ]]
+    activate desktop
+    printf '%s\n' "$build_id" >"$state/desktop-build-id"
+    echo "ChatGPT desktop updated to $version (NixOS compatibility build)."
+  else
+    echo "ChatGPT desktop is up to date ($version)."
+  fi
+  install_link "$bin_path" "$bin/codex-desktop"
+  install_link "$desktop_file" "$apps/codex-desktop.desktop"
+}
+
+adapter_matches_release() {
+  jq -eS '{version, amd64}' "$1/nix/upstream-linux-packages.json" >"$work/adapter-pins.json" &&
+    cmp -s "$work/pins.json" "$work/adapter-pins.json"
+}
+
+# Give each update its own exit status so a failed build won't block the other.
+( update_cli ) &
+cli_job=$!
+( update_desktop ) &
+desktop_job=$!
+failed=0
+wait "$cli_job" || { echo 'Codex CLI update failed.' >&2; failed=1; }
+wait "$desktop_job" || { echo 'ChatGPT desktop update failed.' >&2; failed=1; }
+exit "$failed"

@@ -94,6 +94,17 @@ git diff -- flake.lock
 Bottles 使用声明的 Flatpak 每周更新器；Vitis 容器中的 Ubuntu 软件包使用 apt。
 这些更新独立于 Nix generation。
 
+每日 Codex 自动化运行 `./scripts/update-openai-desktop`，检查 OpenAI 的
+Codex CLI 稳定版和签名的 ChatGPT Linux 仓库，并将更新分别安装到用户的
+Nix profile。ChatGPT 使用社区维护的 NixOS 兼容层；脚本仅在兼容层固定的
+ChatGPT 软件包与 OpenAI 签名的发行版一致时才会构建。脚本不会改动系统
+配置、重启正在运行的应用或更新 OpenCodex。
+
+也可以手动运行脚本。更新后请打开新终端，或退出并重新打开桌面应用。
+若需回滚，可先暂停自动化，再运行
+`nix-env --profile "${XDG_STATE_HOME:-$HOME/.local/state}/openai-updates/cli" --rollback`；
+回滚 ChatGPT 时将 `cli` 改为 `desktop`。
+
 ## 启动签名与恢复
 
 `system/default.nix` 使用 Lanzaboote `v1.1.0` 安装 systemd-boot 与统一内核镜像。
