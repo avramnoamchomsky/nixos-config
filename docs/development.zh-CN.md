@@ -5,10 +5,12 @@
 主机声明开发工具、设备权限及启动包装命令。项目源文件、外部 ESP32 flake、
 AMD 安装程序、已安装 AMD 工具及容器内容均位于仓库之外。
 请按照[验证与应用](operations.zh-CN.md#验证与应用)应用主机修改。
+主机和账户文件的位置见[架构指南](architecture.zh-CN.md)。
 
 ## 目录
 
 - [嵌入式开发](#嵌入式开发)
+- [嵌入式 Linux 与 QEMU](#嵌入式-linux-与-qemu)
 - [开源 HDL 与 FPGA 工具](#开源-hdl-与-fpga-工具)
 - [FPGA 网络与 TFTP](#fpga-网络与-tftp)
 - [AMD Vitis 与 Vivado 2023.2](#amd-vitis-与-vivado-20232)
@@ -32,6 +34,36 @@ AMD 安装程序、已安装 AMD 工具及容器内容均位于仓库之外。
 ESP32 开发 flake 必须已存在于该外部路径。创建项目目录后，在
 `~/all_files/projects/esp32` 中审阅 `.envrc` 并执行 `direnv allow`。
 Home Manager 声明 `.envrc`，但不提供 SDK flake 或项目源文件。
+
+两个 ESP32 入口都在 [Pisces 账户文件](../hosts/Pisces/users/chomsky.nix)中定义。
+
+## 嵌入式 Linux 与 QEMU
+
+[system/embedded-linux.nix](../system/embedded-linux.nix) 系统级安装 QEMU、
+三种 Linux 目标的 GCC 与 binutils，以及构建内核和镜像所需的主机工具。
+主机工具包括 `bc`、`bison`、`flex`、`pkg-config`、ncurses、OpenSSL、
+elfutils、`pahole`、U-Boot 工具和 `genimage`。
+
+| 目标架构 | GCC 与 binutils 前缀 | QEMU 命令 |
+| --- | --- | --- |
+| AArch64 | `aarch64-unknown-linux-gnu-` | `qemu-system-aarch64` |
+| ARMv7 硬浮点 | `armv7l-unknown-linux-gnueabihf-` | `qemu-system-arm` |
+| RISC-V 64 | `riscv64-unknown-linux-gnu-` | `qemu-system-riscv64` |
+
+按项目构建系统要求选择前缀。构建 Linux 内核时，将 `ARCH` 设为 `arm64`、
+`arm` 或 `riscv`，并将 `CROSS_COMPILE` 设为对应前缀，保留末尾连字符。
+
+系统通过 `/run/current-system/sw/share/embedded-linux/` 提供固件，包含
+`u-boot-aarch64.bin`、`u-boot-riscv64-smode.bin` 和 `opensbi-riscv64/` 软件包目录。
+客户机内核、磁盘镜像和机器专用的 QEMU 参数由被测试的项目提供。
+
+```bash
+aarch64-unknown-linux-gnu-gcc -dumpmachine
+armv7l-unknown-linux-gnueabihf-gcc -dumpmachine
+riscv64-unknown-linux-gnu-gcc -dumpmachine
+qemu-system-riscv64 --version
+ls -l /run/current-system/sw/share/embedded-linux
+```
 
 ## 开源 HDL 与 FPGA 工具
 
@@ -92,9 +124,9 @@ Nix store。启动时等待地址超时，应检查接口名称、配置激活�
 
 ## AMD Vitis 与 Vivado 2023.2
 
-Vitis 与 Vivado 在名为 `vitis-2023.2` 的 Ubuntu 22.04 Distrobox 中运行；
-NixOS 主机负责 Docker、USB/JTAG 权限、启动命令及 VNC 服务。AMD 工具安装
-在与容器共享的 `~/Xilinx` 中，因此重建容器不会删除它们。
+Vitis 与 Vivado 在名为 `vitis-2023.2` 的 Ubuntu 22.04 Distrobox 中运行。
+Pisces 提供 Docker 和 USB/JTAG 权限，[用户的 Vitis 模块](../hosts/Pisces/users/vitis.nix)
+定义启动命令和 VNC 服务。AMD 工具安装在与容器共享的 `~/Xilinx` 中，重建容器后仍可使用。
 `hosts/Pisces/fpga.nix` 提供适用于常见 Artix-7 开发板的 AMD/Xilinx 与 Digilent
 下载器 udev 规则。
 

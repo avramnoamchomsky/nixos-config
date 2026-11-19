@@ -5,11 +5,13 @@
 The host declares development tools, device permissions, and launch wrappers.
 Project sources, the external ESP32 flake, the AMD installer, installed AMD
 tools, and container contents live outside this repository. Apply host changes
-through [Validate and apply](operations.md#validate-and-apply).
+through [Validate and apply](operations.md#validate-and-apply). See the
+[architecture guide](architecture.md) for the host and account file layout.
 
 ## Contents
 
 - [Embedded development](#embedded-development)
+- [Embedded Linux and QEMU](#embedded-linux-and-qemu)
 - [Open-source HDL and FPGA tools](#open-source-hdl-and-fpga-tools)
 - [FPGA network and TFTP](#fpga-network-and-tftp)
 - [AMD Vitis and Vivado 2023.2](#amd-vitis-and-vivado-20232)
@@ -30,10 +32,41 @@ through [Validate and apply](operations.md#validate-and-apply).
 - Membership in `dialout` and `plugdev`, plus the OpenOCD and ST-Link udev
   rules, grants access to supported development boards after a fresh login.
 
-The ESP32 development flake must already exist at that external path. For
+The [Pisces account file](../hosts/Pisces/users/chomsky.nix) defines both
+ESP32 entry points. The external development flake must already exist. For
 direnv, review the project `.envrc` and run `direnv allow` in
 `~/all_files/projects/esp32` after creating the project directory. Home Manager
 declares `.envrc`; it does not supply the SDK flake or project sources.
+
+## Embedded Linux and QEMU
+
+[system/embedded-linux.nix](../system/embedded-linux.nix) installs system-wide
+QEMU, GCC and binutils for three Linux targets, and host tools for building
+kernels and images. Host tools include `bc`, `bison`, `flex`, `pkg-config`,
+ncurses, OpenSSL, elfutils, `pahole`, U-Boot tools, and `genimage`.
+
+| Target | GCC and binutils prefix | QEMU binary |
+| --- | --- | --- |
+| AArch64 | `aarch64-unknown-linux-gnu-` | `qemu-system-aarch64` |
+| ARMv7 hard float | `armv7l-unknown-linux-gnueabihf-` | `qemu-system-arm` |
+| RISC-V 64 | `riscv64-unknown-linux-gnu-` | `qemu-system-riscv64` |
+
+Use the prefix expected by the project's build system. For a Linux kernel,
+set `ARCH` to `arm64`, `arm`, or `riscv` and set `CROSS_COMPILE` to the
+corresponding prefix, including the trailing hyphen.
+
+The system exports firmware under `/run/current-system/sw/share/embedded-linux/`.
+It includes `u-boot-aarch64.bin`, `u-boot-riscv64-smode.bin`, and the
+`opensbi-riscv64/` package tree. Guest kernels, disk images, and the
+machine-specific QEMU arguments come from the project you are testing.
+
+```bash
+aarch64-unknown-linux-gnu-gcc -dumpmachine
+armv7l-unknown-linux-gnueabihf-gcc -dumpmachine
+riscv64-unknown-linux-gnu-gcc -dumpmachine
+qemu-system-riscv64 --version
+ls -l /run/current-system/sw/share/embedded-linux
+```
 
 ## Open-source HDL and FPGA tools
 
@@ -101,10 +134,12 @@ calls for checking the interface name, profile activation, and link state.
 
 ## AMD Vitis and Vivado 2023.2
 
-Vitis and Vivado run in an Ubuntu 22.04 Distrobox named `vitis-2023.2` while
-the NixOS host owns Docker, USB/JTAG permissions, launch commands, and the VNC
-service. The AMD tools are installed under `~/Xilinx`, which is shared with the
-container and remains intact if the container is recreated. `hosts/Pisces/fpga.nix`
+Vitis and Vivado run in an Ubuntu 22.04 Distrobox named `vitis-2023.2`. Pisces
+provides Docker and USB/JTAG permissions. The
+[user's Vitis module](../hosts/Pisces/users/vitis.nix) defines the launch
+commands and VNC service. The AMD tools are installed under `~/Xilinx`, which
+is shared with the container and persists across container recreations.
+`hosts/Pisces/fpga.nix`
 provides udev rules for AMD/Xilinx and Digilent programmers commonly used with
 Artix-7 boards.
 

@@ -3,8 +3,8 @@
 [English](operations.md) | [简体中文](operations.zh-CN.md) | [README](../README.md)
 
 These procedures target `Pisces` and `chomsky`. Run Nix commands from the
-repository root. Shell examples use Bash; commands without Bash-specific syntax
-also work in the configured Fish shell.
+repository root. Shell examples use Bash. See the
+[architecture guide](architecture.md) for the host and account boundaries.
 
 ## Contents
 
@@ -39,7 +39,14 @@ not an input-update procedure.
    nix build --no-link --no-update-lock-file .#nixosConfigurations.Pisces.config.system.build.toplevel
    ```
 
-   For a focused Home Manager check, build its activation package instead:
+   For boot, graphics, or structural changes, also build the VFIO
+   specialisation:
+
+   ```bash
+   nix build --no-link --no-update-lock-file .#nixosConfigurations.Pisces.config.specialisation.vfio.configuration.system.build.toplevel
+   ```
+
+   For a focused Home Manager check, build its activation package:
 
    ```bash
    nix build --no-link --no-update-lock-file .#nixosConfigurations.Pisces.config.home-manager.users.chomsky.home.activationPackage
@@ -49,6 +56,17 @@ The flake check evaluates outputs; it does not compile packages or run the
 activation hooks. A successful build confirms the requested output can be
 realized, while service, hardware, and application behavior still require
 checks after activation. `--no-link` avoids creating a local `result` symlink.
+For a refactor intended to preserve behavior, compare the `.drvPath` of all
+three outputs before and after. Identical paths show that Nix derived the same
+builds from the same inputs.
+
+The checkout's kernel pin and the running kernel can be inspected separately:
+
+```bash
+nix eval --raw --no-update-lock-file .#nixosConfigurations.Pisces.config.boot.kernelPackages.kernel.version
+uname -r
+readlink -f /run/current-system
+```
 
 Choose activation according to the change and the current boot mode:
 
@@ -77,11 +95,11 @@ does not update the groups of an existing desktop session.
 
 ## Update pinned inputs and packages
 
-`flake.lock` fixes the input revisions. Stable Nixpkgs and Home Manager follow
-their 26.05 branches; selected applications use `nixpkgs-unstable` through
-`unstablePkgs`. Updating that input does not move the whole system to unstable.
-Other inputs provide nix-flatpak, sops-nix, Lanzaboote, and the
-`codex-desktop-linux` desktop integration.
+[flake.lock](../flake.lock) fixes the input revisions. Stable Nixpkgs and
+Home Manager follow their 26.05 branches. Selected packages use
+`nixpkgs-unstable` through `unstablePkgs`, including QQ, uv, and the paired
+Yosys and SymbiYosys tools. Other inputs provide DMS, MSIME, nix-flatpak,
+sops-nix, Lanzaboote, and the `codex-desktop-linux` desktop integration.
 
 Update a specific input as the normal user, review the lockfile diff, then
 validate and rebuild. For example:
@@ -91,7 +109,18 @@ nix flake update codex-desktop-linux
 git diff -- flake.lock
 ```
 
-The same command with `nixpkgs-unstable` updates the selected unstable packages.
+Use `nix flake update nixpkgs home-manager` to refresh the stable inputs
+together. To move a tag- or commit-pinned input to a new release or revision,
+change its URL in [flake.nix](../flake.nix) first and run
+`nix flake update <input>`. Review both diffs before building. Keep
+`system.stateVersion` and `home.stateVersion` tied to the existing installations.
+
+DMS and Quickshell use the same Qt package set from the DMS input. When updating
+DMS, check the upstream Niri template against the transformations in
+[home/niri.nix](../home/niri.nix). After applying the tested configuration,
+run `niri validate` and verify the existing writable bindings and screenshots.
+See the [desktop guide](desktop.md#desktop-configuration) for file ownership.
+
 The driver version and hashes in `hosts/Pisces/hybrid-graphics.nix`, the custom
 application definitions in `packages/`, and the theme revisions in
 `home/themes.nix` are additional pins. Update their versions, source URLs or
@@ -105,7 +134,10 @@ the Vitis container follow apt. Those updates are separate from Nix generations.
 The optional daily Codex automation runs `./scripts/update-openai-desktop`.
 The script checks OpenAI's stable Codex CLI release and signed ChatGPT Linux
 repository, then builds and installs each update in a separate user Nix
-profile. ChatGPT uses the community NixOS adapter. The updater uses the
+profile under `${XDG_STATE_HOME:-$HOME/.local/state}/openai-updates/`. Its
+launchers in `~/.local/bin` can take precedence over the declarative versions.
+Check `type -a codex` and `codex --version` to see what the current shell
+resolves. ChatGPT uses the community NixOS adapter. The updater uses the
 repository's pinned adapter or checks for a newer one, and builds it only when
 its ChatGPT package pin matches OpenAI's signed release. It does not modify the
 system configuration, restart the running app, or touch OpenCodex.
@@ -214,9 +246,9 @@ Settings. Turning off monitors is separate from system sleep.
 
 `hosts/Pisces/msi-control.nix` loads `msi-ec` and `ec_sys` for MControlCenter. This
 machine's EC `17KKIMS1.115` uses the tested `17KKIMS1.114` driver layout, and
-`ec_sys` write support permits custom fan curves. `home/desktop.nix` declares
-balanced mode and the two fan curves; window geometry is left out of Git.
-Reapply persistent hardware preferences through that module.
+`ec_sys` write support permits custom fan curves. The
+[account file](../hosts/Pisces/users/chomsky.nix) declares balanced mode and
+the two fan curves. Window geometry is managed by the application.
 
 `hosts/Pisces/default.nix` loads `hid_multitouch` before `hid_magicmouse` for the
 external trackpad identifying as `05ac:0265`. Its second HID interface needs
@@ -243,7 +275,8 @@ SOPS_AGE_KEY_FILE=/home/chomsky/all_files/secrets/sops-nix/age-key.txt nix shell
 
 `--inputs-from .` selects sops from this flake's locked Nixpkgs input. sops-nix
 decrypts four secrets under `/run/secrets/rclone/`, owned by `chomsky` with mode
-`0400`. Home Manager injects the secret values into rclone's configuration
+`0400`. The host WebDAV module defines both the mounts and their secret
+ownership. Home Manager injects the secret values into rclone's configuration
 without transforming them. When replacing a password, store the output of
 `rclone obscure` in the encrypted YAML password field; usernames use their
 ordinary values. Keep both encrypted with sops.
@@ -285,10 +318,11 @@ Bluetooth, UPower, fwupd, fstrim, PipeWire, the GNOME keyring, GVfs, and UDisks
 are enabled. The Home Manager udiskie service provides removable-drive
 automounting in Niri.
 
-OpenSSH accepts `chomsky` with password authentication enabled; root login and
-keyboard-interactive authentication are disabled. Its firewall opening is
-managed declaratively. LocalSend opens TCP/UDP `53317`; Avahi opens its service
-ports. Docker is the system daemon, with access granted through the `docker`
+OpenSSH uses password authentication. The
+[account file](../hosts/Pisces/users/chomsky.nix) adds `chomsky` to the SSH
+allowlist. Root login and keyboard-interactive authentication are disabled.
+The configuration opens the SSH firewall port, TCP/UDP `53317` for LocalSend,
+and the Avahi service ports. Docker is the system daemon, with access granted through the `docker`
 group.
 
 The dedicated `enp3s0` FPGA link is trusted by the firewall and uses a static,

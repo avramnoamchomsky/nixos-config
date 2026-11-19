@@ -2,15 +2,17 @@
 
 [English](desktop.md) | [简体中文](desktop.zh-CN.md) | [README](../README.md)
 
-Home Manager owns the desktop files and assets described here. Apply changes
-through the [system rebuild workflow](operations.md#validate-and-apply), and
-acquire changed group memberships with a fresh login. Shell examples use Bash;
-start `bash` from Fish before the avatar example below.
+Pisces's desktop combines Home Manager files with settings that DMS writes
+directly. Apply repository changes through the
+[system rebuild workflow](operations.md#validate-and-apply) and log in again
+after group changes. See the [architecture guide](architecture.md) for where
+account and shared settings live.
 
 ## Contents
 
 - [Desktop configuration](#desktop-configuration)
 - [Everyday shortcuts](#everyday-shortcuts)
+- [Shells, terminal, and blur](#shells-terminal-and-blur)
 - [Applications and system integrations](#applications-and-system-integrations)
 - [Desktop themes](#desktop-themes)
 - [WeChat](#wechat), [WPS Office](#wps-office), and [Ghost Downloader](#ghost-downloader)
@@ -21,20 +23,39 @@ start `bash` from Fish before the avatar example below.
 
 ## Desktop configuration
 
-Log in as `chomsky` on `tty1` to start Niri and DMS. Exiting Niri returns to
-the login prompt. Use `Ctrl+Alt+F2` for a console that stays in Fish.
+Log in as `chomsky` on `tty1` to start Niri and DMS. The login hook lives in
+[the Pisces account file](../hosts/Pisces/users/chomsky.nix). Exiting Niri
+returns to the login prompt. Use `Ctrl+Alt+F2` for a console that stays in Fish.
 
-The flake pins Dux Modular Shell (DMS) to the official stable release. Home
-Manager installs the release's Niri configuration and sets up writable fragments
-under `~/.config/niri/dms/`. DMS manages shortcuts, window rules, input devices,
-cursor, displays, layout, colors, recent windows, and wallpaper integration.
-Use the DMS Settings app to change them.
+The flake pins the official Dux Modular Shell (DMS) release `v2.1.2`. DMS
+Settings writes shortcuts, window rules, input settings, cursor, displays,
+layout, colors, recent windows, and wallpaper integration to writable state,
+including fragments in `~/.config/niri/dms/` under the default XDG paths.
 
-The first activation backs up previous DMS preferences and Niri fragments in
-sibling `*-before-stock.*` directories and starts with the stock configuration.
-Later rebuilds leave edits from DMS in place. The Wood Whale account avatar and
-pink rose wallpaper are retained. Home Manager installs the avatar through
-AccountsService and links the wallpaper collection under `~/Pictures/Wallpapers`.
+Home Manager writes the main Niri config from the upstream template and
+includes the local resize and blur fragments from [home/niri/](../home/niri).
+[home/niri.nix](../home/niri.nix) also supplies the Adwaita cursor fallback and
+disables primary-selection paste from the middle mouse button or three-finger
+tap. Regular clipboard shortcuts still work. The upstream template requests
+server-side decorations through `prefer-no-csd`.
+
+On first activation, the DMS and Niri setup backs up previous preferences and
+fragments in sibling `*-before-stock.*` directories and seeds the release
+defaults plus the repository's local settings. Migration stamps under
+`~/.local/state/` prevent routine rebuilds from resetting these preferences.
+The window-capture clipboard correction also applies to matching stock
+bindings in existing setups.
+
+The Wood Whale avatar and wallpaper collection belong to
+[Pisces's assets](../hosts/Pisces/assets). The
+[account's DMS module](../hosts/Pisces/users/dms.nix) installs the account
+avatar through AccountsService, links the collection at
+`~/Pictures/Wallpapers`, and seeds the pink rose wallpaper on first activation.
+
+Fcitx5 uses MSIME as the only configured input method. The forced profile in
+[home/input-method.nix](../home/input-method.nix) keeps the US hardware
+keyboard layout and sets MSIME as the default engine. Change that file for
+persistent profile changes. Rime and Rime Ice are no longer declared.
 
 UDisks and the Home Manager `udiskie` service mount eligible removable storage
 under `/run/media/chomsky/`. Home Manager also creates the standard XDG user
@@ -56,13 +77,56 @@ On the Niri desktop, `Mod` is Super by default.
 | `Alt+Tab` | Switch recent windows |
 | `Mod+1` through `Mod+9` | Focus a workspace |
 | `Mod+Shift+1` through `Mod+Shift+9` | Move a column to a workspace |
-| `Mod+R` / `Mod+Shift+R` | Cycle column width (50% / 95%) or window height (50% / 100%) |
-| `Print` / `Ctrl+Print` / `Alt+Print` | Use DMS to capture a region / screen / window |
+| `Mod+R` | Cycle column width between 50% and 95% |
+| `Mod+Shift+R` | Cycle window height between 50% and 100% |
+| `Print` / `Ctrl+Print` / `Alt+Print` | DMS region / focused output / focused window capture |
+| `Mod+Print` | Start DMS scrolling capture (custom Pisces binding) |
 | `Mod+Shift+P` | Turn off monitors |
+
+The table includes the seeded bindings and Pisces's custom `Mod+Print`
+binding in the writable `~/.config/niri/dms/binds.kdl` fragment. Use the DMS
+cheatsheet to see the bindings on the current profile.
+
+Run `dms screenshot scroll` to capture a scrolling region. Select a region,
+scroll inside the app with the wheel or touchpad, and press `Enter` to finish
+or `Esc` to cancel. Scrolling capture on Niri requires an unrotated output.
+To restore the Pisces shortcut on a fresh profile, add this line inside
+`binds { ... }` in the writable fragment and run `niri validate`.
+
+```kdl
+Mod+Print repeat=false hotkey-overlay-title="Screenshot: Scroll" { spawn "dms" "screenshot" "scroll"; }
+```
+
+Niri's own file saving is disabled with `screenshot-path null`. For
+focused-window capture, Niri provides the clipboard copy and DMS saves the file.
+
+## Shells, terminal, and blur
+
+Fish is the login shell and starts without its welcome message. Run `bash`
+for an interactive Bash shell. Both use the Starship **Gruvbox Rainbow** preset
+and expose integrations for zoxide, fzf, Eza, and Yazi. Bash uses ble.sh for
+inline suggestions and live highlighting, with bash-completion for
+command-specific completions. In a normal terminal, fzf and zoxide load their
+ble.sh integrations.
+
+Ghostty uses Gruvbox Dark, a JetBrains Mono Nerd Font, 40% background opacity,
+and an animated blue-white cursor trail. The Ghostty theme and cursor shader
+are separate from the Starship prompt theme.
+
+| To change | Edit |
+| --- | --- |
+| Ghostty opacity or shader settings | [home/programs.nix](../home/programs.nix), under `programs.ghostty.settings` |
+| Ghostty cursor trail colors | [home/ghostty/cursor-trail.glsl](../home/ghostty/cursor-trail.glsl) |
+| Swayimg background opacity | [home/programs.nix](../home/programs.nix), under the Swayimg config for viewer, slideshow, and gallery. `#28282866` sets 40% opacity |
+| Niri X-ray blur for each app | [Ghostty rule](../home/niri/ghostty-blur.kdl) and [Swayimg rule](../home/niri/swayimg-blur.kdl) |
+
+Opacity controls how much background shows through an app. X-ray blur samples
+the wallpaper through the window stack. See [Niri window effects](https://github.com/niri-wm/niri/wiki/Window-Effects).
+Apply persistent edits through the [system rebuild workflow](operations.md#validate-and-apply).
 
 ## Applications and system integrations
 
-`home/programs.nix` declares most user applications and commands;
+`home/programs.nix` declares most user applications and commands.
 `system/desktop.nix` supplies services, device access, fonts, and capability
 wrappers. The [dated software audit](software-audit-2026-10-04.md) records the
 installation decisions; the Nix modules define what is installed now.
@@ -76,12 +140,24 @@ installation decisions; the Nix modules define what is installed now.
 | Capture permissions | Wireshark's `dumpcap` wrapper permits members of `wireshark` to capture network traffic; USB capture is disabled. Trippy uses the NixOS capability wrapper |
 | Monitoring | btop with NVML and ROCm SMI, NVTOP, amdgpu_top, and HardInfo2; see [graphics diagnostics](operations.md#hybrid-graphics-and-monitoring) |
 | Media CLI | FFmpeg/FFprobe, ImageMagick, GStreamer and base/good/bad/ugly/libav plugins |
+| mpv | ModernZ provides the on-screen controls. The stock OSC is disabled to avoid duplicate controls |
+| Nautilus | Sushi previews the selected file with `Space`. Open Any Terminal opens Ghostty in the selected local directory |
 | Defaults | Chrome for HTTP/HTTPS, HTML, and PDF; WPS for Microsoft Office formats; Swayimg for PNG/JPEG/GIF/WebP/BMP/TIFF/AVIF |
 | Fonts | Noto/CJK/emoji, JetBrains Mono Nerd Font, Inter, LXGW WenKai, Maple Mono NF-CN, Font Awesome, Material Icons/Symbols, Terminus, and pinned Zhuque Fangsong `0.212` |
 
 Log out and back in after changing the `wireshark` group. A package's presence
 does not establish that a peripheral, remote peer, or every GPU sensor works.
 Chinese TeX setup is covered in the [development guide](development.md#chinese-tex).
+
+Yazi loads `compress`, `full-border`, `git`, `mount`, and `zoom` from
+[home/yazi.nix](../home/yazi.nix). Use `M` for the mount manager, `g` then
+`+` or `-` for image zoom, and `c a a` to archive selected files.
+`c a p` requests a password, `c a h` also encrypts headers, `c a l` prompts
+for a compression level, and `c a u` opens the full set of archive options.
+
+On Pisces, GVfs hides the managed WebDAV mounts from automatic drive discovery
+to keep local file pickers responsive. Open `~/mnt` directly for both shares.
+See [Secrets and WebDAV](operations.md#secrets-and-webdav) for mount diagnostics.
 
 ## Desktop themes
 
@@ -253,13 +329,11 @@ select the discrete NVIDIA GPU when a game needs it.
 
 ## Fish and archive commands
 
-The maintained upstream 7-Zip CLI is also installed. Use either `7zz` or the
-provided compatibility command `7z`; both invoke the same package from the
-pinned Nixpkgs input. Fish provides `7zip` and `7sec` aliases for maximum
-LZMA2 compression, plus `7zipv` and `7secv` variants that split archives into
-100 GiB volumes. The `7sec` variants encrypt file contents and names with the
-configured convenience passphrase.
+The `7zz` and `7z` commands invoke the same 7-Zip package. Fish provides the
+`7zip` and `7sec` aliases for maximum LZMA2 compression, plus `7zipv` and
+`7secv` for 100 GiB volumes. The
+[account file](../hosts/Pisces/users/chomsky.nix) defines these aliases.
 
-The archive aliases are defined in `hosts/Pisces/users/chomsky.nix`. The `7sec` variants
-use a fixed passphrase in that source file; choose an explicit private password
-when an archive needs confidential protection.
+The `7sec` aliases encrypt file contents and names with a passphrase that is
+readable in the repository. For a private archive, use `7z` directly with
+`-p -mhe=on` and enter a private passphrase at the prompt.

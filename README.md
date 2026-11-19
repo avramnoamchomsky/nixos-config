@@ -12,18 +12,15 @@ development environments are specific to this machine.
 | Area | Configuration |
 | --- | --- |
 | Platform | `x86_64-linux`; NixOS and Home Manager 26.05; timezone `Asia/Shanghai` |
-| Package sources | Stable Nixpkgs for the system, with selected applications from a separate pinned unstable input |
-| Kernel and graphics | `linuxPackages_latest`; evaluated lockfile selects Linux `7.2.6`; NVIDIA driver `610.57.04` is pinned explicitly |
+| Package sources | Stable Nixpkgs for the system, with selected applications and tools from a separate pinned unstable input |
+| Kernel and graphics | `linuxPackages_latest` from the pinned stable input, with an explicit NVIDIA driver pin |
 | Desktop | Console login on `tty1` → Niri with Dux Modular Shell (DMS), Ghostty, Nautilus, and XWayland |
 | Input and audio | Fcitx5 with MSIME, and PipeWire/WirePlumber |
 | Appearance | Declarative MacTahoe GTK/Kvantum themes, Wood Whale avatar, and wallpaper collection |
 | Storage | LUKS-encrypted Btrfs, zram, automatic removable-drive mounting, and two rclone WebDAV mounts |
 | Virtualization | libvirt/KVM, virt-manager, Docker/Distrobox, and an RTX 4060 `vfio` boot specialisation |
-| Development | ESP32/STM32, HDL/formal tools, and Ubuntu 22.04 Vitis/Vivado 2023.2 |
+| Development | ESP32/STM32, Linux cross-compilers and QEMU firmware, HDL/formal tools, and Ubuntu 22.04 Vitis/Vivado 2023.2 |
 | Applications | Chrome, WPS Office, Ghost Downloader, Baidu Netdisk, 115 Life/Browser, Readest, SylvaKru, creative tools, Steam, and Flatpak Bottles |
-
-The versions above describe the evaluated repository pins as of 2026-10-06.
-They do not identify the generation currently running on the laptop.
 
 **Suspend and hibernation are disabled. Closing the lid does not suspend the
 machine.** The AMD platform-resume problems recorded for this laptop remain
@@ -62,8 +59,9 @@ flake so Nix includes them.
 
 | Guide | Contents |
 | --- | --- |
+| [Architecture](docs/architecture.md) / [架构](docs/architecture.zh-CN.md) | Configuration flow, file ownership, and how to add a host or an account |
 | [Operations](docs/operations.md) / [运维](docs/operations.zh-CN.md) | Build and activation, boot signing, hybrid graphics, power policy, secrets, networking, virtual machines, and VFIO |
-| [Desktop](docs/desktop.md) / [桌面](docs/desktop.zh-CN.md) | Configuration ownership, shortcuts, avatar, themes, applications, MIME defaults, capture permissions, and gaming |
+| [Desktop](docs/desktop.md) / [桌面](docs/desktop.zh-CN.md) | DMS and Niri ownership, screenshots, shells, blur, plugins, and applications |
 | [Development](docs/development.md) / [开发](docs/development.zh-CN.md) | Embedded and HDL tools, FPGA TFTP network, Vitis/Vivado installation and VNC, Android tools, imaging, and Chinese TeX |
 | [Software audit — 2026-10-04](docs/software-audit-2026-10-04.md) | Historical inventory, installation decisions, recorded checks, and the 2026-10-05 GPU-monitoring follow-up |
 
@@ -76,7 +74,8 @@ local application state, sensor readings, and disk-space figures are historical.
 The root flake pins shared inputs. Each host imports the system modules it
 needs, and each host's account file selects that user's Home Manager modules.
 Accounts with the same username on different hosts can use different groups,
-shells, and applications.
+shells, and applications. See the [architecture guide](docs/architecture.md)
+for how these modules fit together and how to add a host or an account.
 
 | Path | Responsibility |
 | --- | --- |

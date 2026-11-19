@@ -2,15 +2,15 @@
 
 [English](desktop.md) | [简体中文](desktop.zh-CN.md) | [README](../README.zh-CN.md)
 
-Home Manager 管理本指南中的桌面文件与资源。请通过
-[系统重构流程](operations.zh-CN.md#验证与应用)应用修改，并通过重新登录获取
-变更后的用户组成员身份。Shell 示例使用 Bash；从 Fish 执行下方头像示例前，
-请先运行 `bash`。
+Pisces 的桌面同时使用 Home Manager 管理的文件和 DMS 直接写入的设置。
+通过[系统重建流程](operations.zh-CN.md#验证与应用)应用仓库修改，修改用户组后需重新登录。
+账户与共享桌面配置的位置见[架构指南](architecture.zh-CN.md)。
 
 ## 目录
 
 - [桌面配置](#桌面配置)
 - [常用快捷键](#常用快捷键)
+- [Shell、终端与模糊效果](#shell终端与模糊效果)
 - [应用与系统集成](#应用与系统集成)
 - [桌面主题](#桌面主题)
 - [微信](#微信)、[WPS Office](#wps-office)与 [Ghost Downloader](#ghost-downloader)
@@ -21,17 +21,30 @@ Home Manager 管理本指南中的桌面文件与资源。请通过
 
 ## 桌面配置
 
-在 `tty1` 上以 `chomsky` 登录即可启动 Niri 和 DMS。退出 Niri 后会返回登录提示。
+在 `tty1` 上以 `chomsky` 登录即可启动 Niri 和 DMS，登录钩子在
+[Pisces 账户文件](../hosts/Pisces/users/chomsky.nix)中。退出 Niri 后会返回登录提示。
 按 `Ctrl+Alt+F2` 可切换到登录后停留在 Fish 的控制台。
 
-Flake 固定使用 Dux Modular Shell（DMS）的官方稳定版。Home Manager 部署该版本的
-Niri 配置，并在 `~/.config/niri/dms/` 下创建可写配置片段。快捷键、窗口规则、输入设备、
-光标、显示器、布局、配色、最近窗口和壁纸集成都可以在 DMS 设置中管理。
+Flake 固定使用 Dux Modular Shell（DMS）官方发行版 `v2.1.2`。DMS 设置将快捷键、
+窗口规则、输入设置、光标、显示器、布局、配色、最近窗口和壁纸集成写入可写状态。
+使用默认 XDG 路径时，其中的 Niri 片段位于 `~/.config/niri/dms/`。
 
-首次激活会将原有 DMS 偏好和 Niri 配置片段备份到同级 `*-before-stock.*` 目录，
-然后启用官方默认配置。后续重建保留在 DMS 中所做的修改。Wood Whale 头像和粉色玫瑰
-壁纸会保留；Home Manager 通过 AccountsService 设置头像，并将壁纸目录链接到
-`~/Pictures/Wallpapers`。
+Home Manager 使用上游模板生成 Niri 主配置，并加载 [home/niri/](../home/niri) 中的
+尺寸预设和模糊规则。[home/niri.nix](../home/niri.nix) 还提供 Adwaita 后备光标，
+并关闭鼠标中键和触控板三指轻触触发的主选区粘贴。普通剪贴板快捷键仍可使用。
+上游模板通过 `prefer-no-csd` 请求使用服务端窗口装饰。
+
+首次激活时，DMS 与 Niri 会将已有偏好和片段备份到同级 `*-before-stock.*` 目录，
+再初始化发行版默认配置和仓库中的本地设置。`~/.local/state/` 下的迁移标记
+让日常重建保留已修改的偏好。窗口截图的剪贴板修正也适用于已有配置中匹配的默认绑定。
+
+Wood Whale 头像和壁纸集合位于 [Pisces 资源目录](../hosts/Pisces/assets)。
+[账户的 DMS 模块](../hosts/Pisces/users/dms.nix)通过 AccountsService 设置头像，
+将壁纸集合链接至 `~/Pictures/Wallpapers`，并在首次激活时设置粉色玫瑰壁纸。
+
+Fcitx5 的配置中只保留 MSIME。[home/input-method.nix](../home/input-method.nix)
+管理此配置，保留 US 物理键盘布局并将 MSIME 设为默认输入法。长期修改应写入该文件。
+当前配置已移除 Rime 与 Rime Ice。
 
 UDisks 和 Home Manager 的 `udiskie` 服务会将符合条件的可移动存储挂载到
 `/run/media/chomsky/`。Home Manager 也会创建标准 XDG 用户目录，并提供通过 Ghostty
@@ -53,9 +66,47 @@ UDisks 和 Home Manager 的 `udiskie` 服务会将符合条件的可移动存储
 | `Alt+Tab` | 切换最近窗口 |
 | `Mod+1` 至 `Mod+9` | 切换工作区 |
 | `Mod+Shift+1` 至 `Mod+Shift+9` | 将列移至工作区 |
-| `Mod+R` / `Mod+Shift+R` | 循环切换列宽（50% / 95%）或窗口高度（50% / 100%） |
-| `Print` / `Ctrl+Print` / `Alt+Print` | 使用 DMS 截取区域 / 屏幕 / 窗口 |
+| `Mod+R` | 在 50% 和 95% 之间切换列宽 |
+| `Mod+Shift+R` | 在 50% 和 100% 之间切换窗口高度 |
+| `Print` / `Ctrl+Print` / `Alt+Print` | DMS 截取区域 / 当前输出 / 当前窗口 |
+| `Mod+Print` | 启动 DMS 滚动截图（Pisces 自定义绑定） |
 | `Mod+Shift+P` | 关闭显示器 |
+
+上表包含初始化绑定，以及 Pisces 在可写片段 `~/.config/niri/dms/binds.kdl` 中
+设置的自定义 `Mod+Print`。当前配置使用的绑定可在 DMS 快捷键列表中查看。
+
+运行 `dms screenshot scroll` 可开始滚动截图。框选区域后，在应用内用鼠标滚轮或
+触控板滚动，按 `Enter` 完成或按 `Esc` 取消。Niri 下滚动截图要求输出未旋转。
+如需在新配置中恢复 Pisces 的快捷键，在可写片段的 `binds { ... }` 内添加以下行，
+再运行 `niri validate`。
+
+```kdl
+Mod+Print repeat=false hotkey-overlay-title="Screenshot: Scroll" { spawn "dms" "screenshot" "scroll"; }
+```
+
+`screenshot-path null` 关闭 Niri 自身的截图文件保存。截取窗口时，Niri 提供剪贴板副本，
+DMS 保存文件。
+
+## Shell、终端与模糊效果
+
+Fish 是登录 Shell，启动时不显示欢迎语。运行 `bash` 可进入交互式 Bash。
+两个 Shell 都采用 Starship 的 **Gruvbox Rainbow** 预设，并集成 zoxide、fzf、Eza
+和 Yazi。Bash 使用 ble.sh 提供行内建议和实时高亮，并通过 bash-completion 提供
+命令专用补全。在普通终端中，fzf 和 zoxide 也会加载 ble.sh 集成。
+
+Ghostty 使用 Gruvbox Dark、JetBrains Mono Nerd Font、40% 背景不透明度和蓝白光标拖尾。
+Ghostty 主题和光标着色器独立于 Starship 提示符主题。
+
+| 修改内容 | 位置 |
+| --- | --- |
+| Ghostty 不透明度或着色器设置 | [home/programs.nix](../home/programs.nix) 中的 `programs.ghostty.settings` |
+| Ghostty 光标拖尾颜色 | [home/ghostty/cursor-trail.glsl](../home/ghostty/cursor-trail.glsl) |
+| Swayimg 背景不透明度 | [home/programs.nix](../home/programs.nix) 中 Swayimg 的浏览、幻灯片及图库配置。`#28282866` 表示 40% 不透明度 |
+| 各应用的 Niri X-ray 模糊 | [Ghostty 规则](../home/niri/ghostty-blur.kdl)和 [Swayimg 规则](../home/niri/swayimg-blur.kdl) |
+
+不透明度决定应用透出多少背景。X-ray 模糊透过窗口堆叠采样壁纸，
+详见 [Niri 窗口效果](https://github.com/niri-wm/niri/wiki/Window-Effects)。
+持久修改通过[系统重建流程](operations.zh-CN.md#验证与应用)应用。
 
 ## 应用与系统集成
 
@@ -72,11 +123,21 @@ UDisks 和 Home Manager 的 `udiskie` 服务会将符合条件的可移动存储
 | 抓包权限 | Wireshark 的 `dumpcap` 包装器允许 `wireshark` 组成员抓取网络流量；USB 抓包关闭。Trippy 使用 NixOS 能力包装器 |
 | 监控 | 启用 NVML/ROCm SMI 的 btop、NVTOP、amdgpu_top 与 HardInfo2；见[显卡诊断](operations.zh-CN.md#混合显卡与监控) |
 | 媒体命令 | FFmpeg/FFprobe、ImageMagick、GStreamer 及 base/good/bad/ugly/libav 插件 |
+| mpv | ModernZ 提供屏幕控制条，内置 OSC 已关闭以避免重复 |
+| Nautilus | Sushi 通过 `Space` 预览选中文件。Open Any Terminal 在选中的本地目录打开 Ghostty |
 | 默认应用 | Chrome 打开 HTTP/HTTPS、HTML 与 PDF；WPS 打开 Microsoft Office 格式；Swayimg 打开 PNG/JPEG/GIF/WebP/BMP/TIFF/AVIF |
 | 字体 | Noto/CJK/emoji、JetBrains Mono Nerd Font、Inter、LXGW WenKai、Maple Mono NF-CN、Font Awesome、Material Icons/Symbols、Terminus 及固定的朱雀仿宋 `0.212` |
 
 修改 `wireshark` 组后请注销并重新登录。已安装软件包不代表外设、远程节点或每项
 GPU 传感器均已验证。中文 TeX 设置见[开发指南](development.zh-CN.md#中文-tex)。
+
+Yazi 通过 [home/yazi.nix](../home/yazi.nix) 加载 `compress`、`full-border`、`git`、
+`mount` 和 `zoom`。`M` 打开挂载管理器，先按 `g` 再按 `+` 或 `-` 缩放图片预览，
+`c a a` 压缩所选文件。`c a p` 请求密码，`c a h` 同时加密归档头，`c a l` 选择压缩级别，
+`c a u` 打开完整归档选项。
+
+Pisces 的 GVfs 不会自动发现托管的 WebDAV 挂载，以免拖慢本地文件选择器。两个共享仍可通过
+`~/mnt` 直接打开。挂载诊断见[机密与 WebDAV](operations.zh-CN.md#机密与-webdav)。
 
 ## 桌面主题
 
@@ -228,10 +289,9 @@ NixOS 不会同时回退 Bottles。Bottles 仍处于沙箱内；应通过文件 
 
 ## Fish 与归档命令
 
-系统还安装了目前维护的上游 7-Zip CLI。`7zz` 与兼容命令 `7z` 均可使用，
-两者都会调用固定 Nixpkgs 输入中的同一软件包。Fish 提供使用
-LZMA2 最高压缩等级的 `7zip` 与 `7sec` 别名，以及按 100 GiB 分卷的
-`7zipv` 与 `7secv`。`7sec` 系列使用已配置的便捷口令同时加密文件内容和文件名。
+`7zz` 和 `7z` 调用同一个 7-Zip 软件包。Fish 的 `7zip` 与 `7sec` 别名使用
+LZMA2 最高压缩等级，`7zipv` 和 `7secv` 按 100 GiB 分卷。这些别名在
+[账户文件](../hosts/Pisces/users/chomsky.nix)中定义。
 
-归档别名在 `hosts/Pisces/users/chomsky.nix` 中定义；`7sec` 系列使用该源文件中的固定口令。
-需要保密的归档应显式选择私有密码。
+`7sec` 别名使用仓库中可读取的口令加密文件内容和文件名。制作私密归档时，直接
+使用 `7z` 并添加 `-p -mhe=on`，在提示中输入私有口令。

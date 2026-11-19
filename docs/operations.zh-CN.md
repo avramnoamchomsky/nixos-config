@@ -3,7 +3,7 @@
 [English](operations.md) | [简体中文](operations.zh-CN.md) | [README](../README.zh-CN.md)
 
 本流程适用于 `Pisces` 与 `chomsky`。在仓库根目录执行 Nix 命令。
-Shell 示例使用 Bash；不含 Bash 特有语法的命令也可在配置的 Fish 中运行。
+Shell 示例使用 Bash。主机与账户的配置归属见[架构指南](architecture.zh-CN.md)。
 
 ## 目录
 
@@ -19,7 +19,7 @@ Shell 示例使用 Bash；不含 Bash 特有语法的命令也可在配置的 Fi
 
 ## 验证与应用
 
-Home Manager 已集成到 `nixosConfigurations.Pisces`，系统重构也会构建并激活
+Home Manager 已集成到 `nixosConfigurations.Pisces`，系统重建也会构建并激活
 `chomsky` 用户环境。`system.stateVersion` 与 `home.stateVersion` 均为 `26.05`，
 用于兼容性设置；修改它们并不是更新输入的步骤。
 
@@ -37,7 +37,13 @@ Home Manager 已集成到 `nixosConfigurations.Pisces`，系统重构也会构�
    nix build --no-link --no-update-lock-file .#nixosConfigurations.Pisces.config.system.build.toplevel
    ```
 
-   如需单独验证 Home Manager，可改为构建其激活包：
+   修改引导、显卡或项目结构时，也应构建 VFIO specialisation。
+
+   ```bash
+   nix build --no-link --no-update-lock-file .#nixosConfigurations.Pisces.config.specialisation.vfio.configuration.system.build.toplevel
+   ```
+
+   如需单独验证 Home Manager，可构建其激活包。
 
    ```bash
    nix build --no-link --no-update-lock-file .#nixosConfigurations.Pisces.config.home-manager.users.chomsky.home.activationPackage
@@ -46,6 +52,17 @@ Home Manager 已集成到 `nixosConfigurations.Pisces`，系统重构也会构�
 flake 检查会求值输出，并不编译软件包或执行激活钩子。成功构建表明请求的输出
 可以生成；服务、硬件及应用行为仍需在激活后验证。`--no-link` 避免生成本地
 `result` 符号链接。
+
+如果重构应保持行为一致，可对比三个输出在修改前后的 `.drvPath`。相同的路径表示
+Nix 从相同输入得到了相同的构建定义。
+
+可分别查看仓库固定的内核、正在运行的内核，以及激活的系统路径。
+
+```bash
+nix eval --raw --no-update-lock-file .#nixosConfigurations.Pisces.config.boot.kernelPackages.kernel.version
+uname -r
+readlink -f /run/current-system
+```
 
 根据修改内容与当前启动模式选择激活方式：
 
@@ -69,35 +86,47 @@ journalctl -b -u home-manager-chomsky.service
 ```
 
 修改 `docker`、`libvirtd`、`wireshark`、`dialout` 或 `plugdev` 组成员身份后，请
-注销并重新登录，或重启。成功重构不会更新现有桌面会话的用户组。
+注销并重新登录，或重启。成功重建不会更新现有桌面会话的用户组。
 
 ## 更新固定输入与软件包
 
-`flake.lock` 固定各输入 revision。稳定版 Nixpkgs 与 Home Manager 使用 26.05
-分支；指定应用通过 `unstablePkgs` 使用 `nixpkgs-unstable`。更新该输入不会把
-整个系统迁移到 unstable。其他输入提供 nix-flatpak、sops-nix、Lanzaboote 及
-`codex-desktop-linux` 桌面集成。
+[flake.lock](../flake.lock) 固定各输入 revision。稳定版 Nixpkgs 与 Home Manager
+使用 26.05 分支。QQ、uv 和配套的 Yosys、SymbiYosys 等选定软件通过 `unstablePkgs`
+使用 `nixpkgs-unstable`。其他输入提供 DMS、MSIME、nix-flatpak、sops-nix、
+Lanzaboote 及 `codex-desktop-linux` 桌面集成。
 
-以普通用户更新指定输入，检查 lockfile 差异，然后验证并重构。例如：
+以普通用户更新指定输入，检查 lockfile 差异，然后验证并重建。例如：
 
 ```bash
 nix flake update codex-desktop-linux
 git diff -- flake.lock
 ```
 
-将输入名替换为 `nixpkgs-unstable` 可更新指定的不稳定版软件包。
+用 `nix flake update nixpkgs home-manager` 一起刷新稳定版输入。对于固定在标签或
+提交的输入，先在 [flake.nix](../flake.nix) 修改 URL，再运行 `nix flake update <input>`。
+构建前检查两个文件的差异。现有安装继续使用原有的 `system.stateVersion` 和
+`home.stateVersion`。
+
+DMS 和 Quickshell 使用 DMS 输入中的同一套 Qt 软件包。更新 DMS 时，对照上游 Niri
+模板和 [home/niri.nix](../home/niri.nix) 中的转换逻辑。应用经测试的配置后，运行
+`niri validate` 并检查现有的可写绑定和截图功能。配置归属见
+[桌面指南](desktop.zh-CN.md#桌面配置)。
+
 `hosts/Pisces/hybrid-graphics.nix` 中的驱动版本与哈希、`packages/` 中的自定义
 软件包及 `home/themes.nix` 中的主题 revision 是额外的固定项。升级时需同步
 版本、源地址或 revision 及所有受影响哈希。Readest 分别固定源文件、Cargo、
-前端及插件依赖哈希。只执行重构不会更新这些固定项。
+前端及插件依赖哈希。只执行重建不会更新这些固定项。
 
 Bottles 使用声明的 Flatpak 每周更新器；Vitis 容器中的 Ubuntu 软件包使用 apt。
 这些更新独立于 Nix generation。
 
-每日 Codex 自动化运行 `./scripts/update-openai-desktop`，检查 OpenAI 的
+可选的每日 Codex 自动化运行 `./scripts/update-openai-desktop`，检查 OpenAI 的
 Codex CLI 稳定版和签名的 ChatGPT Linux 仓库，并将更新分别安装到用户的
-Nix profile。ChatGPT 使用社区维护的 NixOS 兼容层；脚本仅在兼容层固定的
-ChatGPT 软件包与 OpenAI 签名的发行版一致时才会构建。脚本不会改动系统
+Nix profile，位于 `${XDG_STATE_HOME:-$HOME/.local/state}/openai-updates/`。
+`~/.local/bin` 中的启动器可优先于声明式版本，可用 `type -a codex` 和
+`codex --version` 检查当前 Shell 实际使用的版本。ChatGPT 使用社区维护的
+NixOS 兼容层。脚本仅在兼容层固定的 ChatGPT 软件包与 OpenAI 签名的发行版
+一致时才会构建。脚本不会改动系统
 配置、重启正在运行的应用或更新 OpenCodex。
 
 也可以手动运行脚本。更新后请打开新终端，或退出并重新打开桌面应用。
@@ -109,7 +138,7 @@ ChatGPT 软件包与 OpenAI 签名的发行版一致时才会构建。脚本不�
 
 `hosts/Pisces/default.nix` 使用 Lanzaboote `v1.1.0` 安装 systemd-boot 与统一内核镜像。
 签名密钥在本机 `/var/lib/sbctl` 下生成；`allowUnsigned = true` 允许密钥生成前
-的首次重构。`fwupd-efi` 服务等待 `generate-sb-keys.service`。
+的首次重建。`fwupd-efi` 服务等待 `generate-sb-keys.service`。
 
 本配置生成签名密钥，但不会将其注册到固件或启用 Secure Boot。依赖启动签名
 强制验证前，请另行检查固件状态，并在 Git 之外备份本机密钥。
@@ -190,8 +219,8 @@ busctl call org.freedesktop.login1 /org/freedesktop/login1 \
 
 `hosts/Pisces/msi-control.nix` 为 MControlCenter 加载 `msi-ec` 与 `ec_sys`。
 本机 EC `17KKIMS1.115` 使用已测试的 `17KKIMS1.114` 驱动布局，并启用
-`ec_sys` 写入支持以设置自定义风扇曲线。`home/desktop.nix` 声明平衡模式及
-两个风扇曲线，不将窗口位置尺寸写入 Git。持久硬件偏好应通过该模块重新应用。
+`ec_sys` 写入支持以设置自定义风扇曲线。[账户文件](../hosts/Pisces/users/chomsky.nix)
+声明平衡模式及两条风扇曲线，窗口几何由应用管理。
 
 `hosts/Pisces/default.nix` 为标识为 `05ac:0265` 的外接触控板在 `hid_magicmouse`
 之前加载 `hid_multitouch`，其第二个 HID 接口需要多点触控支持。
@@ -214,8 +243,8 @@ SOPS_AGE_KEY_FILE=/home/chomsky/all_files/secrets/sops-nix/age-key.txt nix shell
 ```
 
 `--inputs-from .` 从本 flake 固定的 Nixpkgs 输入选择 sops。sops-nix 在 `/run/secrets/rclone/`
-下解密四项机密，所有者为 `chomsky`，权限为 `0400`。`hosts/Pisces/webdav.nix` 读取
-这些路径。Home Manager 将机密值直接写入 rclone 配置，不进行转换。更换密码时，
+下解密四项机密，所有者为 `chomsky`，权限为 `0400`。主机 WebDAV 模块同时定义挂载和
+机密所有者。Home Manager 将机密值直接写入 rclone 配置。更换密码时，
 应将 `rclone obscure` 的输出写入加密 YAML 密码字段；用户名使用普通值。
 两者都应通过 sops 保持加密。
 
@@ -251,8 +280,8 @@ NetworkManager 管理主机连接。Avahi 发布 `Pisces.local`、工作站与�
 解析 IPv4 `.local` 名称。蓝牙、UPower、fwupd、fstrim、PipeWire、GNOME keyring、
 GVfs 与 UDisks 均已启用；Home Manager 的 udiskie 服务为 Niri 提供可移动存储自动挂载。
 
-OpenSSH 允许 `chomsky` 使用密码认证，关闭 root 登录与键盘交互式认证，并以声明式
-方式开放防火墙。LocalSend 开放 TCP/UDP `53317`；Avahi 开放对应服务端口。
+OpenSSH 使用密码认证，[账户文件](../hosts/Pisces/users/chomsky.nix)将 `chomsky`
+加入 SSH 允许名单。Root 登录与键盘交互式认证已关闭，防火墙通过声明式配置开放端口。LocalSend 开放 TCP/UDP `53317`；Avahi 开放对应服务端口。
 Docker 使用系统守护进程，并通过 `docker` 组授权访问。
 
 专用 `enp3s0` FPGA 连接受到防火墙信任，使用静态且不提供默认路由的网络。
