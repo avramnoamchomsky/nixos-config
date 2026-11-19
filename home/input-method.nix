@@ -1,7 +1,7 @@
 { ... }:
 
 {
-  # Keep the selected Fcitx group and input-method order reproducible.
+  # Keep MSIME as the only input method across logins and rebuilds.
   xdg.configFile."fcitx5/profile" = {
     force = true;
     text = ''
@@ -14,12 +14,6 @@
       DefaultIM=msime
 
       [Groups/0/Items/0]
-      # Name
-      Name=keyboard-us
-      # Layout
-      Layout=
-
-      [Groups/0/Items/1]
       # Name
       Name=msime
       # Layout
