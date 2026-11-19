@@ -40,7 +40,7 @@ declares `.envrc`; it does not supply the SDK flake or project sources.
 `home/programs.nix` installs the HDL tools. Yosys and SymbiYosys use the pinned
 unstable Nixpkgs input together because stable Yosys passes obsolete CLI flags
 to modern Bitwuzla; the remaining tools use the pinned stable input.
-`system/fpga.nix` installs openFPGALoader and manages USB/JTAG access.
+`hosts/Pisces/fpga.nix` installs openFPGALoader and manages USB/JTAG access.
 
 | Tool | Command | Purpose |
 | --- | --- | --- |
@@ -71,7 +71,7 @@ programmer permissions.
 
 ## FPGA network and TFTP
 
-`system/fpga.nix` declares a NetworkManager profile named `fpga-tftp` on
+`hosts/Pisces/fpga.nix` declares a NetworkManager profile named `fpga-tftp` on
 `enp3s0`, with host address `10.90.50.43/24`. It autoconnects, has no gateway or
 DNS, disables IPv6, and never supplies the default route. Wi-Fi retains its
 normal route. The board must use a compatible address on the same subnet.
@@ -104,7 +104,7 @@ calls for checking the interface name, profile activation, and link state.
 Vitis and Vivado run in an Ubuntu 22.04 Distrobox named `vitis-2023.2` while
 the NixOS host owns Docker, USB/JTAG permissions, launch commands, and the VNC
 service. The AMD tools are installed under `~/Xilinx`, which is shared with the
-container and remains intact if the container is recreated. `system/fpga.nix`
+container and remains intact if the container is recreated. `hosts/Pisces/fpga.nix`
 provides udev rules for AMD/Xilinx and Digilent programmers commonly used with
 Artix-7 boards.
 
@@ -203,7 +203,7 @@ source ~/Xilinx/Vivado/2023.2/settings64.sh
 vivado -mode tcl
 ```
 
-After changing `home/vitis.nix`, follow the
+After changing `hosts/Pisces/users/vitis.nix`, follow the
 [system activation workflow](operations.md#validate-and-apply) and restart `vitis-vnc.service` if the VNC startup configuration changed.
 
 The host enables the system Docker daemon; this is not a rootless Docker

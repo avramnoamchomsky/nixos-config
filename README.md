@@ -73,22 +73,21 @@ local application state, sensor readings, and disk-space figures are historical.
 
 ## Repository map
 
+The root flake pins shared inputs. Each host imports the system modules it
+needs, and each host's account file selects that user's Home Manager modules.
+Accounts with the same username on different hosts can use different groups,
+shells, and applications.
+
 | Path | Responsibility |
 | --- | --- |
-| [flake.nix](flake.nix), [flake.lock](flake.lock) | Inputs, reproducible pins, `Pisces` output, and Home Manager integration |
-| [system/default.nix](system/default.nix), [system/hardware-configuration.nix](system/hardware-configuration.nix) | Module imports, identity, boot, Nix settings, networking, user, and local storage |
-| [system/desktop.nix](system/desktop.nix), [system/gaming.nix](system/gaming.nix) | Session, input, audio, desktop services, permissions, fonts, Flatpak, and Steam |
-| [system/hybrid-graphics.nix](system/hybrid-graphics.nix), [system/vfio.nix](system/vfio.nix) | NVIDIA driver, PRIME offload, and GPU-reservation specialisation |
-| [system/power-management.nix](system/power-management.nix), [system/msi-control.nix](system/msi-control.nix) | Sleep policy, zram, and MSI embedded-controller support |
-| [system/virtualization.nix](system/virtualization.nix), [system/fpga.nix](system/fpga.nix) | KVM/libvirt, Docker, programmer access, and FPGA network/TFTP service |
-| [system/secrets.nix](system/secrets.nix), [.sops.yaml](.sops.yaml), [secrets/webdav.yaml](secrets/webdav.yaml) | Encrypted WebDAV credentials and their decryption policy |
-| [home/default.nix](home/default.nix), [home/programs.nix](home/programs.nix) | User modules, XDG directories, packages, Fish, CLI tools, and development environments |
-| [home/desktop.nix](home/desktop.nix), [home/input-method.nix](home/input-method.nix) | MIME associations, desktop preferences, MControlCenter, and the Fcitx5 input profile |
-| [home/niri.nix](home/niri.nix) | Official Niri defaults and writable DMS configuration |
-| [home/dms.nix](home/dms.nix), [home/dms/Wood_Whale.jpg](home/dms/Wood_Whale.jpg) | DMS settings reset, retained wallpaper, and account avatar |
-| [home/themes.nix](home/themes.nix), [home/wallpapers](home/wallpapers) | Pinned themes and tracked wallpaper assets |
-| [home/ghost-downloader.nix](home/ghost-downloader.nix), [home/baidunetdisk.nix](home/baidunetdisk.nix), [home/115-life.nix](home/115-life.nix), [home/packages](home/packages) | Custom application packages, launchers, URI handlers, and Zhuque Fangsong |
-| [home/rclone.nix](home/rclone.nix), [home/vitis.nix](home/vitis.nix) | User mounts and AMD-tool/container wrappers and VNC service |
+| [flake.nix](flake.nix), [flake.lock](flake.lock) | Shared inputs, reproducible pins, and host entry points |
+| [hosts/Pisces](hosts/Pisces) | Hardware and storage, boot, networking, VFIO, and system module selection |
+| [hosts/Pisces/users/chomsky.nix](hosts/Pisces/users/chomsky.nix) | Unix account, access groups, login shell, and Home Manager profile |
+| [hosts/Pisces/assets](hosts/Pisces/assets) | Pisces wallpaper collection and account avatar |
+| [hosts/Pisces/webdav.nix](hosts/Pisces/webdav.nix), [secrets/webdav.yaml](secrets/webdav.yaml) | User mounts, GVfs visibility, and encrypted credentials |
+| [system/](system) | Opt-in NixOS modules for desktop services, gaming, and embedded development |
+| [home/](home) | Opt-in Home Manager modules for applications, shells, themes, and Niri |
+| [packages/](packages), [scripts/](scripts) | Local package definitions and the OpenAI desktop updater |
 
 ## Contributing changes
 

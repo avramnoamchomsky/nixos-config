@@ -61,7 +61,7 @@ Choose activation according to the change and the current boot mode:
 Shut down guests before rebooting, then run `sudo reboot`. A normal `switch`
 while VFIO or a guest owns the RTX 4060 may try to return the device to NVIDIA.
 Both workflows build the inherited `vfio` specialisation; parent changes apply
-to both modes except for the overrides in `system/vfio.nix`.
+to both modes except for the overrides in `hosts/Pisces/vfio.nix`.
 
 After a switch, check the relevant services, for example:
 
@@ -92,8 +92,8 @@ git diff -- flake.lock
 ```
 
 The same command with `nixpkgs-unstable` updates the selected unstable packages.
-The driver version and hashes in `system/hybrid-graphics.nix`, the custom
-application definitions in `home/packages/`, and the theme revisions in
+The driver version and hashes in `hosts/Pisces/hybrid-graphics.nix`, the custom
+application definitions in `packages/`, and the theme revisions in
 `home/themes.nix` are additional pins. Update their versions, source URLs or
 revisions, and all affected hashes when upgrading them. Readest has separate
 source, Cargo, frontend, and plugin dependency hashes. Rebuilds alone preserve
@@ -118,7 +118,7 @@ doesn't reapply the update on its next run.
 
 ## Boot signing and recovery
 
-`system/default.nix` uses Lanzaboote `v1.1.0` to install systemd-boot with unified
+`hosts/Pisces/default.nix` uses Lanzaboote `v1.1.0` to install systemd-boot with unified
 kernel images. Signing keys are generated locally under `/var/lib/sbctl`;
 `allowUnsigned = true` allows the initial rebuild before keys are available.
 The `fwupd-efi` service waits for `generate-sb-keys.service`.
@@ -183,7 +183,7 @@ works. NVIDIA host telemetry is unavailable when the device belongs to VFIO.
 
 ## Power management
 
-`system/power-management.nix` disables suspend, hibernation, hybrid sleep, and
+`hosts/Pisces/power-management.nix` disables suspend, hibernation, hybrid sleep, and
 suspend-then-hibernate through systemd. Hibernation is no longer planned, and
 the recorded AMD platform-resume failures remain unresolved. Lid-close handling
 is set to `ignore`, and DMS omits suspend and hibernate actions.
@@ -212,20 +212,20 @@ Settings. Turning off monitors is separate from system sleep.
 
 ## MSI controls and trackpad
 
-`system/msi-control.nix` loads `msi-ec` and `ec_sys` for MControlCenter. This
+`hosts/Pisces/msi-control.nix` loads `msi-ec` and `ec_sys` for MControlCenter. This
 machine's EC `17KKIMS1.115` uses the tested `17KKIMS1.114` driver layout, and
 `ec_sys` write support permits custom fan curves. `home/desktop.nix` declares
 balanced mode and the two fan curves; window geometry is left out of Git.
 Reapply persistent hardware preferences through that module.
 
-`system/default.nix` loads `hid_multitouch` before `hid_magicmouse` for the
+`hosts/Pisces/default.nix` loads `hid_multitouch` before `hid_magicmouse` for the
 external trackpad identifying as `05ac:0265`. Its second HID interface needs
 multitouch support. These settings are specific to this laptop and peripheral.
 
 ## Secrets and WebDAV
 
 `secrets/webdav.yaml` contains encrypted WebDAV usernames and passwords.
-`.sops.yaml` declares the public age recipient. `system/secrets.nix` expects
+`.sops.yaml` declares the public age recipient. `hosts/Pisces/webdav.nix` expects
 the private identity outside the repository at:
 
 ```text
@@ -248,7 +248,7 @@ without transforming them. When replacing a password, store the output of
 `rclone obscure` in the encrypted YAML password field; usernames use their
 ordinary values. Keep both encrypted with sops.
 
-`home/rclone.nix` configures these mounts:
+`hosts/Pisces/webdav.nix` configures these mounts:
 
 | Remote | WebDAV endpoint | Mount point |
 | --- | --- | --- |
@@ -298,7 +298,7 @@ address, read-only TFTP service, and checks. Vitis VNC listens only on loopback.
 
 ## Virtual machines
 
-`system/virtualization.nix` enables libvirt with the hardware-accelerated
+`hosts/Pisces/virtualization.nix` enables libvirt with the hardware-accelerated
 `qemu_kvm` package and configures virt-manager to connect to
 `qemu:///system`. QEMU guests run as the unprivileged `qemu-libvirtd` account,
 and software TPM support is available for guests that require TPM 2.0. UEFI
@@ -356,7 +356,7 @@ with `cat /sys/module/kvm_amd/parameters/nested`; it should print `0`.
 
 ### RTX 4060 passthrough
 
-`system/vfio.nix` adds a `vfio` specialisation without changing the normal boot
+`hosts/Pisces/vfio.nix` adds a `vfio` specialisation without changing the normal boot
 configuration. The normal entry keeps the RTX 4060 available to NixOS through
 PRIME offload. The `vfio` entry binds the two NVIDIA functions to `vfio-pci`
 during the initrd:

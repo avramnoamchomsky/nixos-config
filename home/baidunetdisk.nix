@@ -1,7 +1,7 @@
 { pkgs, ... }:
 
 let
-  baiduNetdisk = import ./packages/baidunetdisk.nix { inherit pkgs; };
+  baiduNetdisk = import ../packages/baidunetdisk.nix { inherit pkgs; };
 in
 {
   home.packages = [ baiduNetdisk ];

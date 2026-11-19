@@ -1,19 +1,58 @@
-{ lib, pkgs, ... }:
+{ inputs, lib, pkgs, ... }:
 
+let
+  system = pkgs.stdenv.hostPlatform.system;
+
+  # Keep DMS and Quickshell on the same Qt package set.
+  desktopShell = {
+    package = inputs.dms.packages.${system}.default;
+    quickshell = inputs.dms.inputs.nixpkgs.legacyPackages.${system}.quickshell;
+    source = inputs.dms.outPath;
+  };
+
+  unstablePkgs = import inputs.nixpkgs-unstable {
+    inherit system;
+    config.allowUnfree = true;
+  };
+in
 {
   imports = [
+    inputs.dms.nixosModules.default
+    inputs.codex-desktop-linux.nixosModules.default
+    inputs.msime.nixosModules.default
+    inputs.nix-flatpak.nixosModules.nix-flatpak
+    inputs.sops-nix.nixosModules.sops
+    inputs.lanzaboote.nixosModules.lanzaboote
+    inputs.home-manager.nixosModules.home-manager
+
     ./hardware-configuration.nix
-    ./desktop.nix
-    ./embedded-linux.nix
+    ../../system/desktop.nix
+    ../../system/embedded-linux.nix
     ./fpga.nix
-    ./gaming.nix
+    ../../system/gaming.nix
     ./hybrid-graphics.nix
     ./msi-control.nix
     ./power-management.nix
-    ./secrets.nix
     ./vfio.nix
     ./virtualization.nix
+    ./users/chomsky.nix
   ];
+
+  _module.args = { inherit desktopShell; };
+
+  home-manager = {
+    useGlobalPkgs = true;
+    useUserPackages = true;
+    extraSpecialArgs = { inherit desktopShell unstablePkgs; };
+  };
+
+  programs.msime.package = (pkgs.extend inputs.msime.overlays.default).msime-fcitx5.overrideAttrs {
+    # The candidate canvas tests need fonts inside the build sandbox.
+    FONTCONFIG_FILE = pkgs.makeFontsConf {
+      fontDirectories = [ pkgs.dejavu_fonts pkgs.noto-fonts-cjk-sans ];
+    };
+    CTEST_OUTPUT_ON_FAILURE = "1";
+  };
 
   # Identity and locale
   networking.hostName = "Pisces";
@@ -90,18 +129,6 @@
 
   users.groups.plugdev = { };
 
-  users.users.chomsky = {
-    isNormalUser = true;
-    description = "chomsky";
-    extraGroups = [
-      "wheel"
-      "networkmanager"
-      "plugdev"
-      "dialout"
-    ];
-    shell = pkgs.fish;
-  };
-
   # Password authentication remains enabled until a replacement SSH key is set up.
   services.openssh = {
     enable = true;
@@ -111,7 +138,6 @@
       PasswordAuthentication = true;
       KbdInteractiveAuthentication = false;
       PermitRootLogin = "no";
-      AllowUsers = [ "chomsky" ];
     };
   };
 

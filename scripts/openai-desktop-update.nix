@@ -1,11 +1,11 @@
 let
   repo = builtins.getFlake (builtins.getEnv "OPENAI_UPDATE_REPO");
-  pkgs = repo.nixosConfigurations.Pisces.pkgs;
+  pkgs = repo.inputs.nixpkgs.legacyPackages.x86_64-linux;
   adapter = builtins.getFlake ("path:" + builtins.getEnv "OPENAI_UPDATE_ADAPTER");
   desktop = adapter.packages.x86_64-linux.codex-desktop;
 in
 {
-  cli = pkgs.callPackage ../home/packages/codex.nix {
+  cli = pkgs.callPackage ../packages/codex.nix {
     releaseVersion = builtins.getEnv "OPENAI_UPDATE_CLI_VERSION";
     releaseHash = builtins.getEnv "OPENAI_UPDATE_CLI_HASH";
   };

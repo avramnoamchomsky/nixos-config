@@ -57,7 +57,7 @@ flake 检查会求值输出，并不编译软件包或执行激活钩子。成�
 
 重启前先关闭客户机，然后执行 `sudo reboot`。在 VFIO 或客户机占用 RTX 4060 时
 执行正常配置的 `switch`，可能尝试把设备交还给 NVIDIA。两种方式都会构建继承的
-`vfio` specialisation；父配置修改会应用到两种模式，但 `system/vfio.nix` 的覆盖
+`vfio` specialisation；父配置修改会应用到两种模式，但 `hosts/Pisces/vfio.nix` 的覆盖
 设置除外。
 
 切换后检查相关服务，例如：
@@ -86,7 +86,7 @@ git diff -- flake.lock
 ```
 
 将输入名替换为 `nixpkgs-unstable` 可更新指定的不稳定版软件包。
-`system/hybrid-graphics.nix` 中的驱动版本与哈希、`home/packages/` 中的自定义
+`hosts/Pisces/hybrid-graphics.nix` 中的驱动版本与哈希、`packages/` 中的自定义
 软件包及 `home/themes.nix` 中的主题 revision 是额外的固定项。升级时需同步
 版本、源地址或 revision 及所有受影响哈希。Readest 分别固定源文件、Cargo、
 前端及插件依赖哈希。只执行重构不会更新这些固定项。
@@ -107,7 +107,7 @@ ChatGPT 软件包与 OpenAI 签名的发行版一致时才会构建。脚本不�
 
 ## 启动签名与恢复
 
-`system/default.nix` 使用 Lanzaboote `v1.1.0` 安装 systemd-boot 与统一内核镜像。
+`hosts/Pisces/default.nix` 使用 Lanzaboote `v1.1.0` 安装 systemd-boot 与统一内核镜像。
 签名密钥在本机 `/var/lib/sbctl` 下生成；`allowUnsigned = true` 允许密钥生成前
 的首次重构。`fwupd-efi` 服务等待 `generate-sb-keys.service`。
 
@@ -161,7 +161,7 @@ Niri 持有 GPU 句柄时，在线重置可能中断桌面。部分 AMD 传感�
 
 ## 电源管理
 
-`system/power-management.nix` 通过 systemd 禁用挂起、休眠、混合睡眠及“先挂起后休眠”。
+`hosts/Pisces/power-management.nix` 通过 systemd 禁用挂起、休眠、混合睡眠及“先挂起后休眠”。
 目前不再计划启用休眠，AMD 平台恢复问题也尚未解决。合盖动作被设置为
 `ignore`，DMS 不显示挂起或休眠操作，以防止意外进入无法恢复的状态。
 
@@ -188,19 +188,19 @@ busctl call org.freedesktop.login1 /org/freedesktop/login1 \
 
 ## MSI 控制与触控板
 
-`system/msi-control.nix` 为 MControlCenter 加载 `msi-ec` 与 `ec_sys`。
+`hosts/Pisces/msi-control.nix` 为 MControlCenter 加载 `msi-ec` 与 `ec_sys`。
 本机 EC `17KKIMS1.115` 使用已测试的 `17KKIMS1.114` 驱动布局，并启用
 `ec_sys` 写入支持以设置自定义风扇曲线。`home/desktop.nix` 声明平衡模式及
 两个风扇曲线，不将窗口位置尺寸写入 Git。持久硬件偏好应通过该模块重新应用。
 
-`system/default.nix` 为标识为 `05ac:0265` 的外接触控板在 `hid_magicmouse`
+`hosts/Pisces/default.nix` 为标识为 `05ac:0265` 的外接触控板在 `hid_magicmouse`
 之前加载 `hid_multitouch`，其第二个 HID 接口需要多点触控支持。
 这些设置针对本笔记本及该外设。
 
 ## 机密与 WebDAV
 
 `secrets/webdav.yaml` 保存加密 WebDAV 用户名与密码；`.sops.yaml` 声明公开的
-age 接收者。`system/secrets.nix` 需要仓库之外的私有身份密钥：
+age 接收者。`hosts/Pisces/webdav.nix` 需要仓库之外的私有身份密钥：
 
 ```text
 /home/chomsky/all_files/secrets/sops-nix/age-key.txt
@@ -214,12 +214,12 @@ SOPS_AGE_KEY_FILE=/home/chomsky/all_files/secrets/sops-nix/age-key.txt nix shell
 ```
 
 `--inputs-from .` 从本 flake 固定的 Nixpkgs 输入选择 sops。sops-nix 在 `/run/secrets/rclone/`
-下解密四项机密，所有者为 `chomsky`，权限为 `0400`。`home/rclone.nix` 读取
+下解密四项机密，所有者为 `chomsky`，权限为 `0400`。`hosts/Pisces/webdav.nix` 读取
 这些路径。Home Manager 将机密值直接写入 rclone 配置，不进行转换。更换密码时，
 应将 `rclone obscure` 的输出写入加密 YAML 密码字段；用户名使用普通值。
 两者都应通过 sops 保持加密。
 
-`home/rclone.nix` 配置以下挂载：
+`hosts/Pisces/webdav.nix` 配置以下挂载：
 
 | 远程 | WebDAV 地址 | 挂载点 |
 | --- | --- | --- |
@@ -261,7 +261,7 @@ Docker 使用系统守护进程，并通过 `docker` 组授权访问。
 
 ## 虚拟机
 
-`system/virtualization.nix` 会启用 libvirt 与硬件加速的 `qemu_kvm`
+`hosts/Pisces/virtualization.nix` 会启用 libvirt 与硬件加速的 `qemu_kvm`
 软件包，并将 virt-manager 配置为连接 `qemu:///system`。QEMU 客户机以
 非特权账户 `qemu-libvirtd` 运行，并为需要 TPM 2.0 的客户机提供软件 TPM
 支持；固定版本的 QEMU 软件包已包含 UEFI 固件。
@@ -311,7 +311,7 @@ Remmina 作为 Windows 11 客户机的图形化 RDP 客户端安装。请先在 
 
 ### RTX 4060 直通
 
-`system/vfio.nix` 会新增 `vfio` specialisation，但不会改变正常启动配置。
+`hosts/Pisces/vfio.nix` 会新增 `vfio` specialisation，但不会改变正常启动配置。
 正常启动项仍由 NixOS 通过 PRIME offload 使用 RTX 4060；`vfio` 启动项则在
 initrd 阶段将两个 NVIDIA 功能绑定到 `vfio-pci`：
 

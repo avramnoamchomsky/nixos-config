@@ -1,11 +1,11 @@
 { lib, pkgs, unstablePkgs, ... }:
 
 let
-  browser115 = import ./packages/115-browser.nix { inherit pkgs; };
-  codex = pkgs.callPackage ./packages/codex.nix { };
-  sylvakru = import ./packages/sylvakru.nix { inherit pkgs; };
-  readest = unstablePkgs.callPackage ./packages/readest.nix { };
-  wechat = import ./packages/wechat.nix { inherit pkgs; };
+  browser115 = import ../packages/115-browser.nix { inherit pkgs; };
+  codex = pkgs.callPackage ../packages/codex.nix { };
+  sylvakru = import ../packages/sylvakru.nix { inherit pkgs; };
+  readest = unstablePkgs.callPackage ../packages/readest.nix { };
+  wechat = import ../packages/wechat.nix { inherit pkgs; };
 
   whiteSurGtk = pkgs.whitesur-gtk-theme.override {
     colorVariants = [ "dark" ];
@@ -82,30 +82,13 @@ in
 {
   programs.git = {
     enable = true;
-    settings = {
-      user = {
-        name = "chomsky";
-        email = "315812871+avramnoamchomsky@users.noreply.github.com";
-      };
-      init.defaultBranch = "main";
-    };
+    settings.init.defaultBranch = "main";
   };
 
   programs.fish = {
     enable = true;
     interactiveShellInit = ''
       set -g fish_greeting
-    '';
-
-    shellAliases = {
-      "7sec" = "7z a -t7z -m0=lzma2 -mx=9 -mmt=(nproc) -pcoffee -mhe=on";
-      "7zip" = "7z a -t7z -m0=lzma2 -mx=9 -mmt=(nproc)";
-      "7secv" = "7z a -t7z -v107374182400b -m0=lzma2 -mx=9 -mmt=(nproc) -pcoffee -mhe=on";
-      "7zipv" = "7z a -t7z -v107374182400b -m0=lzma2 -mx=9 -mmt=(nproc)";
-    };
-
-    functions.esp32-shell = ''
-      nix develop ~/all_files/projects/dev-envs/esp32 -c fish
     '';
   };
 
@@ -137,10 +120,6 @@ in
     enableBashIntegration = true;
     nix-direnv.enable = true;
   };
-
-  home.file."all_files/projects/esp32/.envrc".text = ''
-    use flake ~/all_files/projects/dev-envs/esp32
-  '';
 
   programs.ghostty = {
     enable = true;

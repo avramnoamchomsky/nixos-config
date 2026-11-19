@@ -64,9 +64,4 @@
       fi
     '';
   };
-
-  users.users.chomsky.extraGroups = [
-    "docker"
-    "libvirtd"
-  ];
 }

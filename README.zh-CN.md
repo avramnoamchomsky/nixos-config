@@ -66,22 +66,20 @@ generation 编号、本地应用状态、传感器读数及剩余磁盘空间均
 
 ## 仓库索引
 
+仓库根目录的 flake 固定共享输入。每台主机显式导入所需的系统模块，并在主机自己的
+账户配置中选择 Home Manager 模块。不同主机上的同名账户可以使用不同的组、Shell
+和应用。
+
 | 路径 | 职责 |
 | --- | --- |
-| [flake.nix](flake.nix)、[flake.lock](flake.lock) | 输入、可复现版本、`Pisces` 输出及 Home Manager 集成 |
-| [system/default.nix](system/default.nix)、[system/hardware-configuration.nix](system/hardware-configuration.nix) | 模块导入、身份、启动、Nix 设置、网络、用户及本机存储 |
-| [system/desktop.nix](system/desktop.nix)、[system/gaming.nix](system/gaming.nix) | 会话、输入、音频、桌面服务、权限、字体、Flatpak 及 Steam |
-| [system/hybrid-graphics.nix](system/hybrid-graphics.nix)、[system/vfio.nix](system/vfio.nix) | NVIDIA 驱动、PRIME offload 及 GPU 预留 specialisation |
-| [system/power-management.nix](system/power-management.nix)、[system/msi-control.nix](system/msi-control.nix) | 睡眠策略、zram 及 MSI 嵌入式控制器支持 |
-| [system/virtualization.nix](system/virtualization.nix)、[system/fpga.nix](system/fpga.nix) | KVM/libvirt、Docker、下载器访问及 FPGA 网络/TFTP 服务 |
-| [system/secrets.nix](system/secrets.nix)、[.sops.yaml](.sops.yaml)、[secrets/webdav.yaml](secrets/webdav.yaml) | 加密 WebDAV 凭据及其解密策略 |
-| [home/default.nix](home/default.nix)、[home/programs.nix](home/programs.nix) | 用户模块、XDG 目录、软件包、Fish、命令行工具及开发环境 |
-| [home/desktop.nix](home/desktop.nix)、[home/input-method.nix](home/input-method.nix) | MIME 关联、桌面偏好、MControlCenter 及 Fcitx5 输入法配置 |
-| [home/niri.nix](home/niri.nix) | 官方 Niri 默认配置及 DMS 可写配置 |
-| [home/dms.nix](home/dms.nix)、[home/dms/Wood_Whale.jpg](home/dms/Wood_Whale.jpg) | DMS 设置重置、保留的壁纸与账户头像 |
-| [home/themes.nix](home/themes.nix)、[home/wallpapers](home/wallpapers) | 固定主题及已跟踪壁纸资源 |
-| [home/ghost-downloader.nix](home/ghost-downloader.nix)、[home/baidunetdisk.nix](home/baidunetdisk.nix)、[home/115-life.nix](home/115-life.nix)、[home/packages](home/packages) | 自定义应用包、启动器、URI 处理及朱雀仿宋 |
-| [home/rclone.nix](home/rclone.nix)、[home/vitis.nix](home/vitis.nix) | 用户挂载、AMD 工具/容器包装命令及 VNC 服务 |
+| [flake.nix](flake.nix)、[flake.lock](flake.lock) | 共享输入、可复现版本及主机入口 |
+| [hosts/Pisces](hosts/Pisces) | 硬件与存储、启动、网络、VFIO 及系统模块选择 |
+| [hosts/Pisces/users/chomsky.nix](hosts/Pisces/users/chomsky.nix) | Unix 账户、权限组、登录 Shell 及 Home Manager 配置 |
+| [hosts/Pisces/assets](hosts/Pisces/assets) | Pisces 的壁纸与账户头像 |
+| [hosts/Pisces/webdav.nix](hosts/Pisces/webdav.nix)、[secrets/webdav.yaml](secrets/webdav.yaml) | 用户挂载、GVfs 可见性及加密凭据 |
+| [system/](system) | 可选的 NixOS 桌面服务、游戏及嵌入式开发模块 |
+| [home/](home) | 可选的 Home Manager 应用、Shell、主题及 Niri 模块 |
+| [packages/](packages)、[scripts/](scripts) | 本地软件包定义及 OpenAI 桌面更新脚本 |
 
 ## 修改与提交
 

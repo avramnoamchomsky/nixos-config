@@ -1,5 +1,5 @@
 {
-  description = "Pisces NixOS configuration";
+  description = "NixOS host configurations";
 
   inputs = {
     # Main system stays on NixOS 26.05 stable.
@@ -34,74 +34,10 @@
     };
   };
 
-  outputs =
-    {
-      nixpkgs,
-      nixpkgs-unstable,
-      home-manager,
-      dms,
-      nix-flatpak,
-      sops-nix,
-      lanzaboote,
-      codex-desktop-linux,
-      msime,
-      ...
-    }:
-    let
-      system = "x86_64-linux";
-
-      # Keep DMS and Quickshell on the same Qt package set.
-      desktopShell = {
-        package = dms.packages.${system}.default;
-        quickshell = dms.inputs.nixpkgs.legacyPackages.${system}.quickshell;
-        source = dms.outPath;
-      };
-
-      unstablePkgs = import nixpkgs-unstable {
-        inherit system;
-        config.allowUnfree = true;
-      };
-    in
-    {
-      nixosConfigurations.Pisces =
-        nixpkgs.lib.nixosSystem {
-          inherit system;
-
-          # Make an unstable package set available to NixOS and Home Manager.
-          # This does NOT move the NixOS system itself to unstable.
-          specialArgs = { inherit desktopShell unstablePkgs; };
-
-          modules = [
-            ./system
-            dms.nixosModules.default
-            codex-desktop-linux.nixosModules.default
-            msime.nixosModules.default
-            (
-              { pkgs, ... }:
-              {
-                programs.msime.package = (pkgs.extend msime.overlays.default).msime-fcitx5.overrideAttrs {
-                  # The candidate canvas tests need fonts inside the build sandbox.
-                  FONTCONFIG_FILE = pkgs.makeFontsConf {
-                    fontDirectories = [ pkgs.dejavu_fonts pkgs.noto-fonts-cjk-sans ];
-                  };
-                  CTEST_OUTPUT_ON_FAILURE = "1";
-                };
-              }
-            )
-            nix-flatpak.nixosModules.nix-flatpak
-            sops-nix.nixosModules.sops
-            lanzaboote.nixosModules.lanzaboote
-            home-manager.nixosModules.home-manager
-
-            {
-              home-manager = {
-                useGlobalPkgs = true;
-                useUserPackages = true;
-                extraSpecialArgs = { inherit desktopShell unstablePkgs; };
-                users.chomsky = ./home;
-              };
-            }
-          ];
-        };
+  outputs = inputs@{ nixpkgs, ... }: {
+    nixosConfigurations.Pisces = nixpkgs.lib.nixosSystem {
+      specialArgs = { inherit inputs; };
+      modules = [ ./hosts/Pisces ];
     };
+  };
 }

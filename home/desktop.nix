@@ -120,19 +120,4 @@
   # Take ownership of the mutable MIME files that predate Home Manager.
   xdg.configFile."mimeapps.list".force = true;
   xdg.dataFile."applications/mimeapps.list".force = true;
-
-  # MControlCenter's window geometry is deliberately omitted; only hardware
-  # behaviour belongs in Git.
-  xdg.configFile."MControlCenter.conf" = {
-    force = true;
-    text = ''
-      [Settings]
-      UserMode=balanced_mode
-      fan1SpeedSettings=30|30|30|30|30|30|30
-      fan1TempSettings=50|55|60|65|70|75
-      fan2SpeedSettings=30|30|30|30|30|30|30
-      fan2TempSettings=55|60|65|70|75|80
-      fanModeAdvanced=true
-    '';
-  };
 }

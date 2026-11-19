@@ -101,7 +101,7 @@ GPU 传感器均已验证。中文 TeX 设置见[开发指南](development.zh-CN
 
 Home Manager 安装官方[微信 Linux 版](https://linux.weixin.qq.com/)的
 `4.1.13.26` x86_64 AppImage，版本与 SHA-256 固定在
-`home/packages/wechat.nix` 中，并复用 Nixpkgs 的微信 AppImage 打包方式和
+`packages/wechat.nix` 中，并复用 Nixpkgs 的微信 AppImage 打包方式和
 FHS 运行环境。腾讯会在发布更新时替换下载链接对应的文件；升级时应同时
 更新版本与哈希。
 
@@ -126,7 +126,7 @@ MIME 类型。Google Chrome 继续作为默认浏览器，并默认打开 PDF �
 
 Home Manager 从官方 x86_64 AppImage 安装
 [Ghost Downloader v4.3.7](https://github.com/XiaoYouChR/Ghost-Downloader-3/releases/tag/v4.3.7)，
-SHA-256 固定在 `home/packages/ghost-downloader.nix` 中。软件包为自带的
+SHA-256 固定在 `packages/ghost-downloader.nix` 中。软件包为自带的
 Python 和 Qt 库提供 FHS 环境，并提供用于媒体下载的 FFmpeg。
 可从终端运行 `ghost-downloader`，或从应用菜单启动 **Ghost Downloader**。
 `home/ghost-downloader.nix` 将 `ghostdownloader://` 协议注册到 Nix 包装器，
@@ -146,7 +146,7 @@ Python 和 Qt 库提供 FHS 环境，并提供用于媒体下载的 FFmpeg。
 
 Home Manager 从 x86_64 Debian 软件包安装
 [官方百度网盘 Linux 客户端](https://pan.baidu.com/download) `8.7.0`，
-SHA-256 固定在 `home/packages/baidunetdisk.nix` 中。软件包保留自带的
+SHA-256 固定在 `packages/baidunetdisk.nix` 中。软件包保留自带的
 Electron，为 NixOS 修补可执行文件的解释器，并通过启动器提供 GTK 2 和 GTK 3
 依赖。自带的共享库保持原样，因为原生启动完整性检查会在库文件被修改时退出。
 启动器在 Niri 下选择 XWayland 和 Fcitx，以支持中文输入，并保留厂商
@@ -163,7 +163,7 @@ Electron，为 NixOS 修补可执行文件的解释器，并通过启动器提�
 ## 115 生活
 
 [官方 115 生活 37.3.1 Linux 版](https://115.com/115/T984564.html) 在
-`home/packages/115-life.nix` 中固定版本和 SHA-256，并通过
+`packages/115-life.nix` 中固定版本和 SHA-256，并通过
 `home/115-life.nix` 安装。软件包保留自带的 .NET 运行时与 ICU 库，
 为 NixOS 修补原生二进制文件，并提供 Avalonia 所需的 X11 库、
 WebKitGTK 4.1、密钥存储、通知及媒体依赖。在 Niri 下通过 XWayland 运行。
@@ -178,7 +178,7 @@ WebKitGTK 4.1、密钥存储、通知及媒体依赖。在 Niri 下通过 XWayla
 ## 115 浏览器
 
 [官方 x86_64 Linux 版](https://q.115.com/115/T888199.html) 115 浏览器在
-`home/packages/115-browser.nix` 中以声明式方式打包。版本 `35.30.0` 及下载
+`packages/115-browser.nix` 中以声明式方式打包。版本 `35.30.0` 及下载
 哈希已固定，厂商二进制文件已适配 NixOS。由于其传输管理器在 Niri 原生
 Wayland 下显示异常，该应用会强制通过 XWayland 运行。可通过应用启动器或
 `115-browser` 命令运行。
@@ -192,7 +192,7 @@ Wayland 下显示异常，该应用会强制通过 XWayland 运行。可通过�
 ## Readest
 
 [Readest](https://github.com/readest/readest) 使用
-`home/packages/readest.nix` 中固定的上游 `0.12.10` 版本构建原生 Nix 软件包，
+`packages/readest.nix` 中固定的上游 `0.12.10` 版本构建原生 Nix 软件包，
 并使用 `nixpkgs-unstable` 软件包集提供依赖，以避免上游 AppImage 在
 Wayland 下的库兼容问题。可通过应用启动器或 `readest` 命令运行。
 软件包默认关闭自动更新检查与遥测；升级时需更新软件包版本及哈希。
@@ -200,7 +200,7 @@ Wayland 下的库兼容问题。可通过应用启动器或 `readest` 命令运�
 ## SylvaKru
 
 [SylvaKru](https://github.com/AfalpHy/sylvakru) 通过
-`home/packages/sylvakru.nix` 中固定的官方 x86_64 Linux 版本安装。厂商软件
+`packages/sylvakru.nix` 中固定的官方 x86_64 Linux 版本安装。厂商软件
 包已适配 NixOS，并提供 GTK、系统托盘、机密存储、OpenGL 与 mpv 运行库。
 它支持本地音乐，以及通过 WebDAV、Navidrome 和 Emby 访问自托管音乐库。
 可通过应用启动器或 `sylvakru` 命令运行。
@@ -233,5 +233,5 @@ NixOS 不会同时回退 Bottles。Bottles 仍处于沙箱内；应通过文件 
 LZMA2 最高压缩等级的 `7zip` 与 `7sec` 别名，以及按 100 GiB 分卷的
 `7zipv` 与 `7secv`。`7sec` 系列使用已配置的便捷口令同时加密文件内容和文件名。
 
-归档别名在 `home/programs.nix` 中定义；`7sec` 系列使用该源文件中的固定口令。
+归档别名在 `hosts/Pisces/users/chomsky.nix` 中定义；`7sec` 系列使用该源文件中的固定口令。
 需要保密的归档应显式选择私有密码。

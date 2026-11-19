@@ -1,7 +1,7 @@
 { pkgs, ... }:
 
 let
-  life115 = import ./packages/115-life.nix { inherit pkgs; };
+  life115 = import ../packages/115-life.nix { inherit pkgs; };
 in
 {
   home.packages = [ life115 ];

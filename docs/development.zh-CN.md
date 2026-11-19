@@ -37,7 +37,7 @@ Home Manager 声明 `.envrc`，但不提供 SDK flake 或项目源文件。
 
 `home/programs.nix` 安装 HDL 工具。Yosys 与 SymbiYosys 一起使用固定的
 不稳定版 Nixpkgs 输入，因为稳定版 Yosys 会向新版 Bitwuzla 传递已废弃的
-命令行参数；其余工具使用固定的稳定版输入。`system/fpga.nix` 安装
+命令行参数；其余工具使用固定的稳定版输入。`hosts/Pisces/fpga.nix` 安装
 openFPGALoader，并管理 USB/JTAG 访问权限。
 
 | 工具 | 命令 | 用途 |
@@ -67,7 +67,7 @@ smtbmc bitwuzla
 
 ## FPGA 网络与 TFTP
 
-`system/fpga.nix` 在 `enp3s0` 上声明名为 `fpga-tftp` 的 NetworkManager
+`hosts/Pisces/fpga.nix` 在 `enp3s0` 上声明名为 `fpga-tftp` 的 NetworkManager
 配置，主机地址为 `10.90.50.43/24`。该配置自动连接，不设置网关或 DNS，关闭
 IPv6，也不会提供默认路由。Wi-Fi 保留正常路由；开发板需要使用同一子网中兼容的地址。
 
@@ -95,7 +95,7 @@ Nix store。启动时等待地址超时，应检查接口名称、配置激活�
 Vitis 与 Vivado 在名为 `vitis-2023.2` 的 Ubuntu 22.04 Distrobox 中运行；
 NixOS 主机负责 Docker、USB/JTAG 权限、启动命令及 VNC 服务。AMD 工具安装
 在与容器共享的 `~/Xilinx` 中，因此重建容器不会删除它们。
-`system/fpga.nix` 提供适用于常见 Artix-7 开发板的 AMD/Xilinx 与 Digilent
+`hosts/Pisces/fpga.nix` 提供适用于常见 Artix-7 开发板的 AMD/Xilinx 与 Digilent
 下载器 udev 规则。
 
 应用系统配置后，请注销并重新登录一次，以获得 `docker` 组成员身份。随后
@@ -187,7 +187,7 @@ source ~/Xilinx/Vivado/2023.2/settings64.sh
 vivado -mode tcl
 ```
 
-修改 `home/vitis.nix` 后，遵循[系统激活流程](operations.zh-CN.md#验证与应用)；
+修改 `hosts/Pisces/users/vitis.nix` 后，遵循[系统激活流程](operations.zh-CN.md#验证与应用)；
 VNC 启动配置变化时，再重启 `vitis-vnc.service`。
 
 主机启用的是系统 Docker 守护进程，并非 rootless Docker 配置。安装与主机包装

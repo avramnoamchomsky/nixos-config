@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 
 let
-  ghostDownloader = pkgs.callPackage ./packages/ghost-downloader.nix { };
+  ghostDownloader = pkgs.callPackage ../packages/ghost-downloader.nix { };
   desktopId = "io.github.xiaoyouchr.GhostDownloader";
   initialConfig = pkgs.writeText "ghost-downloader-initial-config.json" (builtins.toJSON {
     Software.CheckUpdateAtStartUp = false;

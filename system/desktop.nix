@@ -1,8 +1,8 @@
-{ desktopShell, lib, pkgs, unstablePkgs, ... }:
+{ desktopShell, pkgs, ... }:
 
 let
-  codex = pkgs.callPackage ../home/packages/codex.nix { };
-  zhuqueFangsong = pkgs.callPackage ../home/packages/zhuque-fangsong.nix { };
+  codex = pkgs.callPackage ../packages/codex.nix { };
+  zhuqueFangsong = pkgs.callPackage ../packages/zhuque-fangsong.nix { };
 
   rpiImagerPolicy = pkgs.writeText "com.raspberrypi.rpi-imager.policy.in" ''
     <?xml version="1.0" encoding="UTF-8"?>
@@ -80,14 +80,6 @@ in
     terminal = "custom";
   };
 
-  # Tell GVfs not to probe these as sidebar drives when local dialogs open.
-  # Home Manager still mounts them; fstab only supplies the visibility hint.
-  environment.etc.fstab.text = lib.mkAfter (
-    lib.concatMapStrings (name: ''
-      ${name}: /home/chomsky/mnt/${name} fuse.rclone noauto,nofail,x-gvfs-hide 0 0
-    '') [ "infini-cloud-kurio" "infini-cloud-higa" ]
-  );
-
   programs.dank-material-shell = {
     enable = true;
     inherit (desktopShell) package;
@@ -116,7 +108,6 @@ in
     dumpcap.enable = true;
     usbmon.enable = false;
   };
-  users.users.chomsky.extraGroups = [ "wireshark" ];
 
   programs.trippy.enable = true;
 

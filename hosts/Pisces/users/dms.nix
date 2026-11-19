@@ -6,7 +6,7 @@ let
   profileImage = pkgs.runCommand "dms-wood-whale-avatar.png" {
     nativeBuildInputs = [ pkgs.imagemagick ];
   } ''
-    magick ${./dms/Wood_Whale.jpg} -resize 512x512 -strip "$out"
+    magick ${../assets/Wood_Whale.jpg} -resize 512x512 -strip "$out"
   '';
 
   wallpaperPath = "${config.xdg.userDirs.pictures}/Wallpapers/rose-wallpaper-3840x2160-vibrant-hues-pink-blossoms-454.jpg";
@@ -49,7 +49,7 @@ in
 
   # Keep the wallpaper collection declarative while exposing it at the
   # conventional writable-user-data location expected by DMS file pickers.
-  home.file."Pictures/Wallpapers".source = ./wallpapers;
+  home.file."Pictures/Wallpapers".source = ../assets/wallpapers;
 
   # DMS reads the account icon from AccountsService, not settings.json.
   home.activation.dmsProfileImage = lib.hm.dag.entryAfter [ "dmsSettings" ] ''

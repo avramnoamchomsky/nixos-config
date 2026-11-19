@@ -110,7 +110,7 @@ to save directly to the managed files.
 
 Home Manager installs the official [WeChat Linux](https://linux.weixin.qq.com/)
 `4.1.13.26` x86_64 AppImage, pinned by version and SHA-256 in
-`home/packages/wechat.nix`. It reuses Nixpkgs' WeChat AppImage packaging and
+`packages/wechat.nix`. It reuses Nixpkgs' WeChat AppImage packaging and
 FHS runtime. Tencent replaces the file at its download URL when releasing an
 update; update the version and hash together when upgrading.
 
@@ -137,7 +137,7 @@ Launch WPS from the application menu or with `wps` after applying the configurat
 
 Home Manager installs [Ghost Downloader v4.3.7](https://github.com/XiaoYouChR/Ghost-Downloader-3/releases/tag/v4.3.7)
 from the official x86_64 AppImage, pinned by SHA-256 in
-`home/packages/ghost-downloader.nix`. The package supplies an FHS environment
+`packages/ghost-downloader.nix`. The package supplies an FHS environment
 for the bundled Python and Qt libraries, plus FFmpeg for media downloads.
 
 Launch `ghost-downloader` from the shell or **Ghost Downloader** from the
@@ -160,7 +160,7 @@ settings. The desktop application works independently of the extension.
 
 Home Manager installs the [official Baidu Netdisk Linux client](https://pan.baidu.com/download),
 version `8.7.0`, from the x86_64 Debian package pinned by SHA-256 in
-`home/packages/baidunetdisk.nix`. The package retains the bundled Electron,
+`packages/baidunetdisk.nix`. The package retains the bundled Electron,
 patches executable interpreters for NixOS, and supplies both GTK 2 and GTK 3
 dependencies through the launcher. Bundled shared libraries remain unmodified
 because the native startup integrity check exits if they change. The launcher selects XWayland and
@@ -179,7 +179,7 @@ then rebuilding NixOS.
 ## 115 Life
 
 The [official 115 Life 37.3.1 Linux release](https://115.com/115/T984564.html)
-is pinned by version and SHA-256 in `home/packages/115-life.nix` and installed
+is pinned by version and SHA-256 in `packages/115-life.nix` and installed
 through `home/115-life.nix`. The package keeps the bundled .NET runtime and
 ICU libraries, patches native binaries for NixOS, and supplies Avalonia's X11
 libraries, WebKitGTK 4.1, secret storage, notifications, and media dependencies.
@@ -196,7 +196,7 @@ pinned package version and hash, then rebuild NixOS to upgrade the application.
 ## 115 Browser
 
 The [official x86_64 Linux release](https://q.115.com/115/T888199.html) of 115
-Browser is packaged declaratively in `home/packages/115-browser.nix`. Version
+Browser is packaged declaratively in `packages/115-browser.nix`. Version
 `35.30.0` and its download hash are pinned, the vendor binary is adapted to
 NixOS, and it is forced through XWayland because its Transfer Manager renders
 incorrectly on native Wayland under Niri. Launch it as `115-browser` or from
@@ -213,7 +213,7 @@ and rebuilding the system.
 ## Readest
 
 [Readest](https://github.com/readest/readest) is built as a native Nix package
-from the pinned `0.12.10` upstream release in `home/packages/readest.nix`,
+from the pinned `0.12.10` upstream release in `packages/readest.nix`,
 using the `nixpkgs-unstable` package set for its dependencies. This avoids the upstream
 AppImage's Wayland library-compatibility issue. Launch it as `readest` or from
 the application launcher. The package disables automatic update checks and
@@ -222,7 +222,7 @@ telemetry by default. Update the package version and hashes to upgrade it.
 ## SylvaKru
 
 [SylvaKru](https://github.com/AfalpHy/sylvakru) is installed from its pinned
-official x86_64 Linux release in `home/packages/sylvakru.nix`. The vendor
+official x86_64 Linux release in `packages/sylvakru.nix`. The vendor
 bundle is adapted to NixOS with GTK, system-tray, secret-storage, OpenGL, and
 mpv runtime libraries. It supports local music and self-hosted libraries via
 WebDAV, Navidrome, and Emby. Launch it as `sylvakru` or from the application
@@ -260,6 +260,6 @@ LZMA2 compression, plus `7zipv` and `7secv` variants that split archives into
 100 GiB volumes. The `7sec` variants encrypt file contents and names with the
 configured convenience passphrase.
 
-The archive aliases are defined in `home/programs.nix`. The `7sec` variants
+The archive aliases are defined in `hosts/Pisces/users/chomsky.nix`. The `7sec` variants
 use a fixed passphrase in that source file; choose an explicit private password
 when an archive needs confidential protection.
